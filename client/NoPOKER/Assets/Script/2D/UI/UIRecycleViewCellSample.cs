@@ -1,13 +1,12 @@
 using UnityEngine;
-using UnityEngine.UI;
 using TMPro;
 
 namespace UI
 {
     public class UICellSampleData
     {
-        public string name;
-        public string chat;
+        public string Name;
+        public string Chat;
     }
 
     public class UIRecycleViewCellSample : UIRecycleViewCell<UICellSampleData>
@@ -17,8 +16,8 @@ namespace UI
 
         public override void UpdateContent(UICellSampleData itemData)
         {
-            txtName.text = itemData.name;
-            txtChat.text = itemData.chat;
+            txtName.text = itemData.Name;
+            txtChat.text = itemData.Chat;
         }
 
         public void OnClickedButton()

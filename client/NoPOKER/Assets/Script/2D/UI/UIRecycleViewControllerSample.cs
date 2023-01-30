@@ -1,6 +1,5 @@
 using System.Collections.Generic;
 using UnityEngine;
-using System.Collections;
 
 namespace UI
 {
@@ -10,18 +9,18 @@ namespace UI
         {
             tableData = new List<UICellSampleData>()
             {
-                new UICellSampleData { name="WISE" , chat = "¾È³çÇÏ¼¼¿ë"},
-                new UICellSampleData { name="°×Àß¾Ë" , chat = "ABCDE"},
-                new UICellSampleData { name="¾ä¾ä" , chat = "¾ä¾ä ÆÀ È­ÀÌÆÃ!¾ä¾ä ÆÀ È­ÀÌÆÃ!¾ä¾ä ÆÀ È­ÀÌÆÃ!¾ä¾ä ÆÀ È­ÀÌÆÃ!¾ä¾ä ÆÀ È­ÀÌÆÃ!" +
+                new UICellSampleData { Name="WISE" , Chat = "¾È³çÇÏ¼¼¿ë"},
+                new UICellSampleData { Name="°×Àß¾Ë" , Chat = "ABCDE"},
+                new UICellSampleData { Name="¾ä¾ä" , Chat = "¾ä¾ä ÆÀ È­ÀÌÆÃ!¾ä¾ä ÆÀ È­ÀÌÆÃ!¾ä¾ä ÆÀ È­ÀÌÆÃ!¾ä¾ä ÆÀ È­ÀÌÆÃ!¾ä¾ä ÆÀ È­ÀÌÆÃ!" +
                 "¾ä¾ä ÆÀ È­ÀÌÆÃ!¾ä¾ä ÆÀ È­ÀÌÆÃ!¾ä¾ä ÆÀ È­ÀÌÆÃ!¾ä¾ä ÆÀ È­ÀÌÆÃ!¾ä¾ä ÆÀ È­ÀÌÆÃ!¾ä¾ä ÆÀ È­ÀÌÆÃ!¾ä¾ä ÆÀ È­ÀÌÆÃ!" +
                 "¾ä¾ä ÆÀ È­ÀÌÆÃ!¾ä¾ä ÆÀ È­ÀÌÆÃ!¾ä¾ä ÆÀ È­ÀÌÆÃ!¾ä¾ä ÆÀ È­ÀÌÆÃ!"},
-                new UICellSampleData { name="½º¸¶ÀÏ°ÔÀÌÆ®" , chat = "À©ÅÍµ¥ºêÄ·ÇÁ¿¡ ¿À½Å°É È¯¿µÇÕ´Ï´Ù!"},
-                new UICellSampleData { name="ÀÌ»ç´Ô" , chat = "PMP ¸ñÇ¥¿¡ ¸Â¾Æ¿ä? ±×°Ô??"},
-                new UICellSampleData { name="¿ë¿ë" , chat = "¿ë¿ëÃ¼¸¦ ¾²¸é È­°¡Ç®¸®´Â ¸¶¹ýÀÌ »ý°Ü¿ä"},
-                new UICellSampleData { name="NoPOKER" , chat = "NoPOKER Is Funny!!!NoPOKER Is Funny!!!NoPOKER Is Funny!!!NoPOKER Is Funny!!!NoPOKER Is Funny!!!NoPOKER Is Funny!!!NoPOKER Is Funny!!!NoPOKER Is Funny!!!"},
-                new UICellSampleData { name="³È³È³È³È³È³È³È³È³È³È³È" , chat = "¿Ö ³È³ÈÀÌ ¾Æ´Ï°í ¾ä¾äÀÎ°ÅÁÒ?"},
-                new UICellSampleData { name="ÂÁÂÁ" , chat = "±×·¸°ÔÄ¡¸é ÂÁÂÁµµ ÇÒ¸» ÀÖ´Âµ¥¿ä ±×·¸Áö¾Ê³ª¿ä"},
-                new UICellSampleData { name="¾ä¾ä" , chat = "¿µ¾î·Î ¾²±â°¡ ÆíÇÏ°í °£´ÜÇÏÀÝ¾Æ¿ä, ±Í¿±°í;;"}
+                new UICellSampleData { Name="½º¸¶ÀÏ°ÔÀÌÆ®" , Chat = "À©ÅÍµ¥ºêÄ·ÇÁ¿¡ ¿À½Å°É È¯¿µÇÕ´Ï´Ù!"},
+                new UICellSampleData { Name="ÀÌ»ç´Ô" , Chat = "PMP ¸ñÇ¥¿¡ ¸Â¾Æ¿ä? ±×°Ô??"},
+                new UICellSampleData { Name="¿ë¿ë" , Chat = "¿ë¿ëÃ¼¸¦ ¾²¸é È­°¡Ç®¸®´Â ¸¶¹ýÀÌ »ý°Ü¿ä"},
+                new UICellSampleData { Name="NoPOKER" , Chat = "NoPOKER Is Funny!!!NoPOKER Is Funny!!!NoPOKER Is Funny!!!NoPOKER Is Funny!!!NoPOKER Is Funny!!!NoPOKER Is Funny!!!NoPOKER Is Funny!!!NoPOKER Is Funny!!!"},
+                new UICellSampleData { Name="³È³È³È³È³È³È³È³È³È³È³È" , Chat = "¿Ö ³È³ÈÀÌ ¾Æ´Ï°í ¾ä¾äÀÎ°ÅÁÒ?"},
+                new UICellSampleData { Name="ÂÁÂÁ" , Chat = "±×·¸°ÔÄ¡¸é ÂÁÂÁµµ ÇÒ¸» ÀÖ´Âµ¥¿ä ±×·¸Áö¾Ê³ª¿ä"},
+                new UICellSampleData { Name="¾ä¾ä" , Chat = "¿µ¾î·Î ¾²±â°¡ ÆíÇÏ°í °£´ÜÇÏÀÝ¾Æ¿ä, ±Í¿±°í;;"}
 
             };
             InitializedTableView();
@@ -40,8 +39,8 @@ namespace UI
 
         protected override float GetCellHeightAtIndex(int index)
         { 
-            int countContent= CheckEnglishByte(tableData[index].chat);
-            int countName =  CheckEnglishByte(tableData[index].name);
+            int countContent= CheckEnglishByte(tableData[index].Chat);
+            int countName =  CheckEnglishByte(tableData[index].Name);
      
             float heightContent = 50f * (countContent / 65 + 1f) ;
             float heightName = 50f * (countName / 15 + 1f);
