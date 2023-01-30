@@ -7,7 +7,7 @@ namespace UI
     {
         private void LoadData()
         {
-            tableData = new List<UICellSampleData>()
+            TableData = new List<UICellSampleData>()
             {
                 new UICellSampleData { Name="WISE" , Chat = "안녕하세용"},
                 new UICellSampleData { Name="겜잘알" , Chat = "ABCDE"},
@@ -39,28 +39,27 @@ namespace UI
 
         protected override float GetCellHeightAtIndex(int index)
         { 
-            int countContent= CheckEnglishByte(tableData[index].Chat);
-            int countName =  CheckEnglishByte(tableData[index].Name);
+            int _countContent= CheckEnglishByte(TableData[index].Chat);
+            int _countName =  CheckEnglishByte(TableData[index].Name);
      
-            float heightContent = 50f * (countContent / 65 + 1f) ;
-            float heightName = 50f * (countName / 15 + 1f);
+            float _heightContent = 50f * (_countContent / 65 + 1f) ;
+            float _heightName = 50f * (_countName / 15 + 1f);
 
-            float height = (heightContent > heightName) ? heightContent : heightName;
+            float _height = (_heightContent > _heightName) ? _heightContent : _heightName;
 
-            return height;
+            return _height;
         }
         private int CheckEnglishByte(string text)
         {
-            int byteCount = System.Text.Encoding.Default.GetByteCount(text); ;
+            int _byteCount = System.Text.Encoding.Default.GetByteCount(text); ;
             for (int i = 0; i < text.Length; i++)
             {
-                // if (char.GetUnicodeCategory(tableData[index].chat[i]) == System.Globalization.UnicodeCategory.eng) //한글일 경우
                 if ('a' <= text[i] && text[i] <= 'z' ||
                     'A' <= text[i] && text[i] <= 'Z')
-                    byteCount++;
+                    _byteCount++;
             }
 
-            return byteCount;
+            return _byteCount;
         }
     }
 

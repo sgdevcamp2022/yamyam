@@ -13,9 +13,9 @@ namespace UI
             get { return CachedRectTransform.sizeDelta.y; }
             set 
             {
-                Vector2 sizeDelta = CachedRectTransform.sizeDelta;
-                sizeDelta.y = value;
-                CachedRectTransform.sizeDelta = sizeDelta;
+                Vector2 _sizeDelta = CachedRectTransform.sizeDelta;
+                _sizeDelta.y = value;
+                CachedRectTransform.sizeDelta = _sizeDelta;
             }
         }
 
@@ -25,15 +25,15 @@ namespace UI
         {
             get
             {
-                Vector3[] corners = new Vector3[4];
-                CachedRectTransform.GetLocalCorners(corners);
-                return CachedRectTransform.anchoredPosition + new Vector2(0f, corners[1].y);
+                Vector3[] _corners = new Vector3[4];
+                CachedRectTransform.GetLocalCorners(_corners);
+                return CachedRectTransform.anchoredPosition + new Vector2(0f, _corners[1].y);
              }
             set
             {
-                Vector3[] corners = new Vector3[4];
-                CachedRectTransform.GetLocalCorners(corners);
-                CachedRectTransform.anchoredPosition = value - new Vector2(0f, corners[1].y);
+                Vector3[] _corners = new Vector3[4];
+                CachedRectTransform.GetLocalCorners(_corners);
+                CachedRectTransform.anchoredPosition = value - new Vector2(0f, _corners[1].y);
             }
         }
 
@@ -41,15 +41,15 @@ namespace UI
         {
             get
             {
-                Vector3[] corners = new Vector3[4];
-                CachedRectTransform.GetLocalCorners(corners);
-                return CachedRectTransform.anchoredPosition + new Vector2(0f, corners[3].y);
+                Vector3[] _corners = new Vector3[4];
+                CachedRectTransform.GetLocalCorners(_corners);
+                return CachedRectTransform.anchoredPosition + new Vector2(0f, _corners[3].y);
             }
             set
             {
-                Vector3[] corners = new Vector3[4];
-                CachedRectTransform.GetLocalCorners(corners);
-                CachedRectTransform.anchoredPosition = value - new Vector2(0f, corners[3].y);
+                Vector3[] _corners = new Vector3[4];
+                CachedRectTransform.GetLocalCorners(_corners);
+                CachedRectTransform.anchoredPosition = value - new Vector2(0f, _corners[3].y);
             }
         }
 

@@ -9,22 +9,22 @@ namespace UI
 
     public class UIRecycleViewController<T> : MonoBehaviour
     {
-        protected List<T> tableData = new List<T>();
-        [SerializeField] protected GameObject cellBase = null;
-        [SerializeField] private RectOffset padding;
-        [SerializeField] private float spacingHeight = 4.0f;
-        [SerializeField] private RectOffset visibleRectPadding = null;
+        protected List<T> TableData = new List<T>();
+        [SerializeField] protected GameObject CellBase = null;
+        [SerializeField] private RectOffset _padding;
+        [SerializeField] private float _spacingHeight = 4.0f;
+        [SerializeField] private RectOffset _visibleRectPadding = null;
 
-        private LinkedList<UIRecycleViewCell<T>> cells = new LinkedList<UIRecycleViewCell<T>>();
-        private Rect visibleRect;
-        private Vector2 preScrollPos;
+        private LinkedList<UIRecycleViewCell<T>> _cells = new LinkedList<UIRecycleViewCell<T>>();
+        private Rect _visibleRect;
+        private Vector2 _preScrollPos;
 
         public RectTransform CachedRectTransform => GetComponent<RectTransform>();
         public ScrollRect CachedScrollRect => GetComponent<ScrollRect>();
 
         protected virtual void Start()
         {
-            cellBase.SetActive(false);
+            CellBase.SetActive(false);
             CachedScrollRect.onValueChanged.AddListener(OnScrollPoschanged);
         }
 
@@ -33,36 +33,36 @@ namespace UI
             UpdateScrollViewSize();
             UpdateVisibleRect();
 
-            if(cells.Count <1)
+            if(_cells.Count <1)
             {
-                Vector2 cellTop = new Vector2(0f, -padding.top);
-                for(int i=0;i<tableData.Count; i++)
+                Vector2 cellTop = new Vector2(0f, -_padding.top);
+                for(int i=0;i<TableData.Count; i++)
                 {
-                    float cellHeight = GetCellHeightAtIndex(i);
-                    Vector2 cellBottom = cellTop + new Vector2(0f, -cellHeight);
+                    float _cellHeight = GetCellHeightAtIndex(i);
+                    Vector2 _cellBottom = cellTop + new Vector2(0f, -_cellHeight);
 
-                    if((cellTop.y <= visibleRect.y && cellTop.y >=visibleRect.y - visibleRect.height)
-                        || (cellBottom.y <= visibleRect.y && cellBottom.y >= visibleRect.y - visibleRect.height))
+                    if((cellTop.y <= _visibleRect.y && cellTop.y >=_visibleRect.y - _visibleRect.height)
+                        || (_cellBottom.y <= _visibleRect.y && _cellBottom.y >= _visibleRect.y - _visibleRect.height))
                     {
                         UIRecycleViewCell<T> cell = CreateCellForIndex(i);
                         cell.Top = cellTop;
                         break;
                     }
-                    cellTop = cellBottom + new Vector2(0f, spacingHeight);
+                    cellTop = _cellBottom + new Vector2(0f, _spacingHeight);
                 }
                 SetFillVisibleRectWithCells();
             }
             else
             {
-                LinkedListNode<UIRecycleViewCell<T>> node = cells.First;
-                UpdateCellForIndex(node.Value, node.Value.Index);
-                node = node.Next;
+                LinkedListNode<UIRecycleViewCell<T>> _node = _cells.First;
+                UpdateCellForIndex(_node.Value, _node.Value.Index);
+                _node = _node.Next;
 
-                while(node != null)
+                while(_node != null)
                 {
-                    UpdateCellForIndex(node.Value, node.Previous.Value.Index + 1);
-                    node.Value.Top = node.Previous.Value.Bottom + new Vector2(0f, -spacingHeight);
-                    node = node.Next;
+                    UpdateCellForIndex(_node.Value, _node.Previous.Value.Index + 1);
+                    _node.Value.Top = _node.Previous.Value.Bottom + new Vector2(0f, -_spacingHeight);
+                    _node = _node.Next;
                 }
                 SetFillVisibleRectWithCells();
             }
@@ -70,57 +70,56 @@ namespace UI
 
         protected virtual float GetCellHeightAtIndex(int index)
         {
-            return cellBase.GetComponent<RectTransform>().sizeDelta.y;
+            return CellBase.GetComponent<RectTransform>().sizeDelta.y;
         }
 
         protected void UpdateScrollViewSize()
         {
-            float contentHeight = 0f;
-            for(int i=0;i<tableData.Count;i++)
+            float _contentHeight = 0f;
+            for(int i=0;i<TableData.Count;i++)
             {
-                contentHeight += GetCellHeightAtIndex(i);
-               // contentHeight += 100f;
+                _contentHeight += GetCellHeightAtIndex(i);
                 if (i>0)
                 {
-                    contentHeight += spacingHeight;
+                    _contentHeight += _spacingHeight;
                 }
             }
 
-            Vector2 sizeDelta = CachedScrollRect.content.sizeDelta;
-            sizeDelta.y = padding.top + contentHeight + padding.bottom;
-            CachedScrollRect.content.sizeDelta = sizeDelta;
+            Vector2 _sizeDelta = CachedScrollRect.content.sizeDelta;
+            _sizeDelta.y = _padding.top + _contentHeight + _padding.bottom;
+            CachedScrollRect.content.sizeDelta = _sizeDelta;
         }
 
         private UIRecycleViewCell<T> CreateCellForIndex(int index)
         {
-            GameObject obj = Instantiate(cellBase) as GameObject;
-            obj.SetActive(true);
-            UIRecycleViewCell<T> cell = obj.GetComponent<UIRecycleViewCell<T>>();
+            GameObject _obj = Instantiate(CellBase) as GameObject;
+            _obj.SetActive(true);
+            UIRecycleViewCell<T> _cell = _obj.GetComponent<UIRecycleViewCell<T>>();
 
-            Vector3 scale = cell.transform.localScale;
-            Vector2 sizeDelta = cell.CachedRectTransform.sizeDelta;
-            Vector2 offsetMin = cell.CachedRectTransform.offsetMin;
-            Vector2 offsetMax = cell.CachedRectTransform.offsetMax;
+            Vector3 _scale = _cell.transform.localScale;
+            Vector2 _sizeDelta = _cell.CachedRectTransform.sizeDelta;
+            Vector2 _offsetMin = _cell.CachedRectTransform.offsetMin;
+            Vector2 _offsetMax = _cell.CachedRectTransform.offsetMax;
 
-            cell.transform.SetParent(cellBase.transform.parent);
+            _cell.transform.SetParent(CellBase.transform.parent);
 
-            cell.transform.localScale = scale;
-            cell.CachedRectTransform.sizeDelta = sizeDelta;
-            cell.CachedRectTransform.offsetMin = offsetMin;
-            cell.CachedRectTransform.offsetMax = offsetMax;
+            _cell.transform.localScale = _scale;
+            _cell.CachedRectTransform.sizeDelta = _sizeDelta;
+            _cell.CachedRectTransform.offsetMin = _offsetMin;
+            _cell.CachedRectTransform.offsetMax = _offsetMax;
 
-            UpdateCellForIndex(cell, index);
-            cells.AddLast(cell);
-            return cell;
+            UpdateCellForIndex(_cell, index);
+            _cells.AddLast(_cell);
+            return _cell;
         }
         private void UpdateCellForIndex(UIRecycleViewCell<T> cell, int index)
         {
             cell.Index = index;
 
-            if(cell.Index >= 0 && cell.Index <= tableData.Count-1)
+            if(cell.Index >= 0 && cell.Index <= TableData.Count-1)
             {
                 cell.gameObject.SetActive(true);
-                cell.UpdateContent(tableData[cell.Index]);
+                cell.UpdateContent(TableData[cell.Index]);
                 cell.Height = GetCellHeightAtIndex(cell.Index);
             }
             else
@@ -131,76 +130,76 @@ namespace UI
 
         private void UpdateVisibleRect()
         {
-            visibleRect.x = CachedScrollRect.content.anchoredPosition.x + visibleRectPadding.left;
-            visibleRect.y = -CachedScrollRect.content.anchoredPosition.y + visibleRectPadding.top;
+            _visibleRect.x = CachedScrollRect.content.anchoredPosition.x + _visibleRectPadding.left;
+            _visibleRect.y = -CachedScrollRect.content.anchoredPosition.y + _visibleRectPadding.top;
 
-            visibleRect.width = CachedRectTransform.rect.width + visibleRectPadding.left + visibleRectPadding.right;
-            visibleRect.height = CachedRectTransform.rect.height + visibleRectPadding.top + visibleRectPadding.bottom;
+            _visibleRect.width = CachedRectTransform.rect.width + _visibleRectPadding.left + _visibleRectPadding.right;
+            _visibleRect.height = CachedRectTransform.rect.height + _visibleRectPadding.top + _visibleRectPadding.bottom;
         }
 
         private void SetFillVisibleRectWithCells()
         {
-            if(cells.Count <1)
+            if(_cells.Count <1)
             {
                 return;
             }
 
-            UIRecycleViewCell<T> lastCell = cells.Last.Value;
-            int nextCellDataIndex = lastCell.Index + 1;
-            Vector2 nextCellTop = lastCell.Bottom + new Vector2(0f, -spacingHeight);
+            UIRecycleViewCell<T> _lastCell = _cells.Last.Value;
+            int _nextCellDataIndex = _lastCell.Index + 1;
+            Vector2 _nextCellTop = _lastCell.Bottom + new Vector2(0f, -_spacingHeight);
 
-            while(nextCellDataIndex < tableData.Count && nextCellTop.y >= visibleRect.y - visibleRect.height)
+            while(_nextCellDataIndex < TableData.Count && _nextCellTop.y >= _visibleRect.y - _visibleRect.height)
             {
-                UIRecycleViewCell<T> cell = CreateCellForIndex(nextCellDataIndex);
-                cell.Top = nextCellTop;
+                UIRecycleViewCell<T> _cell = CreateCellForIndex(_nextCellDataIndex);
+                _cell.Top = _nextCellTop;
 
-                lastCell = cell;
-                nextCellDataIndex = lastCell.Index + 1;
-                nextCellTop = lastCell.Bottom + new Vector2(0f, -spacingHeight);
+                _lastCell = _cell;
+                _nextCellDataIndex = _lastCell.Index + 1;
+                _nextCellTop = _lastCell.Bottom + new Vector2(0f, -_spacingHeight);
             }
         }
 
         public void OnScrollPoschanged(Vector2 scrollPos)
         {
             UpdateVisibleRect();
-            UpdateCells((scrollPos.y < preScrollPos.y) ? 1 : -1);
-            preScrollPos = scrollPos;
+            UpdateCells((scrollPos.y < _preScrollPos.y) ? 1 : -1);
+            _preScrollPos = scrollPos;
         }
 
         private void UpdateCells(int scrollDirection)
         {
-            if(cells.Count <1)
+            if(_cells.Count <1)
             {
                 return;
             }
 
             if (scrollDirection > 0)
             {
-                UIRecycleViewCell<T> firstCell = cells.First.Value;
-                while (firstCell.Bottom.y > visibleRect.y)
+                UIRecycleViewCell<T> _firstCell = _cells.First.Value;
+                while (_firstCell.Bottom.y > _visibleRect.y)
                 {
-                    UIRecycleViewCell<T> lastCell = cells.Last.Value;
-                    UpdateCellForIndex(firstCell, lastCell.Index + 1);
-                    firstCell.Top = lastCell.Bottom + new Vector2(0f, -spacingHeight);
+                    UIRecycleViewCell<T> _lastCell = _cells.Last.Value;
+                    UpdateCellForIndex(_firstCell, _lastCell.Index + 1);
+                    _firstCell.Top = _lastCell.Bottom + new Vector2(0f, -_spacingHeight);
 
-                    cells.AddLast(firstCell);
-                    cells.RemoveFirst();
-                    firstCell = cells.First.Value;
+                    _cells.AddLast(_firstCell);
+                    _cells.RemoveFirst();
+                    _firstCell = _cells.First.Value;
                 }
                 SetFillVisibleRectWithCells();
             }
             else if (scrollDirection <0)
             {
-                UIRecycleViewCell<T> lastCell = cells.Last.Value;
-                while(lastCell.Top.y < visibleRect.y - visibleRect.height)
+                UIRecycleViewCell<T> _lastCell = _cells.Last.Value;
+                while(_lastCell.Top.y < _visibleRect.y - _visibleRect.height)
                 {
-                    UIRecycleViewCell<T> firstCell = cells.First.Value;
-                    UpdateCellForIndex(lastCell, firstCell.Index - 1);
-                    lastCell.Bottom = firstCell.Top + new Vector2(0f, spacingHeight);
+                    UIRecycleViewCell<T> firstCell = _cells.First.Value;
+                    UpdateCellForIndex(_lastCell, firstCell.Index - 1);
+                    _lastCell.Bottom = firstCell.Top + new Vector2(0f, _spacingHeight);
 
-                    cells.AddFirst(lastCell);
-                    cells.RemoveLast();
-                    lastCell = cells.Last.Value;
+                    _cells.AddFirst(_lastCell);
+                    _cells.RemoveLast();
+                    _lastCell = _cells.Last.Value;
                 }
 
             }

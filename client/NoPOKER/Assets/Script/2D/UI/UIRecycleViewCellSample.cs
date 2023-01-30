@@ -11,19 +11,18 @@ namespace UI
 
     public class UIRecycleViewCellSample : UIRecycleViewCell<UICellSampleData>
     {
-        [SerializeField] private TMP_Text txtName;
-        [SerializeField] private TMP_Text txtChat;
+        [SerializeField] private TMP_Text _txtName;
+        [SerializeField] private TMP_Text _txtChat;
 
         public override void UpdateContent(UICellSampleData itemData)
         {
-            txtName.text = itemData.Name;
-            txtChat.text = itemData.Chat;
+            _txtName.text = itemData.Name;
+            _txtChat.text = itemData.Chat;
         }
 
         public void OnClickedButton()
         {
-              Debug.Log(txtChat.text + ":" + System.Text.Encoding.Default.GetByteCount(txtName.text));
-           // Debug.Log(txtChat.text.Length);
+              Debug.Log(_txtChat.name);
         }
 
     }
