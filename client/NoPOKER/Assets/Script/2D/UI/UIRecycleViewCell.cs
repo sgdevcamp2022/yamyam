@@ -52,6 +52,5 @@ namespace UI
                 CachedRectTransform.anchoredPosition = value - new Vector2(0f, _corners[3].y);
             }
         }
-
     }
 }

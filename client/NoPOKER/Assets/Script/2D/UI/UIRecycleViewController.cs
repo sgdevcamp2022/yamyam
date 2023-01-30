@@ -112,6 +112,7 @@ namespace UI
             _cells.AddLast(_cell);
             return _cell;
         }
+
         private void UpdateCellForIndex(UIRecycleViewCell<T> cell, int index)
         {
             cell.Index = index;
@@ -201,15 +202,9 @@ namespace UI
                     _cells.RemoveLast();
                     _lastCell = _cells.Last.Value;
                 }
-
             }
         }
-
-
     }
-
-
-
 }
 
 

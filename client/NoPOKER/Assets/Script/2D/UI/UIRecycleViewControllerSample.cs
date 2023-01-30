@@ -62,6 +62,4 @@ namespace UI
             return _byteCount;
         }
     }
-
- 
 }

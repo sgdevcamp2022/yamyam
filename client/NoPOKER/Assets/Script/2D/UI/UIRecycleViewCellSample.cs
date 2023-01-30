@@ -24,6 +24,5 @@ namespace UI
         {
               Debug.Log(_txtChat.name);
         }
-
     }
 }
