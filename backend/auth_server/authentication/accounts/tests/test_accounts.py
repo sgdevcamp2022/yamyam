@@ -18,6 +18,7 @@ class AccountsTests(TestCase):
         self.get_activate_url = reverse('accounts:activate_account', kwargs={
                                         "uidb64": urlsafe_base64_encode(force_bytes(1)), "token": hashlib.sha256('nickname1'.encode('utf-8')).hexdigest()})
         self.login_account_url = reverse('accounts:login_account')
+        self.check_token_url = reverse('accounts:check_token')
 
     def test_create_account(self):
         post = {"username": "user2", "nickname": "nickname2", "email": "user2@example.com",
@@ -67,3 +68,13 @@ class AccountsTests(TestCase):
         self.assertEquals(response.status_code, 200)
         self.assertEquals(response.has_header('Access-Token'), True)
         self.assertEquals(response.has_header('Refresh-Token'), True)
+
+    def test_check_token(self):
+        post = {"username": "user1", "password": "password1"}
+        response = self.client.post(self.login_account_url, post)
+        header = {
+            'HTTP_ACCESS_TOKEN': response['Access-Token'],
+            'HTTP_REFRESH_TOKEN': response['Refresh-Token']
+        }
+        response = self.client.post(self.check_token_url, **header)
+        self.assertEquals(response.status_code, 200)

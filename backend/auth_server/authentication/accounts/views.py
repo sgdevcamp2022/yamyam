@@ -1,4 +1,3 @@
-import datetime
 import jwt
 
 from django.shortcuts import render, get_object_or_404
@@ -13,6 +12,7 @@ from rest_framework.response import Response
 from .models import User
 from .serializers import CreateUserSerializer
 from .hash import check_account_activate_token
+from .utils import issue_token
 from config.base import SECRET_KEY, ALGORITHM
 
 
@@ -51,25 +51,49 @@ class LoginAccount(APIView):
         user = get_object_or_404(User, username=request.data.get("username"))
         username = user.username
         if user.check_password(request.data.get('password')):
-            access_payload = {
-                'username': username,
-                'exp': datetime.datetime.utcnow() + datetime.timedelta(hours=6),
-            }
-            refresh_payload = {
-                'username': username,
-                'exp': datetime.datetime.utcnow() + datetime.timedelta(days=14),
-            }
-            access_token = jwt.encode(access_payload, SECRET_KEY, ALGORITHM)
-            refresh_token = jwt.encode(refresh_payload, SECRET_KEY, ALGORITHM)
+            access_token = issue_token(username, days=0, hours=6)
+            refresh_token = issue_token(username, days=14, hours=0)
             if cache.get(username) is None:
                 cache.set(username, refresh_token, 60*60*24*14)
             else:
                 cache.delete(username)
                 cache.set(username, refresh_token, 60*60*24*14)
-            return Response({"username": username}, status=status.HTTP_200_OK,
+            return Response(status=status.HTTP_200_OK,
                             headers={
-                'Access-Token': access_token,
-                'Refresh-Token': refresh_token
-            })
+                                'Access-Token': access_token,
+                                'Refresh-Token': refresh_token
+                            })
         else:
             return Response({'detail': 'invalid user'}, status=status.HTTP_401_UNAUTHORIZED)
+
+
+class CheckToken(APIView):
+    def post(self, request):
+        try:
+            access_token = jwt.decode(
+                request.headers['Access-Token'], SECRET_KEY, ALGORITHM)
+            user = get_object_or_404(
+                User, username=access_token.get('username'))
+            return Response({'username': user.username}, status=status.HTTP_200_OK)
+        except (jwt.exceptions.DecodeError, jwt.exceptions.InvalidAlgorithmError,
+                jwt.exceptions.InvalidKeyError, jwt.exceptions.MissingRequiredClaimError):
+            return Response(status=status.HTTP_401_UNAUTHORIZED)
+        except (jwt.exceptions.ExpiredSignatureError):
+            try:
+                refresh_token = jwt.decode(
+                    request.headers['Refresh-Token'], SECRET_KEY, ALGORITHM)
+                username = refresh_token.get('username')
+                if cache.get(username) is None:
+                    return Response(status=status.HTTP_401_UNAUTHORIZED)
+                else:
+                    access_token = issue_token(username, days=0, hours=6)
+                    refresh_token = issue_token(username, days=14, hours=0)
+                    cache.delete(username)
+                    cache.set(username, refresh_token, 60*60*24*14)
+                    return Response(status=status.HTTP_200_OK,
+                                    headers={
+                                        'Access-Token': access_token,
+                                        'Refresh-Token': refresh_token
+                                    })
+            except (jwt.exceptions.InvalidTokenError):
+                return Response(status=status.HTTP_401_UNAUTHORIZED)
