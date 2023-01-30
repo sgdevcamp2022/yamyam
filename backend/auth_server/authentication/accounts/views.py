@@ -67,6 +67,21 @@ class LoginAccount(APIView):
             return Response({'detail': 'invalid user'}, status=status.HTTP_401_UNAUTHORIZED)
 
 
+class LogoutAccount(APIView):
+    def post(self, request):
+        try:
+            refresh_token = jwt.decode(
+                request.headers['Refresh-Token'], SECRET_KEY, ALGORITHM)
+            username = refresh_token.get('username')
+            if cache.get(username) is None:
+                return Response(status=status.HTTP_404_NOT_FOUND)
+            else:
+                cache.delete(username)
+                return Response(status=status.HTTP_200_OK)
+        except (jwt.exceptions.InvalidTokenError):
+            return Response(status=status.HTTP_404_NOT_FOUND)
+
+
 class CheckToken(APIView):
     def post(self, request):
         try:
@@ -97,3 +112,7 @@ class CheckToken(APIView):
                                     })
             except (jwt.exceptions.InvalidTokenError):
                 return Response(status=status.HTTP_401_UNAUTHORIZED)
+
+
+class HandleAccount(APIView):
+    pass
