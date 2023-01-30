@@ -66,9 +66,10 @@ class LoginAccount(APIView):
             else:
                 cache.delete(username)
                 cache.set(username, refresh_token, 60*60*24*14)
-            res = Response({"username": username}, status=status.HTTP_200_OK)
-            res.set_cookie('access_token', access_token, httponly=True)
-            res.set_cookie('refresh_token', refresh_token, httponly=True)
-            return res
+            return Response({"username": username}, status=status.HTTP_200_OK,
+                            headers={
+                'Access-Token': access_token,
+                'Refresh-Token': refresh_token
+            })
         else:
             return Response({'detail': 'invalid user'}, status=status.HTTP_401_UNAUTHORIZED)
