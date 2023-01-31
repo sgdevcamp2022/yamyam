@@ -1,10 +1,12 @@
 import jwt
 
+from django.core.mail import send_mail
 from django.shortcuts import render, get_object_or_404
 from django.views.generic.base import View
 from django.utils.encoding import force_str
 from django.utils.http import urlsafe_base64_decode
 from django.core.cache import cache
+from django.template.loader import render_to_string
 from rest_framework import generics, status
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -13,7 +15,7 @@ from .models import User
 from .serializers import CreateUserSerializer
 from .hash import check_account_activate_token
 from .utils import issue_token
-from config.base import SECRET_KEY, ALGORITHM
+from config.base import SECRET_KEY, ALGORITHM, SITE_URL
 
 
 class CreateAccount(generics.GenericAPIView):
@@ -112,6 +114,21 @@ class CheckToken(APIView):
                                     })
             except (jwt.exceptions.InvalidTokenError):
                 return Response(status=status.HTTP_401_UNAUTHORIZED)
+
+
+class FindUsername(APIView):
+    def post(self, request):
+        user = get_object_or_404(User, email=request.data.get("email"))
+        message = render_to_string('accounts/accounts_find_username.html', {
+            'username': user.username,
+        })
+        send_mail(
+            'Here is your NoPOKER ID',
+            message,
+            from_email=None,
+            recipient_list=[user.email],
+        )
+        return Response(status=status.HTTP_200_OK)
 
 
 class HandleAccount(APIView):

@@ -1,4 +1,3 @@
-from django.contrib.sites.models import Site
 from django.template.loader import render_to_string
 from django.utils.encoding import force_bytes
 from django.utils.http import urlsafe_base64_encode

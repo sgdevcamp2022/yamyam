@@ -20,6 +20,7 @@ class AccountsTests(TestCase):
         self.login_account_url = reverse('accounts:login_account')
         self.check_token_url = reverse('accounts:check_token')
         self.logout_account_url = reverse('accounts:logout_account')
+        self.find_username_url = reverse('accounts:find_username')
 
     def test_create_account(self):
         post = {"username": "user2", "nickname": "nickname2", "email": "user2@example.com",
@@ -88,4 +89,9 @@ class AccountsTests(TestCase):
             'HTTP_REFRESH_TOKEN': response['Refresh-Token']
         }
         response = self.client.post(self.logout_account_url, **header)
+        self.assertEquals(response.status_code, 200)
+
+    def test_find_username(self):
+        post = {"email": "user1@example.com"}
+        response = self.client.post(self.find_username_url, post)
         self.assertEquals(response.status_code, 200)
