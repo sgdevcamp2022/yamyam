@@ -7,11 +7,12 @@ public class WindowController : MonoBehaviour
     { get => s_instance; }
 
     [SerializeField] private GameObject _signupWindow;
-    [SerializeField] private GameObject _findWindow;
+    [SerializeField] private GameObject _findIDWindow;
+    [SerializeField] private GameObject _findPWWindow;
     [SerializeField] private GameObject _alertWindow;
     [SerializeField] private SignUp _signUp;
     [SerializeField] private Alert _alert;
-    [SerializeField] private Find _find;
+
 
     private void Awake()
     {
@@ -37,19 +38,21 @@ public class WindowController : MonoBehaviour
 
     public void ActiveFindIdWindow()
     {
-        _find.InitSetting(FindNum.ID);
-        _findWindow.SetActive(true);
+        _findIDWindow.SetActive(true);
     }
 
     public void ActiveFindPwWindow()
     {
-        _find.InitSetting(FindNum.PW);
-        _findWindow.SetActive(true);
+        _findPWWindow.SetActive(true);
     }
 
-    public void InActiveFindWindow()
+    public void InActiveFindIDWindow()
     {
-        _findWindow.SetActive(false);
+        _findIDWindow.SetActive(false);
+    }
+    public void InActiveFindPWWindow()
+    {
+        _findPWWindow.SetActive(false);
     }
 
     public void InActiveAlertWindow()
