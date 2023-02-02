@@ -1,10 +1,6 @@
 import re
 import json
 import hashlib
-import datetime
-import jwt
-
-from django.contrib.auth.forms import SetPasswordForm
 
 from django.core import mail
 from django.urls import reverse
@@ -14,7 +10,6 @@ from django.utils.http import urlsafe_base64_encode
 from django.contrib.auth.hashers import make_password
 
 from authentication.accounts.models import User
-from config.base import SECRET_KEY, ALGORITHM
 
 
 class AccountCreateTests(TestCase):
@@ -46,6 +41,9 @@ class AccountsTests(TestCase):
         self.password_reset_url = reverse('accounts:password_reset')
         self.password_reset_valid_url = reverse('accounts:password_reset_confirm', kwargs={
             "uidb64": urlsafe_base64_encode(force_bytes(1)), "token": "set-password"
+        })
+        self.handle_account_url = reverse('accounts:handle_account', kwargs={
+            "id": 1
         })
 
     def test_create_duplicated_username_account(self):
@@ -133,3 +131,17 @@ class AccountsTests(TestCase):
             response, 'accounts/accounts_password_complete.html')
         u = User.objects.get(email="user1@example.com")
         self.assertTrue(u.check_password("password12345"))
+
+    def test_withdraw_integrate(self):
+        response = self.client.delete(self.handle_account_url)
+        self.assertEquals(response.status_code, 200)
+        self.assertEqual(len(mail.outbox), 1)
+        self.assertEqual(mail.outbox[0].subject,
+                         'Withdraw Your NoPOKER Account')
+        urlmatch = re.search(
+            r"http?://[^/]*(/.*withdraw/\S*)", mail.outbox[0].body)
+        response = self.client.get(urlmatch[0])
+        self.assertTemplateUsed(
+            response, 'accounts/accounts_withdraw_success.html')
+        with self.assertRaises(User.DoesNotExist):
+            user = User.objects.get(pk=1)

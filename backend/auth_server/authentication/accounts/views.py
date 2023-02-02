@@ -1,18 +1,11 @@
-import datetime
 import jwt
 
-from django.contrib.auth.views import PasswordResetView, PasswordResetConfirmView, PasswordResetCompleteView
 from django.contrib.auth.tokens import default_token_generator
-from django.core.mail import send_mail
 from django.core.exceptions import ImproperlyConfigured, ValidationError
 from django.shortcuts import render, get_object_or_404
-from django.views.generic.base import View, TemplateView
-from django.utils.decorators import method_decorator
+from django.views.generic.base import View
 from django.utils.encoding import force_str, force_bytes
 from django.utils.http import urlsafe_base64_decode, urlsafe_base64_encode
-from django.views.decorators.cache import never_cache
-from django.views.decorators.debug import sensitive_post_parameters
-from django.urls import reverse_lazy
 from django.core.cache import cache
 from django.http import HttpResponseRedirect
 from django.template.loader import render_to_string
@@ -215,4 +208,28 @@ class PasswordResetConfirm(View):
 
 
 class HandleAccount(APIView):
-    pass
+    def delete(self, request, id, *args, **kwargs):
+        user = get_object_or_404(User, pk=id)
+        message = render_to_string('accounts/accounts_withdraw_email.html', {
+            'username': user.username,
+            'domain': SITE_URL,
+            'uid': urlsafe_base64_encode(force_bytes(user.pk)),
+            'token': make_token(user.nickname),
+        })
+        user.email_user('Withdraw Your NoPOKER Account', message)
+        return Response(status=status.HTTP_200_OK)
+
+
+class WithdrawAccount(View):
+    def get(self, request, uidb64, token, *args, **kwargs):
+        try:
+            uid = force_str(urlsafe_base64_decode(uidb64))
+            user = User.objects.get(pk=uid)
+        except (TypeError, ValueError, OverflowError, User.DoesNotExist):
+            user = None
+
+        if user is not None:
+            if check_account_activate_token(user.nickname, token):
+                user.delete()
+                return render(request, 'accounts/accounts_withdraw_success.html')
+        return render(request, 'accounts/accounts_withdraw_invalid.html')
