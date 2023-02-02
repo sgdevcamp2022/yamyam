@@ -30,3 +30,9 @@ class CreateUserSerializer(serializers.ModelSerializer):
         })
         user.email_user('Activate Your NoPOKER Account', message)
         return user
+
+
+class RetreiveUserSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ['nickname', 'victory', 'loose', 'date_joined']

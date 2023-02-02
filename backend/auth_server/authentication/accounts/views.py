@@ -15,7 +15,7 @@ from rest_framework.response import Response
 
 from .models import User
 from .forms import PasswordResetForm, SetPasswordForm
-from .serializers import CreateUserSerializer
+from .serializers import CreateUserSerializer, RetreiveUserSerializer
 from .hash import check_account_activate_token, make_token
 from .utils import issue_token
 from config.base import SECRET_KEY, ALGORITHM, SITE_URL
@@ -208,6 +208,11 @@ class PasswordResetConfirm(View):
 
 
 class HandleAccount(APIView):
+    def get(self, request, id, *args, **kwargs):
+        user = get_object_or_404(User, pk=id)
+        serializer = RetreiveUserSerializer(user)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
     def delete(self, request, id, *args, **kwargs):
         user = get_object_or_404(User, pk=id)
         message = render_to_string('accounts/accounts_withdraw_email.html', {
