@@ -1,6 +1,12 @@
+import re
 import json
 import hashlib
+import datetime
+import jwt
 
+from django.contrib.auth.forms import SetPasswordForm
+
+from django.core import mail
 from django.urls import reverse
 from django.test import TestCase
 from django.utils.encoding import force_bytes
@@ -8,19 +14,12 @@ from django.utils.http import urlsafe_base64_encode
 from django.contrib.auth.hashers import make_password
 
 from authentication.accounts.models import User
+from config.base import SECRET_KEY, ALGORITHM
 
 
-class AccountsTests(TestCase):
+class AccountCreateTests(TestCase):
     def setUp(self):
-        User.objects.get_or_create(
-            username="user1", nickname="nickname1", email="user1@example.com", password=make_password('password1'))
         self.create_account_url = reverse('accounts:create_account')
-        self.get_activate_url = reverse('accounts:activate_account', kwargs={
-                                        "uidb64": urlsafe_base64_encode(force_bytes(1)), "token": hashlib.sha256('nickname1'.encode('utf-8')).hexdigest()})
-        self.login_account_url = reverse('accounts:login_account')
-        self.check_token_url = reverse('accounts:check_token')
-        self.logout_account_url = reverse('accounts:logout_account')
-        self.find_username_url = reverse('accounts:find_username')
 
     def test_create_account(self):
         post = {"username": "user2", "nickname": "nickname2", "email": "user2@example.com",
@@ -31,6 +30,23 @@ class AccountsTests(TestCase):
         content = {"username": "user2", "nickname": "nickname2",
                    "email": "user2@example.com"}
         self.assertEquals(data, content)
+
+
+class AccountsTests(TestCase):
+    def setUp(self):
+        User.objects.get_or_create(id=1,
+                                   username="user1", nickname="nickname1", email="user1@example.com", password=make_password('password1'))
+        self.create_account_url = reverse('accounts:create_account')
+        self.get_activate_url = reverse('accounts:activate_account', kwargs={
+                                        "uidb64": urlsafe_base64_encode(force_bytes(1)), "token": hashlib.sha256('nickname1'.encode('utf-8')).hexdigest()})
+        self.login_account_url = reverse('accounts:login_account')
+        self.check_token_url = reverse('accounts:check_token')
+        self.logout_account_url = reverse('accounts:logout_account')
+        self.find_username_url = reverse('accounts:find_username')
+        self.password_reset_url = reverse('accounts:password_reset')
+        self.password_reset_valid_url = reverse('accounts:password_reset_confirm', kwargs={
+            "uidb64": urlsafe_base64_encode(force_bytes(1)), "token": "set-password"
+        })
 
     def test_create_duplicated_username_account(self):
         post = {"username": "user1", "nickname": "nickname2", "email": "user2@example.com",
@@ -95,3 +111,25 @@ class AccountsTests(TestCase):
         post = {"email": "user1@example.com"}
         response = self.client.post(self.find_username_url, post)
         self.assertEquals(response.status_code, 200)
+
+    def test_password_reset(self):
+        post = {"username": "user1", "email": "user1@example.com"}
+        response = self.client.post(self.password_reset_url, post)
+        self.assertEquals(response.status_code, 200)
+        self.assertEqual(len(mail.outbox), 1)
+        self.assertEqual(mail.outbox[0].subject,
+                         'NoPOKER Password reset')
+        urlmatch = re.search(
+            r"http?://[^/]*(/.*reset/\S*)", mail.outbox[0].body)
+        response = self.client.get(urlmatch[1])
+        self.assertEquals(response.status_code, 302)
+        urlmatch_list = urlmatch[1].split('/')
+        session = self.client.session
+        session["_password_reset_token"] = urlmatch_list[4]
+        session.save()
+        response = self.client.post(
+            self.password_reset_valid_url, {"new_password1": "password12345", "new_password2": "password12345"})
+        self.assertTemplateUsed(
+            response, 'accounts/accounts_password_complete.html')
+        u = User.objects.get(email="user1@example.com")
+        self.assertTrue(u.check_password("password12345"))

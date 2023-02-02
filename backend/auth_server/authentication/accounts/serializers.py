@@ -4,7 +4,7 @@ from django.utils.http import urlsafe_base64_encode
 from rest_framework import serializers
 
 from .models import User
-from .hash import make_account_activate_token
+from .hash import make_token
 from config.base import SITE_URL
 
 
@@ -26,7 +26,7 @@ class CreateUserSerializer(serializers.ModelSerializer):
             'username': user.username,
             'domain': SITE_URL,
             'uid': urlsafe_base64_encode(force_bytes(user.pk)),
-            'token': make_account_activate_token(user.nickname),
+            'token': make_token(user.nickname),
         })
         user.email_user('Activate Your NoPOKER Account', message)
         return user

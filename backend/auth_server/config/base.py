@@ -39,6 +39,7 @@ SECRET_KEY = get_secret("SECRET_KEY")
 ALGORITHM = get_secret("ALGORITHM")
 SITE_ID = 1
 SITE_URL = get_secret("SITE_URL")
+PASSWORD_RESET_TIMEOUT = 1800
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
