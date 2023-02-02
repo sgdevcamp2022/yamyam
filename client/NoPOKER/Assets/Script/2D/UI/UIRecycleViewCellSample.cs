@@ -22,7 +22,7 @@ namespace UI
 
         public void OnClickedButton()
         {
-              Debug.Log(_txtChat.name);
+              Debug.Log(_txtName.text);
         }
     }
 }
