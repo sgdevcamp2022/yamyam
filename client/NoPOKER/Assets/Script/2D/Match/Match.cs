@@ -6,54 +6,44 @@ public class Match : MonoBehaviour
 {
     [SerializeField] private List<GameObject> _loadingObject = new List<GameObject>();
     private IEnumerator _loadingCoroutine;
-
-
-    private void Start()
-    {
-        Init();
-    }
-
-    public void Init()
-    {
-        _loadingCoroutine = _loadingUI();
-    }
+    private IEnumerator _loadingUICoroutine;
 
     public void MatchLoading()
     {
-        StartCoroutine(_loadingCoroutine);
-        Debug.Log("next");
-    }
-
-    private void Update()
-    {
-        if (Input.GetKeyDown(KeyCode.A))
+        for (int i = 0; i < _loadingObject.Count; i++)
         {
-            MatchingSucceed();
+            _loadingObject[i].SetActive(true);
         }
+        _loadingCoroutine = Loading();
+        _loadingUICoroutine = LoadingUI();
 
+        StartCoroutine(_loadingCoroutine);
     }
 
-    private IEnumerator _loadingUI()
+    public IEnumerator LoadingUI()
     {
 
         while(true)
-        {
-          
-              
-            Debug.Log("...");
+        {           
             for(int i=0;i<_loadingObject.Count;i++)
             {
-                Debug.Log(i);
                 _loadingObject[i].SetActive(false);
                 yield return new WaitForSeconds(0.5f);
                 _loadingObject[i].SetActive(true);
             }               
         }
-  
+    }
+
+    public IEnumerator Loading()
+    {
+        StartCoroutine(_loadingUICoroutine);
+        yield return new WaitUntil(() => Input.GetKeyDown(KeyCode.A)); //나중에 A키 입력대신 서버통신으로
+        MatchingSucceed();
     }
 
     public void StopLoading()
     {
+        StopCoroutine(_loadingUICoroutine);
         StopCoroutine(_loadingCoroutine);  
     }
 
