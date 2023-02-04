@@ -58,8 +58,31 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'rest_framework',
+    'drf_spectacular',
     'authentication.accounts',
 ]
+
+REST_FRAMEWORK = {
+    # YOUR SETTINGS
+    'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
+}
+
+SPECTACULAR_SETTINGS = {
+    'TITLE': 'NoPOKER Authentication API Document',
+    'DESCRIPTION': 'NoPOKER 인증 API를 설명하기 위한 API 문서입니다.',
+    'CONTACT': {'name': '박동진', 'url': 'https://github.com/pderer', 'email': 'capospi9903@naver.com'},
+    'SWAGGER_UI_SETTINGS': {
+        'dom_id': '#swagger-ui',
+        'layout': 'BaseLayout',
+        'deepLinking': True,
+        'persistAuthorization': True,
+        'displayOperationId': True,
+        'filter': True,
+    },
+    'VERSION': '1.0.0',
+    'SERVE_INCLUDE_SCHEMA': False,
+    'SWAGGER_UI_DIST': '//unpkg.com/swagger-ui-dist@4.15.5',
+}
 
 MIDDLEWARE = [
     # 'django.middleware.security.SecurityMiddleware',

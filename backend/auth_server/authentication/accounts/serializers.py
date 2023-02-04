@@ -32,6 +32,24 @@ class CreateUserSerializer(serializers.ModelSerializer):
         return user
 
 
+class ResetPasswordSerializer(serializers.Serializer):
+    username = serializers.CharField(max_length=150)
+    email = serializers.EmailField(max_length=255)
+
+    def validate_username(self, value):
+        if not User.objects.filter(username=value).exists():
+            raise serializers.ValidationError("해당 사용자ID가 존재하지 않습니다.")
+        return value
+
+    def validate(self, data):
+        username = data['username']
+        email = data['email']
+
+        if User.objects.get(username=username).email != email:
+            raise serializers.ValidationError("사용자의 이메일 주소가 일치하지 않습니다")
+        return data
+
+
 class RetreiveUserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User

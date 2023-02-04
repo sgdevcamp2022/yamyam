@@ -14,8 +14,8 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 
 from .models import User
-from .forms import PasswordResetForm, SetPasswordForm
-from .serializers import CreateUserSerializer, RetreiveUserSerializer
+from .forms import SetPasswordForm
+from .serializers import CreateUserSerializer, RetreiveUserSerializer, ResetPasswordSerializer
 from .hash import check_account_activate_token, make_token
 from .utils import issue_token
 from config.base import SECRET_KEY, ALGORITHM, SITE_URL
@@ -68,7 +68,7 @@ class LoginAccount(APIView):
                                 'Refresh-Token': refresh_token
                             })
         else:
-            return Response({'detail': 'invalid user'}, status=status.HTTP_401_UNAUTHORIZED)
+            return Response(status=status.HTTP_401_UNAUTHORIZED)
 
 
 class LogoutAccount(APIView):
@@ -128,11 +128,14 @@ class FindUsername(APIView):
         return Response(status=status.HTTP_200_OK)
 
 
-class PasswordReset(APIView):
+class PasswordReset(generics.GenericAPIView):
+    queryset = User.objects.all()
+    serializer_class = ResetPasswordSerializer
+
     def post(self, request):
-        password_reset_form = PasswordResetForm(request.POST)
-        if password_reset_form.is_valid():
-            username = password_reset_form.cleaned_data['username']
+        serializer = ResetPasswordSerializer(data=request.data)
+        if serializer.is_valid():
+            username = serializer.validated_data['username']
             user = get_object_or_404(User, username=username)
             message = render_to_string('accounts/accounts_password_reset.html', {
                 'username': username,
@@ -207,7 +210,10 @@ class PasswordResetConfirm(View):
         return user
 
 
-class HandleAccount(APIView):
+class HandleAccount(generics.GenericAPIView):
+    queryset = User.objects.all()
+    serializer_class = RetreiveUserSerializer
+
     def get(self, request, id, *args, **kwargs):
         user = get_object_or_404(User, pk=id)
         serializer = RetreiveUserSerializer(user)

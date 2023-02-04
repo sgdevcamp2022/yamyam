@@ -14,7 +14,7 @@ urlpatterns = [
          name='password_reset'),
     path('reset/<uidb64>/<token>/', PasswordResetConfirm.as_view(),
          name='password_reset_confirm'),
-    path('<id>/', HandleAccount.as_view(), name='handle_account'),
+    path('<int:id>/', HandleAccount.as_view(), name='handle_account'),
     path('withdraw/<uidb64>/<token>/',
          WithdrawAccount.as_view(), name='withdraw_account')
 ]
