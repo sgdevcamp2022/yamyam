@@ -15,7 +15,7 @@ public class Batting : MonoBehaviour
     private int _roundBattingChip = 20;
     public int RoundBattingChip { get => _roundBattingChip; }
 
-    private int _myBattingChip = 90;
+    private int _myBattingChip = 150;
     public int MyBattingChip { get => _myBattingChip; }
 
     private int _callBattingChip = 10;
@@ -24,15 +24,16 @@ public class Batting : MonoBehaviour
     private int _unitBattingChip = 5;
     public int UnitBattingChip { get => _unitBattingChip; }
 
-    private int _turnbattingChip;
     private bool _canPayChip;
+
+    [SerializeField] UIBatting _uiBatting;
 
     private void Awake()
     {
-        _init();
+        Init();
     }
 
-    private void _init()
+    public void Init()
     {
         if (s_instance == null)
             s_instance = this;
@@ -42,8 +43,6 @@ public class Batting : MonoBehaviour
     {
         if(_myBattingChip < batting)
         {
-            //Alert 알림화면으로 낼 칩이 그만큼 없다고 하기.
-            //음.. 게임에 대해서 다시 팀원들과 얘기해보기.
             return false;
         }
             return _myBattingChip < batting ? false : true;
@@ -53,31 +52,40 @@ public class Batting : MonoBehaviour
         _canPayChip = _checkMyChip(raiseChip);
         if (_canPayChip)
         {
-            _payChip(raiseChip);
+            _uiBatting.SetPlayerBattingResult(0, raiseChip.ToString());
+            _payChip(raiseChip, false);
         }
     }
     public void Call()
     {
+        
+
         _canPayChip = _checkMyChip(_callBattingChip);
-        if (_canPayChip) 
+        if (_canPayChip)
         {
-            _payChip(_callBattingChip);
+            _uiBatting.SetPlayerBattingResult(0, "콜");
+            _payChip(_callBattingChip, true);
         }      
     }
     public void Die()
     {
         // 서버통신 : 해당 플레이어가 다이했다는걸 알리기.
         // 턴을 넘기도록함.
+        _uiBatting.SetPlayerBattingResult(0,"다이");
+        PokerGameManager.Instance.FinishTurn();
     }
-    private void _payChip(int batting)
+    private void _payChip(int batting, bool call)
     {
        
         _roundBattingChip += batting;
         _myBattingChip -= batting;
         _callBattingChip = batting;
         Debug.Log("현재 나의 칩 금액 : " + _myBattingChip);
+        // (콜을 했을경우)서버통신 : 해당 플레이어가 콜했다는걸 알리기.
+        //if(call) 
         // 서버통신 : 칩을 지불함, 전체 베팅금액 증가 알림
         // 턴을 넘기도록함.
+        PokerGameManager.Instance.FinishTurn();
     }
 
     ////////////////////////////////////////서버를 통해 받을부분..../////////////////////////////////////
@@ -90,6 +98,11 @@ public class Batting : MonoBehaviour
         _roundBattingChip += raise;
         _callBattingChip += raise;
         //UI쪽에도 변경사항을 반영해야함..
+    }
+
+    public void SettingRoundBatting(int roundBatting)
+    {
+        _roundBattingChip = roundBatting;
     }
 
 

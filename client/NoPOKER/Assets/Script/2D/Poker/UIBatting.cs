@@ -12,6 +12,8 @@ public class UIBatting : MonoBehaviour
     [SerializeField] TMP_Text _myBattingChip;
 
     [SerializeField] GameObject _dieView;
+    [SerializeField] GameObject[] _playerBattingResultObject = new GameObject[4];
+    [SerializeField] TMP_Text[] _playerBattingResultText = new TMP_Text[4];
     private int _canBatting;
 
     private void Start()
@@ -94,6 +96,12 @@ public class UIBatting : MonoBehaviour
     public void ActiveDieView()
     {       
         _dieView.SetActive(true);
+    }
+
+    public void SetPlayerBattingResult(int who, string text)
+    {
+        _playerBattingResultObject[who].SetActive(true);
+        _playerBattingResultText[who].text = text;
     }
 
 }
