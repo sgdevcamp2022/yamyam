@@ -86,36 +86,38 @@ class LogoutAccount(APIView):
             return Response(status=status.HTTP_404_NOT_FOUND)
 
 
-class CheckToken(APIView):
-    def post(self, request):
+class CheckAccessToken(APIView):
+    def get(self, request):
         try:
             access_token = jwt.decode(
                 request.headers['Access-Token'], SECRET_KEY, ALGORITHM)
             user = get_object_or_404(
                 User, username=access_token.get('username'))
             return Response({'username': user.username}, status=status.HTTP_200_OK)
-        except (jwt.exceptions.DecodeError, jwt.exceptions.InvalidAlgorithmError,
-                jwt.exceptions.InvalidKeyError, jwt.exceptions.MissingRequiredClaimError):
+        except (jwt.exceptions.InvalidTokenError):
             return Response(status=status.HTTP_401_UNAUTHORIZED)
-        except (jwt.exceptions.ExpiredSignatureError):
-            try:
-                refresh_token = jwt.decode(
-                    request.headers['Refresh-Token'], SECRET_KEY, ALGORITHM)
-                username = refresh_token.get('username')
-                if cache.get(username) is None:
-                    return Response(status=status.HTTP_401_UNAUTHORIZED)
-                else:
-                    access_token = issue_token(username, days=0, hours=6)
-                    refresh_token = issue_token(username, days=14, hours=0)
-                    cache.delete(username)
-                    cache.set(username, refresh_token, 60*60*24*14)
-                    return Response(status=status.HTTP_200_OK,
-                                    headers={
-                                        'Access-Token': access_token,
-                                        'Refresh-Token': refresh_token
-                                    })
-            except (jwt.exceptions.InvalidTokenError):
+
+
+class CheckRefreshToken(APIView):
+    def get(self, request):
+        try:
+            refresh_token = jwt.decode(
+                request.headers['Refresh-Token'], SECRET_KEY, ALGORITHM)
+            username = refresh_token.get('username')
+            if cache.get(username) is None:
                 return Response(status=status.HTTP_401_UNAUTHORIZED)
+            else:
+                access_token = issue_token(username, days=0, hours=6)
+                refresh_token = issue_token(username, days=14, hours=0)
+                cache.delete(username)
+                cache.set(username, refresh_token, 60*60*24*14)
+                return Response(status=status.HTTP_200_OK,
+                                headers={
+                                    'Access-Token': access_token,
+                                    'Refresh-Token': refresh_token
+                                })
+        except (jwt.exceptions.InvalidTokenError):
+            return Response(status=status.HTTP_401_UNAUTHORIZED)
 
 
 class FindUsername(APIView):
