@@ -3,27 +3,39 @@ using UnityEngine;
 
 namespace UI
 {
-    public class UIRecycleViewControllerSample : UIRecycleViewController<UICellSampleData>
+    public class UIRecycleViewControllerSample : UIRecycleViewController<UICellData>
     {
+        [SerializeField] RectTransform _scroll;
         private void LoadData()
         {
-            TableData = new List<UICellSampleData>()
+            TableData = new List<UICellData>()
             {
-                new UICellSampleData { Name="WISE" , Chat = "¾È³çÇÏ¼¼¿ë"},
-                new UICellSampleData { Name="°×Àß¾Ë" , Chat = "ABCDE"},
-                new UICellSampleData { Name="¾ä¾ä" , Chat = "¾ä¾ä ÆÀ È­ÀÌÆÃ!¾ä¾ä ÆÀ È­ÀÌÆÃ!¾ä¾ä ÆÀ È­ÀÌÆÃ!¾ä¾ä ÆÀ È­ÀÌÆÃ!¾ä¾ä ÆÀ È­ÀÌÆÃ!" +
+                new UICellData { Name="" , Chat = "ÇÑ±ÛÇÑ±ÛÇÑ±ÛÇÑ±ÛÇÑ±ÛÇÑ±ÛÇÑ±ÛÇÑ±ÛÇÑ±ÛÇÑ±ÛÇÑ±ÛÇÑ±ÛÇÑ±ÛÇÑ±ÛÇÑ±ÛÇÑ±ÛÇÑ±ÛÇÑ±ÛÇÑ"},
+                new UICellData { Name="°×Àß¾Ë" , Chat = "CONTENTCONTENTCONTENTCONTENTCONTENTCONTENTC"},
+                new UICellData { Name="¾ä¾ä" , Chat = "¾ä¾ä ÆÀ È­ÀÌÆÃ!¾ä¾ä ÆÀ È­ÀÌÆÃ!¾ä¾ä ÆÀ È­ÀÌÆÃ!¾ä¾ä ÆÀ È­ÀÌÆÃ!¾ä¾ä ÆÀ È­ÀÌÆÃ!" +
                 "¾ä¾ä ÆÀ È­ÀÌÆÃ!¾ä¾ä ÆÀ È­ÀÌÆÃ!¾ä¾ä ÆÀ È­ÀÌÆÃ!¾ä¾ä ÆÀ È­ÀÌÆÃ!¾ä¾ä ÆÀ È­ÀÌÆÃ!¾ä¾ä ÆÀ È­ÀÌÆÃ!¾ä¾ä ÆÀ È­ÀÌÆÃ!" +
                 "¾ä¾ä ÆÀ È­ÀÌÆÃ!¾ä¾ä ÆÀ È­ÀÌÆÃ!¾ä¾ä ÆÀ È­ÀÌÆÃ!¾ä¾ä ÆÀ È­ÀÌÆÃ!"},
-                new UICellSampleData { Name="½º¸¶ÀÏ°ÔÀÌÆ®" , Chat = "À©ÅÍµ¥ºêÄ·ÇÁ¿¡ ¿À½Å°É È¯¿µÇÕ´Ï´Ù!"},
-                new UICellSampleData { Name="ÀÌ»ç´Ô" , Chat = "PMP ¸ñÇ¥¿¡ ¸Â¾Æ¿ä? ±×°Ô??"},
-                new UICellSampleData { Name="¿ë¿ë" , Chat = "¿ë¿ëÃ¼¸¦ ¾²¸é È­°¡Ç®¸®´Â ¸¶¹ýÀÌ »ý°Ü¿ä"},
-                new UICellSampleData { Name="NoPOKER" , Chat = "NoPOKER Is Funny!!!NoPOKER Is Funny!!!NoPOKER Is Funny!!!NoPOKER Is Funny!!!NoPOKER Is Funny!!!NoPOKER Is Funny!!!NoPOKER Is Funny!!!NoPOKER Is Funny!!!"},
-                new UICellSampleData { Name="³È³È³È³È³È³È³È³È³È³È³È" , Chat = "¿Ö ³È³ÈÀÌ ¾Æ´Ï°í ¾ä¾äÀÎ°ÅÁÒ?"},
-                new UICellSampleData { Name="ÂÁÂÁ" , Chat = "±×·¸°ÔÄ¡¸é ÂÁÂÁµµ ÇÒ¸» ÀÖ´Âµ¥¿ä ±×·¸Áö¾Ê³ª¿ä"},
-                new UICellSampleData { Name="¾ä¾ä" , Chat = "¿µ¾î·Î ¾²±â°¡ ÆíÇÏ°í °£´ÜÇÏÀÝ¾Æ¿ä, ±Í¿±°í;;"}
+                new UICellData { Name="½º¸¶ÀÏ°ÔÀÌÆ®" , Chat = "À©ÅÍµ¥ºêÄ·ÇÁ¿¡ ¿À½Å°É È¯¿µÇÕ´Ï´Ù!"},
+                new UICellData { Name="ÀÌ»ç´Ô" , Chat = "PMP ¸ñÇ¥¿¡ ¸Â¾Æ¿ä? ±×°Ô??"},
+                new UICellData { Name="¿ë¿ë" , Chat = "¿ë¿ëÃ¼¸¦ ¾²¸é È­°¡Ç®¸®´Â ¸¶¹ýÀÌ »ý°Ü¿ä"},
+                new UICellData { Name="NoPOKER" , Chat = "NoPOKER Is Funny!!!NoPOKER Is Funny!!!NoPOKER Is Funny!!!NoPOKER Is Funny!!!NoPOKER Is Funny!!!NoPOKER Is Funny!!!NoPOKER Is Funny!!!NoPOKER Is Funny!!!"},
+                new UICellData { Name="³È³È³È³È³È³È³È³È³È³È³È" , Chat = "¿Ö ³È³ÈÀÌ ¾Æ´Ï°í ¾ä¾äÀÎ°ÅÁÒ?"},
+                new UICellData { Name="ÂÁÂÁ" , Chat = "±×·¸°ÔÄ¡¸é ÂÁÂÁµµ ÇÒ¸» ÀÖ´Âµ¥¿ä ±×·¸Áö¾Ê³ª¿ä"},
+                new UICellData { Name="¾ä¾ä" , Chat = "¿µ¾î·Î ¾²±â°¡ ÆíÇÏ°í °£´ÜÇÏÀÝ¾Æ¿ä, ±Í¿±°í;;"}
 
             };
+            UpdataData();
+        }
+
+        public void AddData(UICellData data)
+        {
+            TableData.Add(data);
+        }
+        public void UpdataData()
+        {
             InitializedTableView();
+            _scroll.position = new Vector3(0f, 10000f,0f);
+            _scroll.SetInsetAndSizeFromParentEdge(RectTransform.Edge.Left, 0, 0);
         }
 
         protected override void Start()
@@ -32,22 +44,14 @@ namespace UI
             LoadData();
         }
 
-        public void OnPressCell(UIRecycleViewControllerSample cell)
-        {
-            Debug.Log("Cell Click");
-        }
 
         protected override float GetCellHeightAtIndex(int index)
         { 
             int _countContent= CheckEnglishByte(TableData[index].Chat);
-            int _countName =  CheckEnglishByte(TableData[index].Name);
+            _countContent +=  CheckEnglishByte(TableData[index].Name);
      
-            float _heightContent = 50f * (_countContent / 65 + 1f) ;
-            float _heightName = 50f * (_countName / 15 + 1f);
-
-            float _height = (_heightContent > _heightName) ? _heightContent : _heightName;
-
-            return _height;
+            float _heightContent = 50f * (_countContent / 100 + 1f) ;
+            return _heightContent;
         }
         private int CheckEnglishByte(string text)
         {
@@ -61,5 +65,6 @@ namespace UI
 
             return _byteCount;
         }
+
     }
 }
