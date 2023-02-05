@@ -6,7 +6,7 @@ public class LobbyWindowController : MonoBehaviour
     public static LobbyWindowController Instance
     { get => s_instance; }
 
-    [SerializeField]private GameObject _matchingWindow;
+    [SerializeField] private GameObject _matchingWindow;
     [SerializeField] private Match _match;
     [SerializeField] private GameObject _myPageWindow;
     [SerializeField] private GameObject _freindWindow;
