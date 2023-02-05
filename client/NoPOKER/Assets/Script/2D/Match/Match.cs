@@ -22,7 +22,6 @@ public class Match : MonoBehaviour
 
     public IEnumerator LoadingUI()
     {
-
         while(true)
         {           
             for(int i=0;i<_loadingObject.Count;i++)
