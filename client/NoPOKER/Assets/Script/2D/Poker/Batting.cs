@@ -1,12 +1,5 @@
 using UnityEngine;
 
-public enum BattingMessage
-{
-    Batting,
-    Call,
-    Die
-}
-
 public class Batting : MonoBehaviour
 {
     [SerializeField] UIBatting _uiBatting;
@@ -79,9 +72,6 @@ public class Batting : MonoBehaviour
         _roundBattingChip += batting;
         _myBattingChip -= batting;
         _callBattingChip = batting;
-        Debug.Log("콜이 아닌 최소 베팅 금액 : " + MinBattingChip);
-        Debug.Log("콜금액 : " + _callBattingChip);
-        Debug.Log("유닛 금액 : " +UnitBattingChip);
         _uiBatting.SettingCanBattingChip();
         _uiBatting.ChangeBattingChip();
 
