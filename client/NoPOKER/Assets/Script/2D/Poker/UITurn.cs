@@ -6,12 +6,13 @@ using UnityEngine.UI;
 public class UITurn : MonoBehaviour
 {
     [SerializeField] private Image[] _playersTurnUI;
-    IEnumerator _battingTurn;
-    IEnumerator _turnWait;
-    int _nowTurn = 0;
-    float _turnTime;
-    float _currentTime;
-    float _startTime;
+    [SerializeField] private GameObject[] _playersTurnObject;
+    private IEnumerator _battingTurn;
+    private IEnumerator _turnWait;
+    private int _nowTurn = 0;
+    private float _turnTime;
+    private float _currentTime;
+    private float _startTime;
 
 
     public void StartTurn(int num)
@@ -51,12 +52,11 @@ public class UITurn : MonoBehaviour
         }
         else
         {
-            //time 끝남.
-            //자동으로 콜 하고, 턴을 끝낸다고알림.
-           
             FinishTurn();
+            Batting.Instance.Call();         
         }
     }
+
     void SetFillAmout(float value)
     {
         _playersTurnUI[_nowTurn].fillAmount = value / _turnTime;
@@ -69,24 +69,35 @@ public class UITurn : MonoBehaviour
 
         _turnWait = TurnWait();
         _battingTurn = Turn();
-    }    
+
+        SettingPeople();
+    }     
     
+
+    void SettingPeople()
+    {
+        switch (PokerGameManager.Instance.PeopleNum)
+        {
+            case 3:
+                _playersTurnObject[1].SetActive(true);
+                break;
+            case 4:
+                _playersTurnObject[1].SetActive(true);
+                _playersTurnObject[3].SetActive(true);
+                break;
+        }     
+    }
 
     void FinishTurn()
     {
         StopCoroutine(_battingTurn);
         StopCoroutine(_turnWait);
        
-
-        _playersTurnUI[_nowTurn].gameObject.SetActive(false);
-       PokerGameManager.Instance.FinishTurn();
-
-        Debug.Log("턴 끝났씁니다~");
+       _playersTurnUI[_nowTurn].gameObject.SetActive(false);
     }    
 
     public void ClearTurnUI()
     {
         _playersTurnUI[_nowTurn].gameObject.SetActive(false);
     }
-
 }

@@ -18,29 +18,31 @@ public class PokerGameManager : MonoBehaviour
 {
     private static PokerGameManager s_instance = null;
     public static PokerGameManager Instance { get => s_instance; }
-    
-    private int _peopleNum = 4;
-    private string _myname = "³È³È³È³È³È³È";
-    public int PeopleNum { get => _peopleNum; }
-    private List<Player> _playerOrder = new List<Player>();
+
     [SerializeField] float _turnTiem = 10f;
-    public float TurnTime { get => _turnTiem; }
-    private int _gameProcessNum = 0;
-    private int _order = 4;
+    [SerializeField] private UITurn _turn;
+    private int _peopleNum = 4;
+    public int PeopleNum { get => _peopleNum; }
     private bool _isBattingFinish = false;
     public bool IsBattingFinish { get => _isBattingFinish; }
+    private List<Player> _playerOrder = new List<Player>();
+    public float TurnTime { get => _turnTiem; }
+    private int _order = 4;
+    private int _gameProcessNum = 0;
 
-    [SerializeField] private UITurn _turn; 
+
 
     private void Awake()
     {
         Init();
+   
     }
     private void Start()
     {
         SettingGame();
-        _turn.StartTurn(_order%4);
+        _turn.StartTurn(_order% _peopleNum);
     }
+
     public void Init()
     {
         if (s_instance == null)
@@ -56,21 +58,23 @@ public class PokerGameManager : MonoBehaviour
         }         
         _playerOrder[0].SettingPlayer("³È³È³È³È³È³È", 90);
         _playerOrder[1].SettingPlayer("¾ä¾ä", 90);
-        _playerOrder[2].SettingPlayer("ÂÁÂÁ", 90);
-        _playerOrder[3].SettingPlayer("‡œ‡œ", 90);
+       // _playerOrder[2].SettingPlayer("ÂÁÂÁ", 90);
+       // _playerOrder[3].SettingPlayer("‡œ‡œ", 90);
 
         Batting.Instance.SettingRoundBatting(_peopleNum * 10);
     }
+
     /*[0] Àº ¹«Á¶°Ç ÀÚ±âÀÚ½Å. [1] Àº ÀÚ±â ¹Ù·Î ´ÙÀ½Â÷·Ê. [2]´Â ±×´Ù´ÙÀ½ [3]Àº ±×´Ù´Ù´ÙÀ½
     public void SettingPlayerOrder()
     {
 
     }*/
+
     public void FinishTurn()
     {
         _isBattingFinish = true;
         _turn.ClearTurnUI();
-        if ((_order + 1) % 4 == 0)
+        if ((_order + 1) % _peopleNum == 0)
         {
             _gameProcessNum++;
             Debug.Log("È½¼ö ´Ã¾î³². ÇöÀç : " + _gameProcessNum);
@@ -99,10 +103,8 @@ public class PokerGameManager : MonoBehaviour
             NextTurn();
         }
         else
-        {
-            
-            Change3DGame();
-           
+        {            
+            Change3DGame();        
         }
     }
 
@@ -113,7 +115,7 @@ public class PokerGameManager : MonoBehaviour
     }
 
     public void NextTurn()
-    {
-        _turn.StartTurn(_order % 4);
+    { 
+        _turn.StartTurn(_order % _peopleNum);
     }
 }

@@ -5,8 +5,7 @@ using UnityEngine;
 public class Card : MonoBehaviour
 {
     [SerializeField]private UICard _uiCard;
-    int[] _playerCards = new int[4];
-
+    private int[] _playerCards = new int[4];
     
     private void Awake()
     {
@@ -27,8 +26,6 @@ public class Card : MonoBehaviour
             case 4:
                 _uiCard.SettingCard4(_playerCards);
                 break;
-        }
-       
+        }    
     }
-
 }

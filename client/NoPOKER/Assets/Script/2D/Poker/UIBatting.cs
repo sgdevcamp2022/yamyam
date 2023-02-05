@@ -35,13 +35,14 @@ public class UIBatting : MonoBehaviour
     private void _settingButton()
     {
         _battingButton.onClick.AddListener(() => Batting.Instance.Raise(_canBatting));
-        _battingButton.onClick.AddListener(() => ChangeBattingChip());
-
         _callButton.onClick.AddListener(() => Batting.Instance.Call());
-        _callButton.onClick.AddListener(() => ChangeBattingChip());
-
         _dieButton.onClick.AddListener(() => Batting.Instance.Die());
         _dieButton.onClick.AddListener(() => ActiveDieView());
+    }
+
+    public void SettingCanBattingChip()
+    {
+        _canBatting = Batting.Instance.MinBattingChip;
     }
 
     public void BattingUp()
