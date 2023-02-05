@@ -6,11 +6,13 @@ import java.time.LocalDateTime;
 import java.util.Random;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class Game {
 
-    private final Logger logger = Logger.getLogger("Game");
+    private final Logger log = LoggerFactory.getLogger(Game.class);
+    private static final String MESSAGE_ENDPOINT = "/topic/public/";
 
     private long id;
     private final int MIN_CARD_VALUE = 1;
@@ -43,7 +45,13 @@ public class Game {
     }
 
     public void enterGame(Player player) {
+        if (isFull()) {
+            throw new AssertionError("game room already Full!  current: " + players.size());
+        }
+
         players.add(player);
+        log.info("enter the game / gameId: {} players: {}/{}", id, players.size(),
+            gameType.getPlayerCount());
     }
 
     public void exitGame(Player player) {
@@ -71,20 +79,31 @@ public class Game {
             while (++gameCard[pickCard] >= 1) {
                 player.drawCard(pickCard);
 
-                GameMessage sendMyCard = GameMessage.createDrawMessage(player.getSeatNo(), pickCard);
-                sendMyCard.send(player, "/topic/public/" + id);
+                GameMessage sendMyCard = GameMessage.createDrawMessage(player.getSeatNo(),
+                    pickCard);
+                sendMyCard.send(player, MESSAGE_ENDPOINT + id);
             }
         }
     }
 
-    public void gameStart() {
+    public void gameStartOrNot() {
         if (isFull()) {
+            log.info("====== game start!");
             gameState = GameState.START;
 
             totalBetAmount = 0;
             GameMessage gameMessage = GameMessage.createStartMessage();
-            gameMessage.sendAll(players, "/topic/public/" + id);
+            gameMessage.sendAll(players, MESSAGE_ENDPOINT + id);
         }
+    }
+
+    public void stageStart() {
+        log.info("====== game start!");
+        gameState = GameState.START;
+
+        totalBetAmount = 0;
+        GameMessage gameMessage = GameMessage.createStartMessage();
+        gameMessage.sendAll(players, MESSAGE_ENDPOINT + id);
     }
 
     public void betting() {
@@ -94,13 +113,13 @@ public class Game {
             GameMessage message = GameMessage.createBettingMessage(betAmount,
                 player.getChip(), player.getSeatNo());
             totalBetAmount += betAmount;
-            message.sendAll(players, "/topic/public/" + id);
+            message.sendAll(players, MESSAGE_ENDPOINT + id);
         }
     }
 
     public void focus(int focusSeat) {
         GameMessage message = GameMessage.createFocusMessage(focusSeat);
-        message.sendAll(players, "/topic/public/" + id);
+        message.sendAll(players, MESSAGE_ENDPOINT + id);
     }
 
     public void requestAction() {
@@ -109,8 +128,8 @@ public class Game {
 
         for (Player player : players) {
             idx += 1;
-            GameMessage message = new GameMessage(MessageType.BATTLE, null, null,0, 0);
-            message.send(player, "/topic/public/" + id);
+            GameMessage message = new GameMessage(MessageType.BATTLE, null, null, 0, 0);
+            message.send(player, MESSAGE_ENDPOINT + id);
 
             focus(player.getSeatNo());
         }
@@ -118,7 +137,7 @@ public class Game {
 
     public void turn(int turn) {
         this.currentTurn = turn;
-        logger.info("========= turn: " + turn + " =========");
+        log.info("========= turn: " + turn + " =========");
 
         if (currentTurn >= 1 && currentTurn <= 3) {
             requestAction();
@@ -133,8 +152,8 @@ public class Game {
         return gameType.getPlayerCount() == players.size();
     }
 
-    public Logger getLogger() {
-        return logger;
+    public Logger getLog() {
+        return log;
     }
 
     public int getMIN_CARD_VALUE() {

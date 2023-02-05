@@ -33,14 +33,12 @@ public class GameService implements GameEnterUseCase, GameMakeUseCase, GameUseCa
     @Override
     public void enterGame(User user, long gameId) {
         Game game = storagePort.findGameById(gameId);
+        if (game != null) {
+            log.info("game find! gameInfo = {}", game);
+        }
         Player player = Player.create(user.userId(), user.sessionId(), user.nickname());
         game.enterGame(player);
-    }
-
-    @Override
-    public boolean gameStart(long gameId) {
-        Game game = storagePort.findGameById(gameId);
-        return true;
+        game.gameStartOrNot();
     }
 
     @Override

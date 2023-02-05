@@ -35,37 +35,31 @@ public class GameController {
 
             gameEnterUsecase.enterGame(new User(userId, sessionId, gameMessage.getSender()),
                 gameMessage.getGameId());
-            headerAccessor.getSessionAttributes()
-                .put("ws-session", headerAccessor.getUser().getName());
+            headerAccessor.getSessionAttributes().put("ws-session", headerAccessor.getUser().getName());
         } catch (Exception e) {
             sendingOperations.convertAndSend("/sub/public/" + gameMessage.getGameId(),
                 new GameMessage(MessageType.ERROR, null, null, 0, 0));
         }
-
         sendingOperations.convertAndSend("/sub/public/" + gameMessage.getGameId(), gameMessage);
     }
 
 
-//    @MessageMapping("/action")
-//    public void gameAction(@Payload GameMessage gameMessage,
-//        SimpMessageHeaderAccessor headerAccessor) {
-//        MessageType packet = gameMessage.getType();
-//
-//        switch (packet) {
-//            case GAME_START -> {
-//                if (gameUseCase.gameStart(gameMessage.getGameId())) {
-//                    sendingOperations.convertAndSend("/sub/public/" + gameMessage.getGameId(),
-//                        gameMessage);
-//                }
-//            }
-//
-//            case BET -> {
-//                gameUseCase.betting(gameMessage.getGameId(),
-//                    gameMessage.getContent().get("betAmount"));
-//                sendingOperations.convertAndSend("/sub/public/" + gameMessage.getGameId(),
-//                    gameMessage);
-//            }
-//        }
-//
-//    }
+    @MessageMapping("/action")
+    public void gameAction(@Payload GameMessage gameMessage,
+        SimpMessageHeaderAccessor headerAccessor) {
+        MessageType packet = gameMessage.getType();
+
+        switch (packet) {
+            case BET -> {
+                gameUseCase.betting(gameMessage.getGameId(),
+                    gameMessage.getContent().get("betAmount"));
+                sendingOperations.convertAndSend("/sub/public/" + gameMessage.getGameId(),
+                    gameMessage);
+            }
+
+
+
+        }
+
+    }
 }
