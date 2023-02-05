@@ -1,28 +1,39 @@
 using UnityEngine;
 using TMPro;
-
+using System.Text;
 namespace UI
 {
-    public class UICellSampleData
+    public class UICellData
     {
         public string Name;
         public string Chat;
     }
 
-    public class UIRecycleViewCellSample : UIRecycleViewCell<UICellSampleData>
+    public class UIRecycleViewCellSample : UIRecycleViewCell<UICellData>
     {
-        [SerializeField] private TMP_Text _txtName;
-        [SerializeField] private TMP_Text _txtChat;
+        [SerializeField] private TMP_Text _txtContent;
 
-        public override void UpdateContent(UICellSampleData itemData)
+       StringBuilder _stringBuilder = new StringBuilder();
+        UICellData _data;
+        string _frontColor = "<color=#CAB75B>";
+        string _backColor = "</color>";
+        public override void UpdateContent(UICellData itemData)
         {
-            _txtName.text = itemData.Name;
-            _txtChat.text = itemData.Chat;
+            _data = itemData;
+            _stringBuilder.Clear();
+            _stringBuilder.Append(_frontColor);
+            _stringBuilder.Append(_data.Name);
+            _stringBuilder.Append(" : ");
+            _stringBuilder.Append(_backColor);
+            _stringBuilder.Append(_data.Chat);
+
+            _txtContent.text = _stringBuilder.ToString();
+
         }
 
         public void OnClickedButton()
         {
-              Debug.Log(_txtChat.name);
+              Debug.Log(_data.Name);
         }
     }
 }
