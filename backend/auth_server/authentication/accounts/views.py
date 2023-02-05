@@ -9,7 +9,9 @@ from django.utils.http import urlsafe_base64_decode, urlsafe_base64_encode
 from django.core.cache import cache
 from django.http import HttpResponseRedirect
 from django.template.loader import render_to_string
-from rest_framework import generics, status
+from drf_spectacular.utils import extend_schema, OpenApiParameter, OpenApiResponse, OpenApiExample, inline_serializer
+from drf_spectacular.types import OpenApiTypes
+from rest_framework import generics, status, serializers
 from rest_framework.views import APIView
 from rest_framework.response import Response
 
@@ -24,6 +26,43 @@ from config.base import SECRET_KEY, ALGORITHM, SITE_URL
 class CreateAccount(generics.GenericAPIView):
     serializer_class = CreateUserSerializer
 
+    @extend_schema(
+        summary="사용자를 DB에 등록, 등록을 확정하기 위한 이메일을 보냄.",
+        request=CreateUserSerializer,
+        responses={
+            status.HTTP_201_CREATED: OpenApiResponse(
+                response=CreateUserSerializer,
+                description="User created."
+            ),
+            status.HTTP_400_BAD_REQUEST: OpenApiResponse(
+                response=None,
+                description="Failed to create user."
+            )
+        },
+        examples=[
+            OpenApiExample(
+                request_only=True,
+                summary="Request Body Example입니다.",
+                name="success_example",
+                value={
+                    "username": "user1",
+                    "nickname": "nickname1",
+                    "email": "user1@example.com",
+                    "password": "password1",
+                },
+            ),
+            OpenApiExample(
+                response_only=True,
+                summary="Response Body Example입니다.",
+                name="success_example",
+                value={
+                    "username": "user1",
+                    "nickname": "nickname1",
+                    "email": "user1@example.com",
+                }
+            )
+        ]
+    )
     def post(self, request, format=None):
         serializer = self.get_serializer(
             data=request.data, context={'request': request})
@@ -51,6 +90,47 @@ class ActivateAccount(View):
 
 
 class LoginAccount(APIView):
+    @extend_schema(
+        summary="사용자가 로그인 할 수 있음",
+        request=inline_serializer(
+            "login", {"username": serializers.CharField(), "password": serializers.CharField()}),
+        responses={
+            status.HTTP_200_OK: OpenApiResponse(
+                response=None,
+                description="Login successfully, and Access Token and Refresh Token are issued at Header."
+            ),
+            status.HTTP_404_NOT_FOUND: OpenApiResponse(
+                response=None,
+                description="Login failed."
+            )
+        },
+        parameters=[
+            OpenApiParameter(
+                name="Access-Token",
+                description="Access Token입니다. 200일때만 저장됩니다.",
+                type=str,
+                location=OpenApiParameter.HEADER,
+                response=True
+            ),
+            OpenApiParameter(
+                name="Refresh-Token",
+                description="Refresh Token입니다. 200일때만 저장됩니다.",
+                type=str,
+                location=OpenApiParameter.HEADER,
+                response=True
+            ),
+        ],
+        examples=[
+            OpenApiExample(
+                request_only=True,
+                name="success_example",
+                value={
+                    "username": "user1",
+                    "password": "password1",
+                }
+            )
+        ]
+    )
     def post(self, request):
         user = get_object_or_404(User, username=request.data.get("username"))
         username = user.username
@@ -68,11 +148,35 @@ class LoginAccount(APIView):
                                 'Refresh-Token': refresh_token
                             })
         else:
-            return Response(status=status.HTTP_401_UNAUTHORIZED)
+            return Response(status=status.HTTP_404_NOT_FOUND)
 
 
 class LogoutAccount(APIView):
-    def post(self, request):
+    @extend_schema(
+        summary="사용자가 로그아웃 할 수 있음, 게임을 종료할 때 이 API를 호출해야 함.",
+        description="클라이언트에서 저장된 token들도 삭제해야 함",
+        request=None,
+        responses={
+            status.HTTP_200_OK: OpenApiResponse(
+                response=None,
+                description="Logout successfully, Refresh Token in DB is deleted."
+            ),
+            status.HTTP_404_NOT_FOUND: OpenApiResponse(
+                response=None,
+                description="Logout failed."
+            )
+        },
+        parameters=[
+            OpenApiParameter(
+                name="Refresh-Token",
+                description="Refresh Token입니다.",
+                required=True,
+                type=str,
+                location=OpenApiParameter.HEADER
+            )
+        ],
+    )
+    def get(self, request):
         try:
             refresh_token = jwt.decode(
                 request.headers['Refresh-Token'], SECRET_KEY, ALGORITHM)
@@ -87,18 +191,74 @@ class LogoutAccount(APIView):
 
 
 class CheckAccessToken(APIView):
+    @extend_schema(
+        summary="Header에 있는 Access Token이 유효한지 점검",
+        request=None,
+        responses={
+            status.HTTP_200_OK: OpenApiResponse(
+                response=None,
+                description="Access Token is valid."
+            ),
+            status.HTTP_401_UNAUTHORIZED: OpenApiResponse(
+                response=None,
+                description="Access Token is invalid."
+            )
+        },
+        parameters=[
+            OpenApiParameter(
+                name="Access-Token",
+                description="Access Token입니다.",
+                required=True,
+                type=str,
+                location=OpenApiParameter.HEADER
+            )
+        ]
+    )
     def get(self, request):
         try:
             access_token = jwt.decode(
                 request.headers['Access-Token'], SECRET_KEY, ALGORITHM)
-            user = get_object_or_404(
-                User, username=access_token.get('username'))
-            return Response({'username': user.username}, status=status.HTTP_200_OK)
+            return Response(status=status.HTTP_200_OK)
         except (jwt.exceptions.InvalidTokenError):
             return Response(status=status.HTTP_401_UNAUTHORIZED)
 
 
 class CheckRefreshToken(APIView):
+    @extend_schema(
+        summary="Header에 있는 Refersh Token이 유효한지 점검, 유효하다면 Access Token과 Refresh Token 재발급",
+        request=None,
+        responses={
+            status.HTTP_200_OK: OpenApiResponse(
+                description="Since the refresh token is valid, new access tokens and refresh tokens are issued.",
+            ),
+            status.HTTP_401_UNAUTHORIZED: OpenApiResponse(
+                description="Refresh Token is invalid.",
+            )
+        },
+        parameters=[
+            OpenApiParameter(
+                name="Refresh-Token",
+                description="Refresh Token입니다.",
+                required=True,
+                type=str,
+                location=OpenApiParameter.HEADER,
+            ),
+            OpenApiParameter(
+                name="Access-Token",
+                description="Access Token입니다. 200일때만 저장됩니다.",
+                type=str,
+                location=OpenApiParameter.HEADER,
+                response=True
+            ),
+            OpenApiParameter(
+                name="Refresh-Token",
+                description="Refresh Token입니다. 200일때만 저장됩니다.",
+                type=str,
+                location=OpenApiParameter.HEADER,
+                response=True
+            ),
+        ]
+    )
     def get(self, request):
         try:
             refresh_token = jwt.decode(
@@ -121,6 +281,21 @@ class CheckRefreshToken(APIView):
 
 
 class FindUsername(APIView):
+    @extend_schema(
+        summary="사용자에게 username을 찾을 수 있는 이메일을 보낼 수 있음",
+        request=inline_serializer(
+            "email", {"email": serializers.EmailField()}),
+        responses={
+            status.HTTP_200_OK: OpenApiResponse(
+                response=None,
+                description="Email a withdraw mail to user successfully."
+            ),
+            status.HTTP_404_NOT_FOUND: OpenApiResponse(
+                response=None,
+                description="Invalid user."
+            )
+        },
+    )
     def post(self, request):
         user = get_object_or_404(User, email=request.data.get("email"))
         message = render_to_string('accounts/accounts_find_username.html', {
@@ -130,10 +305,32 @@ class FindUsername(APIView):
         return Response(status=status.HTTP_200_OK)
 
 
-class PasswordReset(generics.GenericAPIView):
-    queryset = User.objects.all()
-    serializer_class = ResetPasswordSerializer
-
+class PasswordReset(APIView):
+    @extend_schema(
+        summary="사용자의 비밀번호를 재생성할 수 있는 링크를 이메일로 보냄",
+        request=ResetPasswordSerializer,
+        responses={
+            status.HTTP_200_OK: OpenApiResponse(
+                response=None,
+                description="Password reset email sent to user successfully."
+            ),
+            status.HTTP_404_NOT_FOUND: OpenApiResponse(
+                response=None,
+                description="Failed to send email."
+            )
+        },
+        examples=[
+            OpenApiExample(
+                request_only=True,
+                summary="Request Body Example입니다.",
+                name="success_example",
+                value={
+                    "username": "user1",
+                    "email": "user1@example.com",
+                },
+            ),
+        ]
+    )
     def post(self, request):
         serializer = ResetPasswordSerializer(data=request.data)
         if serializer.is_valid():
@@ -148,7 +345,7 @@ class PasswordReset(generics.GenericAPIView):
             user.email_user('NoPOKER Password reset', message)
             return Response(status=status.HTTP_200_OK)
         else:
-            return Response(status=status.HTTP_400_BAD_REQUEST)
+            return Response(status=status.HTTP_404_NOT_FOUND)
 
 
 INTERNAL_RESET_SESSION_TOKEN = "_password_reset_token"
@@ -216,11 +413,61 @@ class HandleAccount(generics.GenericAPIView):
     queryset = User.objects.all()
     serializer_class = RetreiveUserSerializer
 
+    @extend_schema(
+        summary="마이페이지에서 사용자의 정보를 받을 수 있음",
+        request=None,
+        responses={
+            status.HTTP_200_OK: OpenApiResponse(
+                response=RetreiveUserSerializer,
+                description="Find user successfully."
+            ),
+            status.HTTP_404_NOT_FOUND: OpenApiResponse(
+                response=None,
+                description="Failed to get user."
+            )
+        },
+        parameters=[
+            OpenApiParameter(
+                name="id",
+                description="user의 id입니다.",
+                required=True,
+                type=OpenApiTypes.STR,
+                location=OpenApiParameter.PATH
+            )
+        ],
+        examples=[
+            OpenApiExample(
+                response_only=True,
+                summary="Response Body Example입니다.",
+                name="success_example",
+                value={
+                    "nickname": "nickname1",
+                    "victory": 5,
+                    "loose": 3,
+                    "date_joined": "2023-02-05T05:37:14.096Z",
+                }
+            )
+        ]
+    )
     def get(self, request, id, *args, **kwargs):
         user = get_object_or_404(User, pk=id)
         serializer = RetreiveUserSerializer(user)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
+    @extend_schema(
+        summary="사용자에게 회원탈퇴 이메일을 보낼 수 있음",
+        request=None,
+        responses={
+            status.HTTP_200_OK: OpenApiResponse(
+                response=None,
+                description="Email a withdraw mail to user successfully."
+            ),
+            status.HTTP_404_NOT_FOUND: OpenApiResponse(
+                response=None,
+                description="Failed to delete user."
+            )
+        },
+    )
     def delete(self, request, id, *args, **kwargs):
         user = get_object_or_404(User, pk=id)
         message = render_to_string('accounts/accounts_withdraw_email.html', {

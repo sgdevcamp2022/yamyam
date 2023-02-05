@@ -94,10 +94,7 @@ class AccountsTests(TestCase):
             'HTTP_REFRESH_TOKEN': response['Refresh-Token']
         }
         response = self.client.get(self.check_access_token_url, **header)
-        data = json.loads(response.content)
-        content = {"username": "user1"}
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(data, content)
 
     # def test_check_refresh_token(self):
 
@@ -108,7 +105,7 @@ class AccountsTests(TestCase):
             'HTTP_ACCESS_TOKEN': response['Access-Token'],
             'HTTP_REFRESH_TOKEN': response['Refresh-Token']
         }
-        response = self.client.post(self.logout_account_url, **header)
+        response = self.client.get(self.logout_account_url, **header)
         self.assertEqual(response.status_code, 200)
 
     def test_find_username(self):
