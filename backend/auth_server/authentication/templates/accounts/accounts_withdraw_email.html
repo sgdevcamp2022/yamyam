@@ -1,0 +1,6 @@
+{% autoescape off %}
+  Hi {{ username }},
+  Please click on the link below to confirm your withdraw :
+  http://{{ domain }}{% url 'accounts:withdraw_account' uidb64=uid token=token %}
+  Thanks for playing.
+{% endautoescape %}
