@@ -24,7 +24,7 @@ public class Chatting : MonoBehaviour
    public void SendChatting(UICellData chattingData)
     {
         uIRecycleViewControllerSample.AddData(chattingData);
-        uIRecycleViewControllerSample.UpdataData();
+        uIRecycleViewControllerSample.UpdataMyData();
 
     }
 }
