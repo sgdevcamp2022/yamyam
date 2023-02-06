@@ -21,6 +21,7 @@ namespace UI
 
         public RectTransform CachedRectTransform => GetComponent<RectTransform>();
         public ScrollRect CachedScrollRect => GetComponent<ScrollRect>();
+        public Vector2 SizeDelta;
 
         protected virtual void Start()
         {
@@ -28,7 +29,7 @@ namespace UI
             CachedScrollRect.onValueChanged.AddListener(OnScrollPoschanged);
         }
 
-        protected void InitializedTableView()
+        protected void InitializeTableView()
         {
             UpdateScrollViewSize();
             UpdateVisibleRect();
@@ -72,7 +73,7 @@ namespace UI
         {
             return CellBase.GetComponent<RectTransform>().sizeDelta.y;
         }
-
+        
         protected void UpdateScrollViewSize()
         {
             float _contentHeight = 0f;
@@ -85,9 +86,11 @@ namespace UI
                 }
             }
 
-            Vector2 _sizeDelta = CachedScrollRect.content.sizeDelta;
-            _sizeDelta.y = _padding.top + _contentHeight + _padding.bottom;
-            CachedScrollRect.content.sizeDelta = _sizeDelta;
+            SizeDelta = CachedScrollRect.content.sizeDelta;
+            //Vector2 _sizeDelta = new Vector2(0f, 0f);
+            SizeDelta.y = _padding.top + _contentHeight + _padding.bottom;
+           
+            CachedScrollRect.content.sizeDelta = SizeDelta;
         }
 
         private UIRecycleViewCell<T> CreateCellForIndex(int index)
@@ -129,7 +132,7 @@ namespace UI
             }
         }
 
-        private void UpdateVisibleRect()
+        public void UpdateVisibleRect()
         {
             _visibleRect.x = CachedScrollRect.content.anchoredPosition.x + _visibleRectPadding.left;
             _visibleRect.y = -CachedScrollRect.content.anchoredPosition.y + _visibleRectPadding.top;
@@ -167,13 +170,13 @@ namespace UI
             _preScrollPos = scrollPos;
         }
 
-        private void UpdateCells(int scrollDirection)
+        public void UpdateCells(int scrollDirection)
         {
             if(_cells.Count <1)
             {
                 return;
             }
-
+            
             if (scrollDirection > 0)
             {
                 UIRecycleViewCell<T> _firstCell = _cells.First.Value;
