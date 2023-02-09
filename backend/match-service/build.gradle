@@ -28,3 +28,7 @@ dependencies {
 tasks.named('test') {
 	useJUnitPlatform()
 }
+
+jar {
+	enable = false
+}
