@@ -37,7 +37,6 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = get_secret("SECRET_KEY")
 ALGORITHM = get_secret("ALGORITHM")
-SITE_ID = 1
 SITE_URL = get_secret("SITE_URL")
 PASSWORD_RESET_TIMEOUT = 1800
 
