@@ -16,7 +16,6 @@ public class ResetPW : MonoBehaviour
     [SerializeField] private  TMP_InputField _inputEmail;
 
     private string _blank = "";
-    private bool _isCorrect;
 
 
     private void OnEnable()
@@ -26,7 +25,6 @@ public class ResetPW : MonoBehaviour
 
     public void InitSetting()
     {
-        _isCorrect = false;
         _inputID.text = _blank;
         _inputEmail.text = _blank;
     }
@@ -47,18 +45,15 @@ public class ResetPW : MonoBehaviour
     }
      async Task ResetPwWebRequest()
     {
-        ResetPWData data = new ResetPWData();
-        data.email = _inputEmail.text;
-        data.username = _inputID.text;
-        HttpClient httpClient = new HttpClient();
-        HttpContent httpContent = new StringContent(JsonUtility.ToJson(data), Encoding.UTF8, "application/json");
-        string url = "http://127.0.0.1:8000/accounts/password_reset";
-        using HttpResponseMessage response = await httpClient.PostAsync(url, httpContent);
-        Debug.Log((int)response.StatusCode);
-        Debug.Log(response.Content);
-        Debug.Log(response);
+        ResetPWData _data = new ResetPWData();
+        _data.email = _inputEmail.text;
+        _data.username = _inputID.text;
+        HttpClient _httpClient = new HttpClient();
+        HttpContent _httpContent = new StringContent(JsonUtility.ToJson(_data), Encoding.UTF8, "application/json");
+        string _url = "http://127.0.0.1:8000/accounts/password_reset";
+        using HttpResponseMessage _response = await _httpClient.PostAsync(_url, _httpContent);
 
-        switch((int)response.StatusCode)
+        switch((int)_response.StatusCode)
         {
             case 200:
                 SucceedFindPWWebRequest();

@@ -18,8 +18,6 @@ public class Login : MonoBehaviour
      public string _token = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJ2ZWxvcGVydC5jb20iLCJleHAiOiIxNDg1MjcwMDAwMDAwIiwiaHR0cHM6Ly92ZWxvcGVydC5jb20vand0X2NsYWltcy9pc19hZG1pbiI6dHJ1ZSwidXNlcklkIjoiMTEwMjgzNzM3MjcxMDIiLCJ1c2VybmFtZSI6InZlbG9wZXJ0In0.WE5fMufM0NDSVGJ8cAolXGkyB5RmYwCto1pQwDIqo2w";
 
 
-
-    private bool _isCorrect= true;
     public void RequestLogin()
     {
         if (_id.text.Equals("") || _pw.text.Equals(""))
@@ -32,14 +30,15 @@ public class Login : MonoBehaviour
 
     async Task ResetPwWebRequest()
     {
-        LoginData data = new LoginData();
-        data.username = _id.text;
-        data.password = _pw.text;
-        HttpClient httpClient = new HttpClient();
-        HttpContent httpContent = new StringContent(JsonUtility.ToJson(data), Encoding.UTF8, "application/json");
-        string url = "http://127.0.0.1:8000/accounts/login/";
-        using HttpResponseMessage response = await httpClient.PostAsync(url, httpContent);
-        switch ((int)response.StatusCode)
+        LoginData _data = new LoginData();
+        _data.username = _id.text;
+        _data.password = _pw.text;
+        HttpClient _httpClient = new HttpClient();
+        HttpContent _httpContent = new StringContent(JsonUtility.ToJson(_data), Encoding.UTF8, "application/json");
+        string _url = "http://127.0.0.1:8000/accounts/login/";
+        using HttpResponseMessage _response = await _httpClient.PostAsync(_url, _httpContent);
+
+        switch ((int)_response.StatusCode)
         {
             case 200:
                 SucceedLoginWebRequest();

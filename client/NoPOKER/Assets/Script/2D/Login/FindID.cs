@@ -36,20 +36,19 @@ public class FindID : MonoBehaviour
             WindowController.Instance.SendAlertMessage(AlertMessage.IncorrectEmail);
             return;
         }
-
         ResetPwWebRequest();
     }
 
     async Task ResetPwWebRequest()
     {
-        FindIdData data = new FindIdData();
-        data.email = _email.text;
-        HttpClient httpClient = new HttpClient();
-        HttpContent httpContent = new StringContent(JsonUtility.ToJson(data), Encoding.UTF8, "application/json");
-        string url = "http://127.0.0.1:8000/accounts/find_username/";
-        using HttpResponseMessage response = await httpClient.PostAsync(url, httpContent);
+        FindIdData _data = new FindIdData();
+        _data.email = _email.text;
+        HttpClient _httpClient = new HttpClient();
+        HttpContent _httpContent = new StringContent(JsonUtility.ToJson(_data), Encoding.UTF8, "application/json");
+        string _url = "http://127.0.0.1:8000/accounts/find_username/";
+        using HttpResponseMessage _response = await _httpClient.PostAsync(_url, _httpContent);
         
-        switch ((int)response.StatusCode)
+        switch ((int)_response.StatusCode)
         {
             case 200:
                 SucceedFindIDWebRequest();
@@ -70,8 +69,8 @@ public class FindID : MonoBehaviour
     {
         try
         {
-            var addr = new System.Net.Mail.MailAddress(email);
-            return addr.Address == email;
+            var _addr = new System.Net.Mail.MailAddress(email);
+            return _addr.Address == email;
         }
         catch
         {
