@@ -16,7 +16,6 @@ public class LobbyWindowController : MonoBehaviour
     [SerializeField] private GameObject _addFriendWindow;
     [SerializeField] private GameObject _settingWindow;
     [SerializeField] private GameObject _removeWindow;
-    [SerializeField] private GameObject _succeedMatchWindow;
 
 
     private void Awake()
@@ -125,13 +124,4 @@ public class LobbyWindowController : MonoBehaviour
         _removeWindow.SetActive(false);
     }
 
-    public void ActiveSucceedMatchWindow()
-    {
-        _succeedMatchWindow.SetActive(true);
-    }
-
-    public void InActiveSucceedMatchWindow()
-    {
-        _succeedMatchWindow.SetActive(false);
-    }
 }

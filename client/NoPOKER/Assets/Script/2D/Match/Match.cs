@@ -140,7 +140,6 @@ public class Match : MonoBehaviour
     {
         StopLoading();
         LobbyWindowController.Instance.InActiveMatchingWindow();
-        LobbyWindowController.Instance.ActiveSucceedMatchWindow();
     }
 
     //수락누르면 다음씬 가도록.
@@ -151,11 +150,4 @@ public class Match : MonoBehaviour
     }
      */
 
-    public void ClickedRejectMatching()
-    {
-        StopLoading();
-        LobbyWindowController.Instance.InActiveMatchingWindow();
-        LobbyWindowController.Instance.InActiveSucceedMatchWindow();
-        //서버통신 : 거절 횟수 적립 및 패널티부여
-    }
 }
