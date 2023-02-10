@@ -1,0 +1,30 @@
+plugins {
+	id 'java'
+	id 'org.springframework.boot' version '3.0.2'
+	id 'io.spring.dependency-management' version '1.1.0'
+}
+
+group = 'com'
+version = '0.0.1-SNAPSHOT'
+sourceCompatibility = '17'
+
+repositories {
+	mavenCentral()
+}
+
+dependencies {
+	implementation 'org.springframework.boot:spring-boot-starter-web'
+	implementation 'org.springframework.boot:spring-boot-starter-websocket'
+	testImplementation 'org.springframework.boot:spring-boot-starter-test'
+	implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.0.2'
+
+	implementation group: 'org.webjars', name: 'webjars-locator', version: '0.46'
+	implementation group: 'org.webjars', name: 'bootstrap', version: '5.2.3'
+	implementation group: 'org.webjars', name: 'jquery', version: '3.6.3'
+	implementation group: 'org.webjars', name: 'stomp-websocket', version: '2.3.4'
+	implementation group: 'org.webjars', name: 'sockjs-client', version: '1.5.1'
+}
+
+tasks.named('test') {
+	useJUnitPlatform()
+}
