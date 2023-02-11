@@ -20,7 +20,7 @@ root@ac61c662ee4c:/# psql -U postgres
 postgres=# create database nopoker;
 CREATE DATABASE
 postgres=# \connect nopoker;
-You are now connected to database "nopoker" as user "User".
+You are now connected to database "nopoker" as user "postgres".
 nopoker=# create user root with password '12345678';
 CREATE ROLE
 nopoker=# alter role root set client_encoding to 'utf-8';
