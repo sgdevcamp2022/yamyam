@@ -1,13 +1,17 @@
 using UnityEngine;
 using TMPro;
+using System.Net.Http;
+using System.Threading.Tasks;
 using System.Text;
-
+public class FindIdData
+{
+    public string email;
+}
 public class FindID : MonoBehaviour
 {
-    [SerializeField] private TMP_InputField _input;
+    [SerializeField] private TMP_InputField _email;
 
     private string _blank = "";
-    private bool _isCorrect;
 
     private void OnEnable()
     {
@@ -16,22 +20,61 @@ public class FindID : MonoBehaviour
 
     public void InitSetting()
     {
-        _isCorrect = false;
-        _input.text = _blank;
+        _email.text = _blank;
     }
 
     public void FindUserID()
     {
-        if (_input.text.Equals(_blank))
+        if (_email.text.Equals(_blank))
         {
             WindowController.Instance.SendAlertMessage(AlertMessage.Blank);
             return;
         }
-        //서버통신 : DB확인 및 결과값 수신
-        if (_isCorrect)
+
+        if (!IsValidEmail(_email.text))
         {
-            gameObject.SetActive(false);
-            WindowController.Instance.SendAlertMessage(AlertMessage.FindID);
+            WindowController.Instance.SendAlertMessage(AlertMessage.IncorrectEmail);
+            return;
+        }
+        ResetPwWebRequest();
+    }
+
+    async Task ResetPwWebRequest()
+    {
+        FindIdData _data = new FindIdData();
+        _data.email = _email.text;
+        HttpClient _httpClient = new HttpClient();
+        HttpContent _httpContent = new StringContent(JsonUtility.ToJson(_data), Encoding.UTF8, "application/json");
+        string _url = "http://127.0.0.1:8000/accounts/find_username/";
+        using HttpResponseMessage _response = await _httpClient.PostAsync(_url, _httpContent);
+        
+        switch ((int)_response.StatusCode)
+        {
+            case 200:
+                SucceedFindIDWebRequest();
+                break;
+            case 404:
+                WindowController.Instance.SendAlertMessage(AlertMessage.NotFound);
+                break;
+        }
+    }
+
+    public void SucceedFindIDWebRequest()
+    {
+        gameObject.SetActive(false);
+        WindowController.Instance.SendAlertMessage(AlertMessage.FindID);
+    }
+
+    public bool IsValidEmail(string email)
+    {
+        try
+        {
+            var _addr = new System.Net.Mail.MailAddress(email);
+            return _addr.Address == email;
+        }
+        catch
+        {
+            return false;
         }
     }
 }
