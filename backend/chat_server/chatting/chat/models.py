@@ -24,3 +24,6 @@ class Room(models.Model):
 
     def __str__(self):
         return f'{self.name} ({self.get_online_count()})'
+
+    class Meta:
+        db_table = "Room"
