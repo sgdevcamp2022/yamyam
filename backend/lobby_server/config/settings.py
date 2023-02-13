@@ -39,7 +39,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'chatting.chat',
+    'lobby.socket',
 ]
 
 ASGI_APPLICATION = "config.asgi.application"

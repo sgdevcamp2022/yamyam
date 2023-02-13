@@ -2,7 +2,7 @@ from channels.testing import ChannelsLiveServerTestCase
 from selenium import webdriver
 
 
-class ChatTests(ChannelsLiveServerTestCase):
+class SocketTests(ChannelsLiveServerTestCase):
     serve_static = True
 
     @classmethod
