@@ -75,11 +75,96 @@ class SingleConsumer(JsonWebsocketConsumer):
             }
         )
 
+    def leader_exit_send(self, data):
+        leader_id = data["leader"]["id"]
+        leader = "%s_%s" % (leader_id, data["leader"]["nickname"])
+        caches['default'].set(leader, "")
+        caches['team'].delete(leader)
+        invitees = data["invitees"]
+        for invitee in invitees:
+            temp = "%s_%s" % (invitee["id"], invitee["nickname"])
+            caches['default'].set(temp, "")
+        async_to_sync(self.channel_layer.group_send)(
+            "team_%s" % leader_id,
+            {
+                'type': 'leader_exit',
+                'leader_id': leader_id
+            }
+        )
+
+    def invitee_exit_send(self, data):
+        reqeuester_id = data["requester"]["id"]
+        requester = "%s_%s" % (reqeuester_id, data["requester"]["nickname"])
+        leader_id = data["leader"]["id"]
+        leader_nickname = data["leader"]["nickname"]
+        leader = "%s_%s" % (leader_id, data["leader"]["nickname"])
+        caches['default'].set(requester, "")
+        invitees = data["invitees"]
+        for invitee in invitees:
+            if invitee["id"] == reqeuester_id:
+                del invitee
+                break
+        if len(invitee) == 0:
+            caches['team'].delete(leader)
+            caches['default'].set(leader, "")
+        update = {
+            "leader": {
+                'id': leader_id,
+                'nickname': leader_nickname,
+            },
+            "invitees": invitees,
+        }
+        caches['team'].set(leader, json.dumps(update))
+        async_to_sync(self.channel_layer.group_discard)(
+            "team_%s" % leader_id, self.channel_name
+        )
+        async_to_sync(self.channel_layer.group_send)(
+            "team_%s" % leader_id,
+            {
+                'type': 'invitee_exit',
+                "leader": {
+                        'id': leader_id,
+                        'nickname': leader_nickname,
+                },
+                "invitees": invitees,
+            }
+        )
+
+    def game_start_send(self, data):
+        leader_id = data["leader"]["id"]
+        leader_nickname = data["leader"]["nickname"]
+        leader = "%s_%s" % (leader_id, data["leader"]["nickname"])
+        invitees = data["invitees"]
+        caches['default'].set(leader, "game")
+        if len(invitees) == 0:
+            return
+        for invitee in invitees:
+            temp = "%s_%s" % (invitee["id"], invitee["nickname"])
+            caches['default'].set(temp, "game")
+        caches['team'].delete(leader)
+        async_to_sync(self.channel_layer.group_send)(
+            "team_%s" % leader_id,
+            {
+                'type': 'game_start',
+                "leader_id": leader_id,
+            }
+        )
+
+    def game_exit_send(self, data):
+        players = data["players"]
+        for player in players:
+            temp = "%s_%s" % (player["id"], player["nickname"])
+            caches['default'].set(temp, "")
+
     types = {
         'lobby_message': lobby_message_send,
         'team_message': team_message_send,
         'invite_request': invite_request_send,
         'invite_accept': invite_accept_send,
+        'leader_exit': leader_exit_send,
+        'invitee_exit': invitee_exit_send,
+        'game_start': game_start_send,
+        'game_exit': game_exit_send,
     }
 
     def connect(self):
@@ -244,6 +329,24 @@ class SingleConsumer(JsonWebsocketConsumer):
 
     def team_list(self, event):
         self.send_json(event)
+
+    def leader_exit(self, event):
+        async_to_sync(self.channel_layer.group_discard)(
+            "team_%s" % event["leader_id"], self.channel_name
+        )
+        self.send_json(
+            {
+                'type': 'leader_exit',
+            }
+        )
+
+    def invitee_exit(self, event):
+        self.send_json(event)
+
+    def game_start(self, event):
+        async_to_sync(self.channel_layer.group_discard)(
+            "team_%s" % event["leader_id"], self.channel_name
+        )
 
     def user_join(self, event):
         self.send_json(event)
