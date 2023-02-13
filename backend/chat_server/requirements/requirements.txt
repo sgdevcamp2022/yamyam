@@ -16,7 +16,6 @@ cryptography==39.0.0
 cssbeautifier==1.14.7
 daphne==4.0.0
 Django==4.1.5
-djangorestframework==3.14.0
 djlint==1.19.13
 EditorConfig==0.12.3
 h11==0.14.0
