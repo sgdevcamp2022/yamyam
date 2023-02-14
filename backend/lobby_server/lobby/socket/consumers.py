@@ -5,7 +5,7 @@ from channels.generic.websocket import JsonWebsocketConsumer
 from django.core.cache import caches
 
 
-class SingleConsumer(JsonWebsocketConsumer):
+class LobbyConsumer(JsonWebsocketConsumer):
     def lobby_message_send(self, data):
         # produce log here.
         async_to_sync(self.channel_layer.group_send)(
@@ -30,18 +30,40 @@ class SingleConsumer(JsonWebsocketConsumer):
         )
 
     def invite_request_send(self, data):
-        async_to_sync(self.channel_layer.group_send)(
-            "notification_%s" % data['invitee']['id'],
-            {
-                'type': 'invite_request',
-                'inviter': {
-                    'id': data['inviter']['id'],
-                    'nickname': data['inviter']['nickname'],
-                },
-                'invitee': {
-                    'id': data['invitee']['id'],
-                    'nickname': data['invitee']['nickname'],
+        invitee_status = caches['default'].get("%s_%s" % (
+            data["invitee"]["id"], data["invitee"]["nickname"]))
+        if invitee_status == "":
+            async_to_sync(self.channel_layer.group_send)(
+                "notification_%s" % data['invitee']['id'],
+                {
+                    'type': 'invite_request',
+                    'inviter': {
+                        'id': data['inviter']['id'],
+                        'nickname': data['inviter']['nickname'],
+                    },
+                    'invitee': {
+                        'id': data['invitee']['id'],
+                        'nickname': data['invitee']['nickname'],
+                    }
                 }
+            )
+            return
+        if invitee_status == "game":
+            self.send_json(
+                {
+                    'type': 'invitee_playing',
+                }
+            )
+            return
+        if invitee_status == "invitee":
+            self.send_json(
+                {
+                    'type': 'team_redundancy',
+                }
+            )
+        self.send_json(
+            {
+                'type': 'invalid_request',
             }
         )
 
@@ -100,13 +122,10 @@ class SingleConsumer(JsonWebsocketConsumer):
         leader = "%s_%s" % (leader_id, data["leader"]["nickname"])
         caches['default'].set(requester, "")
         invitees = data["invitees"]
-        for invitee in invitees:
+        for invitee in invitees[:]:
             if invitee["id"] == reqeuester_id:
-                del invitee
+                invitees.remove(invitee)
                 break
-        if len(invitee) == 0:
-            caches['team'].delete(leader)
-            caches['default'].set(leader, "")
         update = {
             "leader": {
                 'id': leader_id,
@@ -114,7 +133,6 @@ class SingleConsumer(JsonWebsocketConsumer):
             },
             "invitees": invitees,
         }
-        caches['team'].set(leader, json.dumps(update))
         async_to_sync(self.channel_layer.group_discard)(
             "team_%s" % leader_id, self.channel_name
         )
@@ -129,10 +147,21 @@ class SingleConsumer(JsonWebsocketConsumer):
                 "invitees": invitees,
             }
         )
+        if len(invitees) == 0:
+            caches['team'].delete(leader)
+            caches['default'].set(leader, "")
+            async_to_sync(self.channel_layer.group_send)(
+                "team_%s" % leader_id,
+                {
+                    'type': 'no_invitee',
+                    'leader_id': leader_id
+                }
+            )
+            return
+        caches['team'].set(leader, json.dumps(update))
 
     def game_start_send(self, data):
         leader_id = data["leader"]["id"]
-        leader_nickname = data["leader"]["nickname"]
         leader = "%s_%s" % (leader_id, data["leader"]["nickname"])
         invitees = data["invitees"]
         caches['default'].set(leader, "game")
@@ -173,6 +202,7 @@ class SingleConsumer(JsonWebsocketConsumer):
         self.notification_group_name = "notification_%s" % self.user_id
         self.user_info = "%s_%s" % (self.user_id, self.user_nickname)
 
+        self.accept()
         async_to_sync(self.channel_layer.group_add)(
             self.notification_group_name, self.channel_name
         )
@@ -180,10 +210,15 @@ class SingleConsumer(JsonWebsocketConsumer):
             "lobby", self.channel_name
         )
 
+        user_list = caches['default']._cache.get_client().keys("*")
+        temp = []
+        for user in user_list:
+            temp.append(user.decode('utf-8'))
+        user_json = json.dumps(temp)
         self.send_json(
             {
                 "type": "user_list",
-                "users": caches['default'].get("*")
+                "users": user_json
             }
         )
         async_to_sync(self.channel_layer.group_send)(
@@ -194,8 +229,6 @@ class SingleConsumer(JsonWebsocketConsumer):
             }
         )
         caches['default'].set(self.user_info, "")
-
-        self.accept()
 
     def disconnect(self, close_code):
         async_to_sync(self.channel_layer.group_discard)(
@@ -216,7 +249,7 @@ class SingleConsumer(JsonWebsocketConsumer):
 
     def receive(self, text_data):
         data = json.loads(text_data)
-        self.types[data['type']](self, data)
+        self.types[data["type"]](self, data)
 
     def lobby_message(self, event):
         self.send_json(event)
@@ -247,6 +280,12 @@ class SingleConsumer(JsonWebsocketConsumer):
                 "type": "team_redundancy"
             })
             return
+        if caches['default'].get(leader) == "game":
+            self.send_json(
+                {
+                    "type": "inviter_playing",
+                }
+            )
         if caches['team'].get(leader) != None:
             team_json = json.loads(caches['team'].get(leader))
             if len(team_json["invitees"]) == 3:
@@ -258,16 +297,19 @@ class SingleConsumer(JsonWebsocketConsumer):
                 "id": invitee_id,
                 "nickname": invitee_nickname
             }
-            team_invitees = team_json["invitees"].append(new_invitee_json)
+            team_json["invitees"].append(new_invitee_json)
             update = {
                 "leader": {
                     'id': leader_id,
                     'nickname': leader_nickname,
                 },
-                "invitees": team_invitees,
+                "invitees": team_json["invitees"],
             }
             caches['team'].set(leader, json.dumps(update))
             caches['default'].set(invitee, "invitee")
+            async_to_sync(self.channel_layer.group_add)(
+                "team_%s" % leader_id, self.channel_name
+            )
             async_to_sync(self.channel_layer.group_send)(
                 "team_%s" % leader_id, {
                     "type": "team_list",
@@ -275,12 +317,12 @@ class SingleConsumer(JsonWebsocketConsumer):
                         'id': leader_id,
                         'nickname': leader_nickname,
                     },
-                    "invitees": team_invitees,
+                    "invitees": team_json["invitees"],
                 }
             )
             return
         # inviter have no team, invitee have no team
-        invitee_json_str = '["id": %s, "nickname: %s]' % (
+        invitee_json_str = '[{"id": %d, "nickname": "%s"}]' % (
             invitee_id, invitee_nickname)
         invitee_json = json.loads(invitee_json_str)
         self.send_json(
@@ -309,7 +351,7 @@ class SingleConsumer(JsonWebsocketConsumer):
         if caches['team'].get(leader) != None:
             return
         # inviter have no team, invitee have no team
-        invitee_json_str = '["id": %s, "nickname: %s]' % (
+        invitee_json_str = '[{"id": %d, "nickname": "%s"}]' % (
             invitee_id, invitee_nickname)
         invitee_json = json.loads(invitee_json_str)
         self.send_json(
@@ -322,7 +364,15 @@ class SingleConsumer(JsonWebsocketConsumer):
                 "invitees": invitee_json
             }
         )
+        update = {
+            "leader": {
+                'id': leader_id,
+                'nickname': leader_nickname,
+            },
+            "invitees": invitee_json,
+        }
         caches['default'].set(leader, "leader")
+        caches['team'].set(leader, json.dumps(update))
         async_to_sync(self.channel_layer.group_add)(
             "team_%s" % leader_id, self.channel_name
         )
@@ -342,6 +392,11 @@ class SingleConsumer(JsonWebsocketConsumer):
 
     def invitee_exit(self, event):
         self.send_json(event)
+
+    def no_invitee(self, event):
+        async_to_sync(self.channel_layer.group_discard)(
+            "team_%s" % event["leader_id"], self.channel_name
+        )
 
     def game_start(self, event):
         async_to_sync(self.channel_layer.group_discard)(
