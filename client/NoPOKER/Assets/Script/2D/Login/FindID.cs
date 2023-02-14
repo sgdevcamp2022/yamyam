@@ -27,13 +27,13 @@ public class FindID : MonoBehaviour
     {
         if (_email.text.Equals(_blank))
         {
-            WindowController.Instance.SendAlertMessage(AlertMessage.Blank);
+            WindowController.Instance.SendAlertMessage(LoginAlertMessage.Blank);
             return;
         }
 
         if (!IsValidEmail(_email.text))
         {
-            WindowController.Instance.SendAlertMessage(AlertMessage.IncorrectEmail);
+            WindowController.Instance.SendAlertMessage(LoginAlertMessage.IncorrectEmail);
             return;
         }
         ResetPwWebRequest();
@@ -54,7 +54,7 @@ public class FindID : MonoBehaviour
                 SucceedFindIDWebRequest();
                 break;
             case 404:
-                WindowController.Instance.SendAlertMessage(AlertMessage.NotFound);
+                WindowController.Instance.SendAlertMessage(LoginAlertMessage.NotFound);
                 break;
         }
     }
@@ -62,7 +62,7 @@ public class FindID : MonoBehaviour
     public void SucceedFindIDWebRequest()
     {
         gameObject.SetActive(false);
-        WindowController.Instance.SendAlertMessage(AlertMessage.FindID);
+        WindowController.Instance.SendAlertMessage(LoginAlertMessage.FindID);
     }
 
     public bool IsValidEmail(string email)

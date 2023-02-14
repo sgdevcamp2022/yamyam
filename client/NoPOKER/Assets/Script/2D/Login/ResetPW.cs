@@ -33,12 +33,12 @@ public class ResetPW : MonoBehaviour
     {
         if (_inputID.text.Equals(_blank) || _inputEmail.text.Equals(_blank))
         {
-            WindowController.Instance.SendAlertMessage(AlertMessage.Blank);
+            WindowController.Instance.SendAlertMessage(LoginAlertMessage.Blank);
             return;
         }
         if (!IsValidEmail(_inputEmail.text))
         {
-            WindowController.Instance.SendAlertMessage(AlertMessage.IncorrectEmail);
+            WindowController.Instance.SendAlertMessage(LoginAlertMessage.IncorrectEmail);
             return;
         }
          ResetPwWebRequest();
@@ -59,7 +59,7 @@ public class ResetPW : MonoBehaviour
                 SucceedFindPWWebRequest();
                 break;
             case 404:
-                WindowController.Instance.SendAlertMessage(AlertMessage.NotFound);
+                WindowController.Instance.SendAlertMessage(LoginAlertMessage.NotFound);
                 break;
         }
     }
@@ -67,7 +67,7 @@ public class ResetPW : MonoBehaviour
     public void SucceedFindPWWebRequest()
     {
         gameObject.SetActive(false);
-        WindowController.Instance.SendAlertMessage(AlertMessage.FindPW);
+        WindowController.Instance.SendAlertMessage(LoginAlertMessage.FindPW);
     }
 
     public bool IsValidEmail(string email)

@@ -14,7 +14,7 @@ public class SendChatt : MonoBehaviour
     }
     public void SendChattContent()
     {
-        Chatting.Instance.SendChatting(new UICellData {Name= Chatting.Instance.UserName,Chat= _sendChattContent.text});
+        Chatting.Instance.SendChatting(new UICellData {Name= UserInfo.Instance.NickName,Chat= _sendChattContent.text});
         _chattingField.text = "";
     }
 }

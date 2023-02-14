@@ -9,7 +9,7 @@ namespace UI
         public string Chat;
     }
 
-    public class UIRecycleViewCellSample : UIRecycleViewCell<UICellData>
+    public class UIRecycleViewCellChatting : UIRecycleViewCell<UICellData>
     {
         [SerializeField] private TMP_Text _txtContent;
 

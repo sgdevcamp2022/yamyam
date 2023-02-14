@@ -11,14 +11,15 @@ public class LobbyWindowController : MonoBehaviour
     [SerializeField] private GameObject _myPageWindow;
     [SerializeField] private GameObject _freindWindow;
     [SerializeField] private GameObject _alertWindow;
+    [SerializeField] private LobbyAlert _lobbyAlert;
     [SerializeField] private GameObject _choiceAlertWindow;
     [SerializeField] private LobbyChoiceAlert _lobbyChoiceAlert;
-    [SerializeField] private GameObject _addFriendWindow;
     [SerializeField] private GameObject _settingWindow;
     [SerializeField] private GameObject _removeWindow;
-    [SerializeField] private GameObject _succeedMatchWindow;
-
-
+    [SerializeField] private GameObject _teamWindow;
+    [SerializeField] private GameObject _allChatWindow;
+    [SerializeField] private GameObject _teamChatWindow;
+ 
     private void Awake()
     {
         _init();
@@ -56,19 +57,11 @@ public class LobbyWindowController : MonoBehaviour
         _myPageWindow.SetActive(false);
     }
 
-    public void ActiveFriendWindow()
-    {
-        _freindWindow.SetActive(true);
-    }
 
-    public void InActiveFriendWindow()
-    {
-        _freindWindow.SetActive(false);
-    }
-
-    public void ActiveAlertWindow()
+    public void ActiveAlertWindow(LobbyAlertMessage message)
     {
         //AlertMessage에 따라 다르게 되도록 
+        _lobbyAlert.SetAlertContent(LobbyAlertMessage.RejectInvite);
         _alertWindow.SetActive(true);
     }
 
@@ -83,26 +76,15 @@ public class LobbyWindowController : MonoBehaviour
         _choiceAlertWindow.SetActive(true);
     }
 
-    public void ActiveInviteFriendWindow()
+    public void ActiveInviteTeamWindow(string userName)
     {
-        _lobbyChoiceAlert.SetChoiceAlertContent(LobbyChoiceAlertMessage.InviteFriend);
+        _lobbyChoiceAlert.SetChoiceAlertContent(LobbyChoiceAlertMessage.InviteTeam, userName);
         _choiceAlertWindow.SetActive(true);
     }
 
-    public void ActiveInviteTeamWindow()
+    public void InActiveChoiceAlertWindow()
     {
-        _lobbyChoiceAlert.SetChoiceAlertContent(LobbyChoiceAlertMessage.InviteTeam);
-        _choiceAlertWindow.SetActive(true);
-    }
-
-    public void ActiveFriendAddWindow()
-    {
-        _addFriendWindow.SetActive(true);
-    }
-
-    public void InActiveFriendAddWindow()
-    {
-        _addFriendWindow.SetActive(false);        
+        _choiceAlertWindow.SetActive(false);
     }
 
     public void ActiveSettingWindow()
@@ -125,13 +107,35 @@ public class LobbyWindowController : MonoBehaviour
         _removeWindow.SetActive(false);
     }
 
-    public void ActiveSucceedMatchWindow()
+    public void ActiveTeamWindow()
     {
-        _succeedMatchWindow.SetActive(true);
+        _teamWindow.SetActive(true);
+        Chatting.Instance.ActiveTeamChatting();
     }
 
-    public void InActiveSucceedMatchWindow()
+    public void InActiveTeamWindow()
     {
-        _succeedMatchWindow.SetActive(false);
+        _teamWindow.SetActive(false);
+        Chatting.Instance.InActiveTeamChatting();
+    }
+
+    public void ActiveAllChatWindow()
+    {
+        _allChatWindow.SetActive(true);
+    }
+
+    public void InActiveAllChatWindow()
+    {
+        _allChatWindow.SetActive(false);
+    }
+
+    public void ActiveTeamChatWindow()
+    {
+        _teamChatWindow.SetActive(true);
+    }
+
+    public void InActiveTeamChatWindow()
+    {
+        _teamChatWindow.SetActive(false);
     }
 }
