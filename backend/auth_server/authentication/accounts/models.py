@@ -68,6 +68,14 @@ class User(AbstractBaseUser):
         self.is_active = True
         self.save()
 
+    def winner(self):
+        self.victory += 1
+        self.save()
+
+    def looser(self):
+        self.loose += 1
+        self.save()
+
     @property
     def is_staff(self):
         return self.is_admin

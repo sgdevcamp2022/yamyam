@@ -1,3 +1,4 @@
+import json
 import jwt
 
 from django.contrib.auth.tokens import default_token_generator
@@ -72,6 +73,60 @@ class CreateAccount(generics.GenericAPIView):
             serializer.data,
             status=status.HTTP_201_CREATED
         )
+
+
+class ListAccount(APIView):
+    @extend_schema(
+        summary="사용자의 리스트를 받고 승, 패를 업데이트함",
+        request=inline_serializer(
+            "result_update", {"id": serializers.IntegerField(), "result": serializers.CharField()}),
+        responses={
+            status.HTTP_200_OK: OpenApiResponse(
+                response=None,
+                description="Update result successfully."
+            ),
+            status.HTTP_404_NOT_FOUND: OpenApiResponse(
+                response=None,
+                description="Update failed."
+            )
+        },
+        examples=[
+            OpenApiExample(
+                request_only=True,
+                summary="Response Body Example입니다.",
+                name="success_example",
+                value={
+                    "players": [
+                        {
+                            "id": 1,
+                            "result": "WIN",
+                        },
+                        {
+                            "id": 2,
+                            "result": "LOOSE",
+                        },
+                        {
+                            "id": 3,
+                            "result": "LOOSE",
+                        },
+                        {
+                            "id": 4,
+                            "result": "LOOSE",
+                        },
+                    ]}
+            ),
+        ]
+    )
+    def post(self, request, format=None):
+        players = request.data.getlist("players")
+        for player in players:
+            temp = json.loads(player.replace("'", "\""))
+            user = get_object_or_404(User, id=temp["id"])
+            if temp["result"] == "WIN":
+                user.winner()
+            else:
+                user.looser()
+        return Response(status=status.HTTP_200_OK)
 
 
 class ActivateAccount(View):
