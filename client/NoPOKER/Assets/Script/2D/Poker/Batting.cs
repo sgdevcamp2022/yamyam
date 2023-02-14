@@ -44,7 +44,8 @@ public class Batting : MonoBehaviour
         _canPayChip = _checkMyChip(raiseChip);
         if (_canPayChip)
         {
-            _uiBatting.SetPlayerBattingResult(0, raiseChip.ToString());
+            _uiBatting.SetPlayerBattingResult(PokerGameManager.Instance.NowTurn, raiseChip.ToString());
+            PersonSound.Instance.PlayRaiseSound();
             _payChip(raiseChip, false);
         }
     }
@@ -54,7 +55,8 @@ public class Batting : MonoBehaviour
         _canPayChip = _checkMyChip(_callBattingChip);
         if (_canPayChip)
         {
-            _uiBatting.SetPlayerBattingResult(0, "콜");
+            _uiBatting.SetPlayerBattingResult(PokerGameManager.Instance.NowTurn, "콜");
+            PersonSound.Instance.PlayCallSound();
             _payChip(_callBattingChip, true);
         }      
     }
@@ -63,7 +65,11 @@ public class Batting : MonoBehaviour
     {
         // 서버통신 : 해당 플레이어가 다이했다는걸 알리기.
         // 턴을 넘기도록함.
-        _uiBatting.SetPlayerBattingResult(0,"다이");
+        _uiBatting.SetPlayerBattingResult(PokerGameManager.Instance.NowTurn, "다이");
+        _uiBatting.ActiveDieView(PokerGameManager.Instance.NowTurn);
+        PokerGameManager.Instance.UpDieNum();
+        PersonSound.Instance.PlayDieSound();
+        PokerGameManager.Instance.ChangePlayerState(PokerState.die);
         PokerGameManager.Instance.FinishTurn();
     }
 
@@ -75,6 +81,7 @@ public class Batting : MonoBehaviour
         _uiBatting.SettingCanBattingChip();
         _uiBatting.ChangeBattingChip();
 
+        _uiBatting.ShowBattingChipMoveCenter(batting);
         // (콜을 했을경우)서버통신 : 해당 플레이어가 콜했다는걸 알리기.
         // 서버통신 : 칩을 지불함, 전체 베팅금액 증가 알림
         // 턴을 넘기도록함.
@@ -96,4 +103,28 @@ public class Batting : MonoBehaviour
     {
         _roundBattingChip = roundBatting;
     }
+
+    public void Win() //모두 다이를 했을 경우 마지막 한 사람에게 돈을 몰아줌.
+    {
+        for (int i = 0; i < PokerGameManager.Instance.PeopleNum; i++)
+        {
+            if (PokerGameManager.Instance.PlayerOrder[i].GetState() != PokerState.die)
+            {
+                PokerGameManager.Instance.PlayerOrder[i].AddChip(_roundBattingChip);
+                //Reset 베팅 칩
+                ResetBattingChip();
+                //베팅칩 그 사람한테 가는거 UI적으로 보여주기
+                _uiBatting.ShowBattingChipMovePlayer(i);
+                Debug.Log("winner찾음~!");
+            }
+        }
+        //다시 포커게임 시작.
+    }
+    public void ResetBattingChip()
+    {
+        _roundBattingChip = 0;
+        _callBattingChip = 10;
+    }
+
+
 }

@@ -13,7 +13,8 @@ public class UITurn : MonoBehaviour
     private float _turnTime;
     private float _currentTime;
     private float _startTime;
-
+    private bool _isFirst = true;
+    bool _stopTimer = false;
 
     public void StartTurn(int num)
     {
@@ -24,7 +25,11 @@ public class UITurn : MonoBehaviour
     }
 
     IEnumerator TurnWait()
-    {
+    {   if (_isFirst)
+        {
+            yield return new WaitUntil(() => PokerGameManager.Instance.DistributeNum==4);
+            _isFirst = false;
+        }      
         StartCoroutine(_battingTurn);
         yield return new WaitUntil(()=> PokerGameManager.Instance.IsBattingFinish);
         _playersTurnUI[_nowTurn].gameObject.SetActive(false);
@@ -36,15 +41,23 @@ public class UITurn : MonoBehaviour
     {
         _turnTime = PokerGameManager.Instance.TurnTime;
         _startTime = Time.time;
+        _stopTimer = false;
         while (true)
         {          
             CheckTime();
             yield return new WaitForSeconds(0.1f);
+            if (_stopTimer)
+                break;
         }
     }
 
     void  CheckTime()
     {
+        if (PokerGameManager.Instance.PokerFinish)
+        {
+            _stopTimer = true;
+            return;
+        }           
         _currentTime = Time.time - _startTime;
         if(_currentTime < _turnTime)
         {
@@ -52,6 +65,7 @@ public class UITurn : MonoBehaviour
         }
         else
         {
+            _stopTimer = true;
             FinishTurn();
             Batting.Instance.Call();         
         }
@@ -93,8 +107,16 @@ public class UITurn : MonoBehaviour
         StopCoroutine(_battingTurn);
         StopCoroutine(_turnWait);
        
-       _playersTurnUI[_nowTurn].gameObject.SetActive(false);
+       _playersTurnUI[_nowTurn ].gameObject.SetActive(false);
     }    
+
+    public void StopAllTurn()
+    {
+        StopCoroutine(_battingTurn);
+        StopCoroutine(_turnWait);
+
+        _playersTurnUI[_nowTurn].gameObject.SetActive(false);
+    }
 
     public void ClearTurnUI()
     {
