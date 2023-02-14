@@ -60,7 +60,6 @@ $ docker run -it --network redis-net --rm redis redis-cli -h djangoredisserver
 5. 터미널에서 auth_server/ 로 이동
 6. 서버 실행
    ```
-   $ python manage.py makemigrations
    $ python manage.py migrate
    $ python manage.py runserver
    ```
