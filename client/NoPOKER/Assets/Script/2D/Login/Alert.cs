@@ -1,6 +1,6 @@
 using UnityEngine;
 using TMPro;
-public enum AlertMessage
+public enum LoginAlertMessage
 {
     Blank,
     IncorrectPW,
@@ -24,7 +24,7 @@ public class Alert : MonoBehaviour
                                         "이메일로 재설정 링크를 보냈습니다.\n30분내로 확인해주세요", "이메일 형식을 다시 확인해주세요",
                                         "이미 사용중인 ID입니다.", "이미 사용중인 닉네임입니다.", "이미 사용중인 이메일입니다."};
 
-    public void SetAlertContent(AlertMessage message)
+    public void SetAlertContent(LoginAlertMessage message)
     {
         _alertContent.text = _alertMessage[(int)message];
     }

@@ -4,7 +4,7 @@ using UnityEngine.UI;
 
 namespace UI
 {
-    public class UIRecycleViewControllerSample : UIRecycleViewController<UICellData>
+    public class AllChattRecycleViewController : UIRecycleViewController<UICellData>
     {
         [SerializeField] RectTransform _scroll;
         [SerializeField] ScrollRect _scrollRect;
@@ -13,7 +13,7 @@ namespace UI
         float _preContentHeight;
         float _currentContentPos;
         private float _changedHeight;
-        private void LoadData()
+        public void LoadAllChattingData()
         {
             TableData = new List<UICellData>()
             {
@@ -41,7 +41,7 @@ namespace UI
         {
             TableData.Add(data);
         }
-        public void UpdataMyData() //본인이 쓴 채팅이 업데이트 되도록.
+        public void UpdateMyData() //본인이 쓴 채팅이 업데이트 되도록.
         {
           
             InitializeTableView();        
@@ -49,7 +49,7 @@ namespace UI
             OnScrollPoschanged(new Vector2(0f, -0.01f));
         }
 
-        public void UpdataData() //남이 채팅에서 썻을때
+        public void UpdateData() //남이 채팅에서 썻을때
         {
             _currentContentPos = CachedScrollRect.content.anchoredPosition.y;
             _changedHeight = CachedScrollRect.content.sizeDelta.y - _preContentHeight;
@@ -64,7 +64,11 @@ namespace UI
         protected override void Start()
         {
             base.Start();
-            LoadData();
+            LoadAllChattingData();
+        }
+        private void OnEnable()
+        {
+            Chatting.Instance.SetChattingMode(ChattMode.All);
         }
 
 
@@ -73,7 +77,7 @@ namespace UI
             int _countContent = CheckEnglishByte(TableData[index].Chat);
             _countContent += CheckEnglishByte(TableData[index].Name);
 
-            float _heightContent = 50f * (_countContent / 110 + 1f);
+            float _heightContent = 50f * (_countContent / 95 + 1f);
             return _heightContent;
         }
         private int CheckEnglishByte(string text)

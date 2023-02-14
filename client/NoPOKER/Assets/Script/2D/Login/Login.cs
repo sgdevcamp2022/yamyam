@@ -22,7 +22,7 @@ public class Login : MonoBehaviour
     {
         if (_id.text.Equals("") || _pw.text.Equals(""))
         {
-            WindowController.Instance.SendAlertMessage(AlertMessage.Blank);
+            WindowController.Instance.SendAlertMessage(LoginAlertMessage.Blank);
             return;
         }
         ResetPwWebRequest();
@@ -44,7 +44,7 @@ public class Login : MonoBehaviour
                 SucceedLoginWebRequest();
                 break;
             case 404:
-                WindowController.Instance.SendAlertMessage(AlertMessage.NotFound);
+                WindowController.Instance.SendAlertMessage(LoginAlertMessage.NotFound);
                 break;
         }
     }

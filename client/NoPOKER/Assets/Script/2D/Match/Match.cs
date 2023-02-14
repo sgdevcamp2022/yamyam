@@ -19,13 +19,14 @@ public class Match : MonoBehaviour
     private void Start()
     {
        // var wssv = new WebSocketServer("3.36.131.0", 8080);
+       /*
         _socket = new WebSocket("ws://3.36.131.0:8080/match-ws");
         _socket.OnMessage += ws_OnMessage; //서버에서 유니티 쪽으로 메세지가 올 경우 실행할 함수를 등록한다.
         _socket.OnOpen += ws_OnOpen;//서버가 연결된 경우 실행할 함수를 등록한다
         _socket.OnClose += ws_OnClose;//서버가 닫힌 경우 실행할 함수를 등록한다.
         _socket.Connect();//서버에 연결한다.
         _socket.Send("hello");//서버에게 "hello"라는 메세지를 보낸다.
-    
+    */
     }
     void ws_OnMessage(object sender, MessageEventArgs e)
     {
@@ -133,7 +134,6 @@ public class Match : MonoBehaviour
     public void MatchingExit()
     {
         StopLoading();
-        LobbyWindowController.Instance.ActiveAlertWindow();
     }
 
     public void MatchingSucceed()
