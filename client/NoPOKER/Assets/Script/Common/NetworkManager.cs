@@ -40,7 +40,7 @@ public class NetworkManager : MonoBehaviourPunCallbacks
     [ContextMenu("정보")]
     void Info()
     {
-        if (PhotonNetwork.InRoom)
+        if (PhotonNetwork.InRoom) // 방에 있을때 표시
         {
             print("현재 방 이름 : " + PhotonNetwork.CurrentRoom.Name);
             print("현재 방 인원수 : " + PhotonNetwork.CurrentRoom.PlayerCount);
@@ -50,7 +50,7 @@ public class NetworkManager : MonoBehaviourPunCallbacks
             for (int i = 0; i < PhotonNetwork.PlayerList.Length; i++) playerStr += PhotonNetwork.PlayerList[i].NickName + ", ";
             print(playerStr);
         }
-        else
+        else // 로비나 마스터에 있을때 표시
         {
             print("접속한 인원 수 : " + PhotonNetwork.CountOfPlayers);
             print("방 개수 : " + PhotonNetwork.CountOfRooms);
