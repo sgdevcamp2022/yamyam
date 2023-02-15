@@ -77,6 +77,8 @@ public class SignUp : MonoBehaviour
         string _url = "http://127.0.0.1:8000/accounts/";
         using HttpResponseMessage response = await _httpClient.PostAsync(_url, _httpContent);
 
+       // Debug.Log("result = " + response.Content.ReadAsStringAsync().Result);
+       // Debug.Log("response = " + response);
         switch ((int)response.StatusCode)
         {
             case 201:
