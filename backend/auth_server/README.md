@@ -14,20 +14,20 @@ $ docker pull redis
 #### postgreSQL 세팅 방법
 
 ```
-$ docker run -p 5432:5432 --name postgres -e POSTGRES_PASSWORD=12345678 -d postgres
+$ docker run -p 5432:5432 --name postgres -e POSTGRES_PASSWORD=12345678 -d postgres:14.6-alpine
 $ docker exec -it postgres /bin/bash
 root@ac61c662ee4c:/# psql -U postgres
 postgres=# create database nopoker;
 CREATE DATABASE
 postgres=# \connect nopoker;
-You are now connected to database "nopoker" as user "User".
-project=# create user root with password '12345678';
+You are now connected to database "nopoker" as user "postgres".
+nopoker=# create user root with password '12345678';
 CREATE ROLE
-project=# alter role root set client_encoding to 'utf-8';
+nopoker=# alter role root set client_encoding to 'utf-8';
 ALTER ROLE
-project=# alter role root set timezone to 'Asia/Seoul';
+nopoker=# alter role root set timezone to 'Asia/Seoul';
 ALTER ROLE
-project=# grant all privileges on database nopoker to root;
+nopoker=# grant all privileges on database nopoker to root;
 GRANT
 ```
 
@@ -60,7 +60,6 @@ $ docker run -it --network redis-net --rm redis redis-cli -h djangoredisserver
 5. 터미널에서 auth_server/ 로 이동
 6. 서버 실행
    ```
-   $ python manage.py makemigrations
    $ python manage.py migrate
    $ python manage.py runserver
    ```
