@@ -67,7 +67,7 @@ public class UITurn : MonoBehaviour
         {
             _stopTimer = true;
             FinishTurn();
-            Batting.Instance.Call();         
+            Batting.Instance.Die();         
         }
     }
 

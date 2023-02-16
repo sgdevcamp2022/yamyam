@@ -43,16 +43,6 @@ public class PokerPlayer
 
 }
 
-public class PokerOrder {
-    public int PokerUserID;
-    public string PokerUserNickName;
-
-    public PokerOrder(int id, string name)
-    {
-        PokerUserID = id;
-        PokerUserNickName = name;
-    }
-}
 
 public class PokerGameManager : MonoBehaviour
 {
@@ -78,14 +68,26 @@ public class PokerGameManager : MonoBehaviour
     private bool _pokerFinish = false;
     public bool PokerFinish { get => _pokerFinish; }
     [SerializeField] UIPokerPlayer _uiPokerPlayer;
-    private List<PokerOrder> _pokerOrder = new List<PokerOrder>();
     private int _myOrder;
     private int _myID = 3;
     private int _startPoint;
+    private int _callNum = 0;
+    private int _alivePeople;
+
+    public void UpCallNum()
+    {
+        _callNum++;
+    }
+    
+    public void ResetCallNum()
+    {
+        _callNum = 0;
+    }
 
     public void UpDieNum()
     {
         _dieNum++;
+        _alivePeople--;
     }
 
     public void UpDistributeNum()
@@ -123,6 +125,7 @@ public class PokerGameManager : MonoBehaviour
         {
             PlayerOrder.Add(new PokerPlayer(_playerNames[i],90));
         }    */
+        _alivePeople = _peopleNum;
         GetPlayerOrder();
         SetPlayerPosition();
 
@@ -155,6 +158,11 @@ public class PokerGameManager : MonoBehaviour
             FinishPokerGame();
             AllDie();
             //본인 카드 공개 되면서, 베팅된칩 그 한명에게로 몰빵           
+        }
+        else if(_callNum == _alivePeople) //살아 있는 모두가 콜을 했을 경우 
+        {
+            FinishPokerGame();
+            Change3DGame();
         }
         else
         {
