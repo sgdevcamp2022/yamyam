@@ -86,7 +86,9 @@ class AccountsTests(TestCase):
     def test_login_account(self):
         post = {"username": "user1", "password": "password1"}
         response = self.client.post(self.login_account_url, post)
+        content = {"id": 1, "nickname": "nickname1"}
         self.assertEqual(response.status_code, 200)
+        self.assertEqual(content, json.loads(response.content))
         self.assertEqual(response.has_header('Access-Token'), True)
         self.assertEqual(response.has_header('Refresh-Token'), True)
 
