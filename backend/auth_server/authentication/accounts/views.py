@@ -207,11 +207,14 @@ class LoginAccount(APIView):
             else:
                 cache.delete(username)
                 cache.set(username, refresh_token, 60*60*24*14)
-            return Response(status=status.HTTP_200_OK,
-                            headers={
-                                'Access-Token': access_token,
-                                'Refresh-Token': refresh_token
-                            })
+            return Response(data={
+                "id": user.id,
+                "nickname": user.nickname
+            }, status=status.HTTP_200_OK,
+                headers={
+                'Access-Token': access_token,
+                'Refresh-Token': refresh_token
+            })
         else:
             return Response(status=status.HTTP_404_NOT_FOUND)
 
