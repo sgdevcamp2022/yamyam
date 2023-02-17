@@ -50,4 +50,19 @@ public class FileIO : MonoBehaviour
         _fileReader.Close();
         return System.Convert.FromBase64String(_content);
     }
+
+    public static void ResetKey()
+    {
+        _sw = new StreamWriter(_filePath);
+        _sw.WriteLine("");
+        _sw.Flush();
+        _sw.Close();
+
+
+        _sw = new StreamWriter(_fileRePath);
+        _sw.WriteLine("");
+
+        _sw.Flush();
+        _sw.Close();
+    }
 }

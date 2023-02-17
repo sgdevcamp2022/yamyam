@@ -3,12 +3,19 @@ using TMPro;
 using System.Net.Http;
 using System.Threading.Tasks;
 using System.Text;
-using System.Collections;
+using Newtonsoft.Json.Linq;
 
-public class LoginData
+
+public class JsonLoginData
 {
     public string username;
     public string password;
+}
+
+public class JsonUserData 
+{
+    public int id;
+    public string nickname;
 }
 
 public class Login : MonoBehaviour
@@ -16,8 +23,16 @@ public class Login : MonoBehaviour
     [SerializeField] private TMP_InputField _id;
     [SerializeField] private TMP_InputField _pw;
 
-     public string _AccessToken = "";
-    public string _RefreshToken = "";
+    string _AccessToken = "";
+    string _RefreshToken = "";
+
+    HttpClient _httpClient;
+    HttpContent _httpContent;
+    JsonLoginData _loginData;
+    HttpResponseMessage _response;
+    JsonUserData _userJson;
+
+    string _loginUrl = "http://127.0.0.1:8000/accounts/login/";
 
     public void RequestLogin()
     {
@@ -26,29 +41,42 @@ public class Login : MonoBehaviour
             WindowController.Instance.SendAlertMessage(LoginAlertMessage.Blank);
             return;
         }
-        ResetPwWebRequest();
+        LoginWebRequest();
     }
 
-    async Task ResetPwWebRequest()
+    
+
+    async Task LoginWebRequest()
     {
-        LoginData _data = new LoginData();
-        _data.username = _id.text;
-        _data.password = _pw.text;
-        HttpClient _httpClient = new HttpClient();
-        HttpContent _httpContent = new StringContent(JsonUtility.ToJson(_data), Encoding.UTF8, "application/json");
-        string _url = "http://127.0.0.1:8000/accounts/login/";
-         HttpResponseMessage _response = await _httpClient.PostAsync(_url, _httpContent);
+        _loginData = new JsonLoginData();
+        _loginData.username = _id.text;
+        _loginData.password = _pw.text;
+        _httpClient = new HttpClient();
+        _httpContent = new StringContent(JsonUtility.ToJson(_loginData), Encoding.UTF8, "application/json");
+        
+        _response = await _httpClient.PostAsync(_loginUrl, _httpContent);
 
-        //Debug.Log("ResponseHeader : " + _response.Headers);
 
-        //IEnumerator enumerator = _response.Headers.GetEnumerator();
+      
 
-        //Debug.Log("AccessToken : " + _response.Headers.GetValues("Access-Token").ToString());
-        //Test용
-        string AccessToken = "";
-        string RefreshToken = "";
+        switch ((int)_response.StatusCode)
+        {
+            case 200:
+                _userJson = JsonUtility.FromJson<JsonUserData>(_response.Content.ReadAsStringAsync().Result);
+                SucceedLoginWebRequest();
+                break;
+            case 404:
+                WindowController.Instance.SendAlertMessage(LoginAlertMessage.NotFound);
+                FileIO.ResetKey();
+                break;
+        }
+    }
 
-        foreach( var i in _response.Headers.GetValues("Access-Token"))
+
+    
+    public void SucceedLoginWebRequest()
+    {
+        foreach (var i in _response.Headers.GetValues("Access-Token"))
         {
             _AccessToken = i;
         }
@@ -56,26 +84,15 @@ public class Login : MonoBehaviour
         {
             _RefreshToken = i;
         }
-        Debug.Log("response RequestMessage : " + _response.RequestMessage);
-        Debug.Log("response Result : " + _response.Content.ReadAsStringAsync().Result);
-   
-        switch ((int)_response.StatusCode)
-        {
-            case 200:
-                SucceedLoginWebRequest();
-                break;
-            case 404:
-                WindowController.Instance.SendAlertMessage(LoginAlertMessage.NotFound);
-                break;
-        }
-    }
 
-    public void SucceedLoginWebRequest()
-    {
+        Debug.Log("refresh-token = " + _RefreshToken);
+
 
         //_token은 서버로부터 받아온값을 바로 넣어주는걸로.
         _AccessToken = Crypto.AESEncrypt128(_AccessToken, CryptoType.AccessToken);
         _RefreshToken = Crypto.AESEncrypt128(_RefreshToken, CryptoType.RefreshToken);
+
+        UserInfo.Instance.SetUserInfo(_userJson.id, _userJson.nickname);
 
         /*복호화테스트용.
         _AccessToken = Crypto.AESDecrypt128(CryptoType.AccessToken);
