@@ -20,7 +20,12 @@ public class UserInfo : MonoBehaviour
         if (_instance == null)
             _instance = this;
 
-        _userID = 1;
-        _userNickName = "¾ä¾ä";
+        DontDestroyOnLoad(this);
+    }
+
+    public void SetUserInfo(int id, string nickName)
+    {
+        _userID = id;
+        _userNickName = nickName;
     }
 }

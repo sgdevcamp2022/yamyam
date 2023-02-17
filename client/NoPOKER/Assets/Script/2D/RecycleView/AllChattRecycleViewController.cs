@@ -19,17 +19,10 @@ namespace UI
             {
                 new UICellData { Name="" , Chat = "한글한글한글한글한글한글한글한글한글한글한글한글한글한글한글한글한글"},
                 new UICellData { Name="겜잘알" , Chat = "CONTENTCONTENTCONTENTCONTENTCONTENTCONTENTC"},
-                /*new UICellData { Name="얌얌" , Chat = "얌얌 팀 화이팅!얌얌 팀 화이팅!얌얌 팀 화이팅!얌얌 팀 화이팅!얌얌 팀 화이팅!" +
-                "얌얌 팀 화이팅!얌얌 팀 화이팅!얌얌 팀 화이팅!얌얌 팀 화이팅!얌얌 팀 화이팅!얌얌 팀 화이팅!얌얌 팀 화이팅!" +
-                "얌얌 팀 화이팅!얌얌 팀 화이팅!얌얌 팀 화이팅!얌얌 팀 화이팅!"},*/
                 new UICellData { Name="스마일게이트" , Chat = "윈터데브캠프에 오신걸 환영합니다!"},
                 new UICellData { Name="이사님" , Chat = "PMP 목표에 맞아요? 그게??"},
                 new UICellData { Name="용용" , Chat = "용용체를 쓰면 화가풀리는 마법이 생겨요"},
-               new UICellData { Name="NoPOKER" , Chat = "NoPOKER Is Funny!!!NoPOKER Is Funny!!!NoPOKER Is Funny!!!NoPOKER Is Funny!!!NoPOKER Is Funny!!!NoPOKER Is Funny!!!NoPOKER Is Funny!!!NoPOKER Is Funny!!!"},
-               // new UICellData { Name="냠냠냠냠냠냠냠냠냠냠냠" , Chat = "왜 냠냠이 아니고 얌얌인거죠?"},
-               // new UICellData { Name="쩝쩝" , Chat = "그렇게치면 쩝쩝도 할말 있는데요 그렇지않나요"},
-               // new UICellData { Name="얌얌" , Chat = "영어로 쓰기가 편하고 간단하잖아요, 귀엽고;;"}
-
+               new UICellData { Name="NoPOKER" , Chat = "NoPOKER Is Funny!!!NoPOKER Is Funny!!!NoPOKER Is Funny!!!NoPOKER Is Funny!!!NoPOKER Is Funny!!!NoPOKER Is Funny!!!NoPOKER Is Funny!!!NoPOKER Is Funny!!!"}
             };
 
             InitializeTableView();
