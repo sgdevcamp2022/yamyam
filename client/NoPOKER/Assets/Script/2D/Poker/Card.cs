@@ -1,4 +1,4 @@
-using System.Collections;
+ï»¿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -9,7 +9,7 @@ public class Card : MonoBehaviour
 
 
 
-    public void  DistributeCard()//³ªÁß¿¡ ¼­¹ö·ÎºÎÅÍ ÇÃ·¹ÀÌ¾î Ä«µåÁ¤º¸µéÀ» ¹Ş¾Æ¿À´Â ¿ªÇÒÀ» ÇÔ.
+    public void  DistributeCard()//ë‚˜ì¤‘ì— ì„œë²„ë¡œë¶€í„° í”Œë ˆì´ì–´ ì¹´ë“œì •ë³´ë“¤ì„ ë°›ì•„ì˜¤ëŠ” ì—­í• ì„ í•¨.
     {
 
         for(int i=0;i<PokerGameManager.Instance.PeopleNum; i++)

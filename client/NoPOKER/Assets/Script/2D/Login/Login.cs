@@ -1,4 +1,4 @@
-using UnityEngine;
+О╩©using UnityEngine;
 using TMPro;
 using System.Net.Http;
 using System.Threading.Tasks;
@@ -88,17 +88,17 @@ public class Login : MonoBehaviour
         Debug.Log("refresh-token = " + _RefreshToken);
 
 
-        //_tokenю╨ ╪╜╧Ж╥н╨нем ╧ч╬ф©б╟╙ю╩ ╧ы╥н Ёж╬Наж╢б╟и╥н.
+        //_tokenЛ²─ Л└°К╡└К║°К╤─М└╟ К╟⌡Л∙└Л≤╗Й╟▓Л²└ К╟■К║° К└ёЛ√╢Лё╪К┼■Й╠╦К║°.
         _AccessToken = Crypto.AESEncrypt128(_AccessToken, CryptoType.AccessToken);
         _RefreshToken = Crypto.AESEncrypt128(_RefreshToken, CryptoType.RefreshToken);
 
         UserInfo.Instance.SetUserInfo(_userJson.id, _userJson.nickname);
 
-        /*╨╧хёх╜ев╫╨ф╝©К.
+        /*КЁ╣М≤╦М≥■М┘▄Л┼╓М┼╦Л ╘.
         _AccessToken = Crypto.AESDecrypt128(CryptoType.AccessToken);
         _RefreshToken = Crypto.AESDecrypt128(CryptoType.RefreshToken);
-        Debug.Log("AES ╨╧хёх╜ : " + _AccessToken);
-        Debug.Log("AES ╨╧хёх╜ : " + _RefreshToken);*/
+        Debug.Log("AES КЁ╣М≤╦М≥■ : " + _AccessToken);
+        Debug.Log("AES КЁ╣М≤╦М≥■ : " + _RefreshToken);*/
         GameManager.Instance.ChangeScene(Scenes.LobbyScene);
     }
 }

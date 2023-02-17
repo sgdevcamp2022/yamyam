@@ -1,4 +1,4 @@
-using System.Collections;
+ï»¿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using TMPro;
@@ -11,7 +11,7 @@ public class LobbyAlert : MonoBehaviour
 {
     [SerializeField] private TMP_Text _alertContent;
     private LobbyAlertMessage _alertState;
-    private string[] _alertMessage = { "´ÔÀÌ ÃÊ´ë¸¦ °ÅÀıÇÏ¿´½À´Ï´Ù.", "·Î±×ÀÎÈ­¸éÀ¸·Î ÀÌµ¿ÇÕ´Ï´Ù." };
+    private string[] _alertMessage = { "ë‹˜ì´ ì´ˆëŒ€ë¥¼ ê±°ì ˆí•˜ì˜€ìŠµë‹ˆë‹¤.", "ë¡œê·¸ì¸í™”ë©´ìœ¼ë¡œ ì´ë™í•©ë‹ˆë‹¤." };
 
 
     public void SetAlertContent(LobbyAlertMessage message)

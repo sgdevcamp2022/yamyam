@@ -1,4 +1,4 @@
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
 using System.Net.Http;
 using System.Threading.Tasks;
@@ -39,6 +39,7 @@ public class UserPage : MonoBehaviour
     HttpClient _httpClient;
     HttpContent _httpContent;
     HttpResponseMessage _response;
+    JsonUserPageData _userPageData;
     StringBuilder _userPageUrl = new StringBuilder();
     UserType _pageType;
 
@@ -55,6 +56,7 @@ public class UserPage : MonoBehaviour
 
     public async Task UserPageWebRequest(int id)
     {
+        _response = null;
         _pageData = new JsonUserPageData();
 
         _httpClient = new HttpClient();
@@ -64,7 +66,7 @@ public class UserPage : MonoBehaviour
         _userPageUrl.Append(id);
         _userPageUrl.Append("/");
         _response = await _httpClient.GetAsync(_userPageUrl.ToString());
-        JsonUserPageData _userPageData = JsonUtility.FromJson<JsonUserPageData>(_response.Content.ReadAsStringAsync().Result);
+        _userPageData = JsonUtility.FromJson<JsonUserPageData>(_response.Content.ReadAsStringAsync().Result);
         Debug.Log(_response.Content.ReadAsStringAsync().Result);
 
         Debug.Log("Name : " + _userPageData.GetNickName());
@@ -73,7 +75,14 @@ public class UserPage : MonoBehaviour
         Debug.Log("Victory : " + _userPageData.GetVictory());
 
 
+        StartCoroutine(SettingUserPageUI());       
+    }
 
+    IEnumerator SettingUserPageUI()
+    {
+        yield return new WaitUntil(() => _response!=null);
         _uiUserPage.SetUserPage(_userPageData);
+       LobbyWindowController.Instance.ActiveMyPageWindow();
+            
     }
 }

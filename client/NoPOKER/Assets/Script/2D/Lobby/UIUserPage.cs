@@ -1,4 +1,4 @@
-using System.Collections;
+ï»¿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using TMPro;
@@ -29,8 +29,8 @@ public class UIUserPage : MonoBehaviour
         _myPageButton.onClick.AddListener(() => UserPage.Instance.UserPageWebRequest(UserInfo.Instance.UserID));
     }
 
-    string _myTitle = "¸¶ÀÌÆäÀÌÁö";
-    string _userTitle = "À¯ÀúÆäÀÌÁö";
+    string _myTitle = "ë§ˆì´í˜ì´ì§€";
+    string _userTitle = "ìœ ì €í˜ì´ì§€";
 
     public void SetUserPageTitle(UserType userType)
     {
@@ -52,9 +52,9 @@ public class UIUserPage : MonoBehaviour
         _userName.text = data.GetNickName();
         _scoreSb.Clear();
         _scoreSb.Append(data.GetVictory().ToString());
-        _scoreSb.Append("½Â / ");
+        _scoreSb.Append("ìŠ¹ / ");
         _scoreSb.Append(data.GetLoose().ToString());
-        _scoreSb.Append("ÆĞ");
+        _scoreSb.Append("íŒ¨");
         _score.text = _scoreSb.ToString();
 
         int _scoreResult;

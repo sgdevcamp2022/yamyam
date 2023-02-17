@@ -1,4 +1,4 @@
-using System.Collections;
+ï»¿using System.Collections;
 using System.Collections.Generic;
 using System.Net.Http;
 using System.Text;
@@ -27,7 +27,7 @@ public class Logout : MonoBehaviour
     {
 
 
-        Debug.Log("·Î±×¾Æ¿ô ÀÌÀü : " + Crypto.AESDecrypt128(CryptoType.RefreshToken));
+        Debug.Log("ë¡œê·¸ì•„ì›ƒ ì´ì „ : " + Crypto.AESDecrypt128(CryptoType.RefreshToken));
 
 
         _httpClient = new HttpClient();

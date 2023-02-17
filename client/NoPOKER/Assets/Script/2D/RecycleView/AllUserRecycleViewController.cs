@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+ï»¿using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -17,11 +17,11 @@ namespace UI
         {
             TableData = new List<UICellUserData>()
             {
-                new UICellUserData { Name="‡œ‡œ¾²" ,Invite = true},
-                new UICellUserData { Name="°×Àß¾Ë" , Invite = true},
-                new UICellUserData { Name="½º¸¶ÀÏ°ÔÀÌÆ®" ,Invite = true },
-                new UICellUserData { Name="ÀÌ»ç´Ô" , Invite = true},
-                new UICellUserData { Name="¿ë¿ë" ,Invite = true },
+                new UICellUserData { Name="ë‡¸ë‡¸ì“°" ,Invite = true},
+                new UICellUserData { Name="ê²œì˜ì•Œ" , Invite = true},
+                new UICellUserData { Name="ìŠ¤ë§ˆì¼ê²Œì´íŠ¸" ,Invite = true },
+                new UICellUserData { Name="ì´ì‚¬ë‹˜" , Invite = true},
+                new UICellUserData { Name="ìš©ìš©" ,Invite = true },
                new UICellUserData { Name="NoPOKER" , Invite = true},
 
             };
@@ -36,7 +36,7 @@ namespace UI
             TableData.Add(data);
         }
 
-        public void UpdateData() //»õ·Î¿î À¯Àú°¡ ·Îºñ¿¡ Ãß°¡µÇ¾úÀ» ¶§
+        public void UpdateData() //ìƒˆë¡œìš´ ìœ ì €ê°€ ë¡œë¹„ì— ì¶”ê°€ë˜ì—ˆì„ ë•Œ
         {
             _currentContentPos = CachedScrollRect.content.anchoredPosition.y;
             _changedHeight = CachedScrollRect.content.sizeDelta.y - _preContentHeight;
