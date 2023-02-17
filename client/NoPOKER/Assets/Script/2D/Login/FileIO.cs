@@ -1,12 +1,12 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using System.IO;
 public class FileIO : MonoBehaviour
 {
-    static string _filePath = "Assets/Script/Common/secret.txt";
-    static string _fileRePath = "Assets/Script/Common/secretR.txt";
-    static string _filekeyPath = "Assets/Script/Common/secretK.txt";
+    static string _filePath = "Assets/Script/Common/Secret/secret.txt";
+    static string _fileRePath = "Assets/Script/Common/Secret/secretR.txt";
+    static string _filekeyPath = "Assets/Script/Common/Secret/secretK.txt";
     static StreamWriter _sw;
     static private StreamReader _fileReader;
     static string _content;
