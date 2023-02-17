@@ -1,4 +1,4 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Collections.Generic;
 using System.Net.Http;
 using System.Threading.Tasks;
@@ -60,7 +60,6 @@ public class UserPage : MonoBehaviour
         _pageData = new JsonUserPageData();
 
         _httpClient = new HttpClient();
-        //_httpContent = new StringContent(JsonUtility.ToJson(_pageData), Encoding.UTF8, "application/json");
         _userPageUrl.Clear();
         _userPageUrl.Append("http://127.0.0.1:8000/accounts/");
         _userPageUrl.Append(id);
