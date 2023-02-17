@@ -2252,6 +2252,7 @@ GameObject:
   m_Component:
   - component: {fileID: 298026980}
   - component: {fileID: 298026981}
+  - component: {fileID: 298026982}
   m_Layer: 5
   m_Name: SettingUI
   m_TagString: Untagged
@@ -2294,6 +2295,19 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _logoutButton: {fileID: 2116559235}
+--- !u!114 &298026982
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 298026979}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e7d44ff7f3682a1479471f76e164571e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _destroyButton: {fileID: 1640998942}
 --- !u!1 &303031689
 GameObject:
   m_ObjectHideFlags: 0

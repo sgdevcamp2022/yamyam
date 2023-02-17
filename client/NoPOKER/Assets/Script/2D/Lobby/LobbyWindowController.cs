@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 
 public class LobbyWindowController : MonoBehaviour
 {
@@ -33,12 +33,13 @@ public class LobbyWindowController : MonoBehaviour
 
     public void Active2MatchingWindow()
     {
-        //Match 클래스에다가 2인/4인 나눠서 알릴 수 있도록하기.
+        _match.SetMatch2();
         _matchingWindow.SetActive(true);
     }
 
     public void Active4MatchingWindow()
     {
+        _match.SetMatch4();
         _matchingWindow.SetActive(true);
     }
 
@@ -106,12 +107,12 @@ public class LobbyWindowController : MonoBehaviour
         _settingWindow.SetActive(false);
     }
 
-    public void ActiveRemoveWindow()
+    public void ActiveDestroyUserWindow()
     {
         _removeWindow.SetActive(true);
     }
 
-    public void InActiveRemoveWindow()
+    public void InActiveDestroyUserWindow()
     {
         _removeWindow.SetActive(false);
     }

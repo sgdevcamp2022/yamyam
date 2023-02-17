@@ -5,7 +5,15 @@ using WebSocketSharp;
 using WebSocketSharp.Server;
 using System.Threading;
 using System;
+using System.Text;
+using Newtonsoft.Json;
 
+public class MatchSendData {
+    public string sender = "aaa";
+    public string type = "MATCH";
+    public Dictionary<string, string> content = new Dictionary<string, string>();
+    public int userId = UserInfo.Instance.UserID;
+}
 
 
 public class Match : MonoBehaviour
@@ -15,44 +23,105 @@ public class Match : MonoBehaviour
     private IEnumerator _loadingUICoroutine;
 
     public WebSocket _socket = null;
-
-    private void Start()
+    private StringBuilder _matchType = new StringBuilder();
+    public void SetMatch2()
     {
-       // var wssv = new WebSocketServer("3.36.131.0", 8080);
-       /*
-        _socket = new WebSocket("ws://3.36.131.0:8080/match-ws");
-        _socket.OnMessage += ws_OnMessage; //¼­¹ö¿¡¼­ À¯´ÏÆ¼ ÂÊÀ¸·Î ¸Ş¼¼Áö°¡ ¿Ã °æ¿ì ½ÇÇàÇÒ ÇÔ¼ö¸¦ µî·ÏÇÑ´Ù.
-        _socket.OnOpen += ws_OnOpen;//¼­¹ö°¡ ¿¬°áµÈ °æ¿ì ½ÇÇàÇÒ ÇÔ¼ö¸¦ µî·ÏÇÑ´Ù
-        _socket.OnClose += ws_OnClose;//¼­¹ö°¡ ´İÈù °æ¿ì ½ÇÇàÇÒ ÇÔ¼ö¸¦ µî·ÏÇÑ´Ù.
-        _socket.Connect();//¼­¹ö¿¡ ¿¬°áÇÑ´Ù.
-        _socket.Send("hello");//¼­¹ö¿¡°Ô "hello"¶ó´Â ¸Ş¼¼Áö¸¦ º¸³½´Ù.
-    */
+        _matchType.Clear();
+        _matchType.Append("2P");
     }
+
+    public void SetMatch4()
+    {
+        _matchType.Clear();
+        _matchType.Append("4P");
+    }
+
+
     void ws_OnMessage(object sender, MessageEventArgs e)
     {
-        Debug.Log(e.Data);//¹ŞÀº ¸Ş¼¼Áö¸¦ µğ¹ö±× ÄÜ¼Ö¿¡ Ãâ·ÂÇÑ´Ù.
+        Debug.Log(e.Data);//ë°›ì€ ë©”ì„¸ì§€ë¥¼ ë””ë²„ê·¸ ì½˜ì†”ì— ì¶œë ¥í•œë‹¤.
     }
     void ws_OnOpen(object sender, System.EventArgs e)
     {
-        Debug.Log("open"); //µğ¹ö±× ÄÜ¼Ö¿¡ "open"ÀÌ¶ó°í Âï´Â´Ù.
+        Debug.Log("open"); //ë””ë²„ê·¸ ì½˜ì†”ì— "open"ì´ë¼ê³  ì°ëŠ”ë‹¤.
+        SendStompConnect();
+        SendSubScribe();
+        SendMatchRequest();
     }
     void ws_OnClose(object sender, CloseEventArgs e)
     {
-        Debug.Log("close"); //µğ¹ö±× ÄÜ¼Ö¿¡ "close"ÀÌ¶ó°í Âï´Â´Ù.
+        Debug.Log("close"); //ë””ë²„ê·¸ ì½˜ì†”ì— "close"ì´ë¼ê³  ì°ëŠ”ë‹¤.
     }
 
+    private void OnDestroy()
+    {
+        DisconnectSever();
+    }
 
+    private void SendStompConnect()
+    {
+        string _connectMessage = "STOMP\n" +
+            "accept-version:1.2\n" +
+            "host:localhost\n" +
+            "\n" +
+            "\0";
+
+        _socket.Send(_connectMessage);
+    }
+
+    private void SendMatchRequest()
+    {
+        MatchSendData data = new MatchSendData();
+        data.content.Add("match_type", _matchType.ToString());
+        StringBuilder strBuilder = new StringBuilder();
+        strBuilder.Append("SEND\n" +
+            "destination:/pub/v1/match\n" +
+            "\n");
+        strBuilder.Append(JsonConvert.SerializeObject(data));
+        strBuilder.Append("\n\u0000");
+
+       _socket.Send(strBuilder.ToString());
+    }
+
+    private void SendSubScribe()
+    {
+        
+        string _subscribeMessage = "SUBSCRIBE\n" +  
+            "id:sub0\n"+
+            "destination:/topic/match\n" +
+            "\n" +
+            "\u0000";
+
+        _socket.Send(_subscribeMessage);
+    }
+
+    private void SendUnSubScribe()
+    {
+
+        string _subscribeMessage = "UNSUBSCRIBE\n" +
+            "id:sub0\n" +
+            "destination:/topic/match\n" +
+            "\n" +
+            "\u0000";
+
+        _socket.Send(_subscribeMessage);
+    }
 
     public void MatchLoading()
     {
+     
+        _socket = new WebSocket("ws://3.36.64.92:8003/match-ws");
+        _socket.OnMessage += ws_OnMessage; //ì„œë²„ì—ì„œ ìœ ë‹ˆí‹° ìª½ìœ¼ë¡œ ë©”ì„¸ì§€ê°€ ì˜¬ ê²½ìš° ì‹¤í–‰í•  í•¨ìˆ˜ë¥¼ ë“±ë¡í•œë‹¤.
+        _socket.OnOpen += ws_OnOpen;//ì„œë²„ê°€ ì—°ê²°ëœ ê²½ìš° ì‹¤í–‰í•  í•¨ìˆ˜ë¥¼ ë“±ë¡í•œë‹¤
+        _socket.OnClose += ws_OnClose;//ì„œë²„ê°€ ë‹«íŒ ê²½ìš° ì‹¤í–‰í•  í•¨ìˆ˜ë¥¼ ë“±ë¡í•œë‹¤.
+        _socket.Connect();
+
         for (int i = 0; i < _loadingObject.Count; i++)
         {
             _loadingObject[i].SetActive(true);
         }
         _loadingCoroutine = Loading();
         _loadingUICoroutine = LoadingUI();
-        //Connect();
-        _socket.Send("hello");
         StartCoroutine(_loadingCoroutine);
        
     }
@@ -64,45 +133,16 @@ public class Match : MonoBehaviour
                 return;
 
             if (_socket.IsAlive)
+            {
+                SendUnSubScribe();
                 _socket.Close();
+            }
+                
         }
         catch(Exception e)
         {
             Debug.Log(e.ToString());
         }
-    }
-
-    public void Connect()
-    {
-        try
-        {
-            if (_socket == null )
-            {
-                _socket.Connect();
-                Debug.Log("connect!");
-            }
-            else
-            {
-                if (_socket == null)
-                    Debug.Log("it is null");
-
-            }
-                
-        }
-        catch (Exception e)
-        {
-            Debug.Log(e.ToString());
-        }
-    }
-
-    private void CloseConnect(object sender, CloseEventArgs e)
-    {
-        DisconnectSever();
-    }
-    public void Recv(object sender, MessageEventArgs e)
-    {
-        Debug.Log(e.Data);
-        Debug.Log(e.RawData);
     }
 
     public IEnumerator LoadingUI()
@@ -121,12 +161,14 @@ public class Match : MonoBehaviour
     public IEnumerator Loading()
     {
         StartCoroutine(_loadingUICoroutine);
-        yield return new WaitUntil(() => Input.GetKeyDown(KeyCode.A)); //³ªÁß¿¡ AÅ° ÀÔ·Â´ë½Å ¼­¹öÅë½ÅÀ¸·Î
+        yield return new WaitUntil(() => Input.GetKeyDown(KeyCode.A)); //ë‚˜ì¤‘ì— Aí‚¤ ì…ë ¥ëŒ€ì‹  ì„œë²„í†µì‹ ìœ¼ë¡œ
         MatchingSucceed();
     }
 
     public void StopLoading()
     {
+        DisconnectSever();
+
         StopCoroutine(_loadingUICoroutine);
         StopCoroutine(_loadingCoroutine);  
     }
@@ -142,12 +184,6 @@ public class Match : MonoBehaviour
         LobbyWindowController.Instance.InActiveMatchingWindow();
     }
 
-    //¼ö¶ô´©¸£¸é ´ÙÀ½¾À °¡µµ·Ï.
-    /*
-      public void ClickedAcceptMatching()
-    {
-
-    }
-     */
+  
 
 }
