@@ -5,32 +5,32 @@ using System.Text;
 using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.UI;
-using System.Net.Http.Headers;
-public class Logout : MonoBehaviour
-{
-    [SerializeField] Button _logoutButton;
+
+public class DestroyUser : MonoBehaviour {
+
+    [SerializeField] Button _destroyButton;
     HttpClient _httpClient;
     HttpContent _httpContent;
     HttpResponseMessage _response;
-    string _logoutUrl = "http://127.0.0.1:8000/accounts/logout/";
-
+    string _logoutUrl = "http://127.0.0.1:8000/accounts/";
+    StringBuilder _userPageUrl = new StringBuilder();
 
     void Start()
     {
-        _logoutButton.onClick.AddListener(() => LobbyWindowController.Instance.ActiveAlertWindow(LobbyAlertMessage.Logout));
-        _logoutButton.onClick.AddListener(() => LobbyWindowController.Instance.InActiveSettingWindow());
-        _logoutButton.onClick.AddListener(() => LogOutWebRequest());
+       // _logoutButton.onClick.AddListener(() => LobbyWindowController.Instance.ActiveAlertWindow(LobbyAlertMessage.Logout));
+       // _logoutButton.onClick.AddListener(() => LobbyWindowController.Instance.InActiveSettingWindow());
+       // _logoutButton.onClick.AddListener(() => LogOutWebRequest());
     }
 
 
-    public async Task LogOutWebRequest()
+    public async Task DestroyUserWebRequest()
     {
 
 
-        Debug.Log("로그아웃 이전 : " + Crypto.AESDecrypt128(CryptoType.RefreshToken));
 
 
-        _httpClient = new HttpClient();
+
+    _httpClient = new HttpClient();
         _httpClient.DefaultRequestHeaders.TryAddWithoutValidation("Refresh-Token", Crypto.AESDecrypt128(CryptoType.RefreshToken));
         _response = await _httpClient.GetAsync(_logoutUrl);
 
@@ -42,5 +42,4 @@ public class Logout : MonoBehaviour
         LobbyWindowController.Instance.ActiveAlertWindow(LobbyAlertMessage.Logout);
 
     }
-
 }

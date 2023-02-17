@@ -16346,9 +16346,9 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 2118272977}
-        m_TargetAssemblyTypeName: LobbyWindowController, Assembly-CSharp
-        m_MethodName: InActiveAlertWindow
+      - m_Target: {fileID: 2031520567}
+        m_TargetAssemblyTypeName: LobbyAlert, Assembly-CSharp
+        m_MethodName: ClickedAlertCheckButton
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
