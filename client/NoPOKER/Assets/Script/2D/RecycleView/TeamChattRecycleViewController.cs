@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+ï»¿using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -18,8 +18,8 @@ namespace UI
         {
             TableData = new List<UICellData>()
             {
-                new UICellData { Name="Team" , Chat = "¿©±â´Â ÆÀÃ¤ÆÃÀÔ´Ï´Ù. ÆÀÀÌ¿ä ÆÀ!"},
-                new UICellData { Name="°×Àß¾Ë" , Chat = "ÆÀ³¢¸®´Â ¾î¶²¸»À» ÇÏ´Â°Ç°¡¿©?"},
+                new UICellData { Name="Team" , Chat = "ì—¬ê¸°ëŠ” íŒ€ì±„íŒ…ì…ë‹ˆë‹¤. íŒ€ì´ìš” íŒ€!"},
+                new UICellData { Name="ê²œì˜ì•Œ" , Chat = "íŒ€ë¼ë¦¬ëŠ” ì–´ë–¤ë§ì„ í•˜ëŠ”ê±´ê°€ì—¬?"},
             };
 
             InitializeTableView();
@@ -32,7 +32,7 @@ namespace UI
         {
             TableData.Add(data);
         }
-        public void UpdateMyData() //º»ÀÎÀÌ ¾´ Ã¤ÆÃÀÌ ¾÷µ¥ÀÌÆ® µÇµµ·Ï.
+        public void UpdateMyData() //ë³¸ì¸ì´ ì“´ ì±„íŒ…ì´ ì—…ë°ì´íŠ¸ ë˜ë„ë¡.
         {
           
             InitializeTableView();        
@@ -40,7 +40,7 @@ namespace UI
             OnScrollPoschanged(new Vector2(0f, -0.01f));
         }
 
-        public void UpdateData() //³²ÀÌ Ã¤ÆÃ¿¡¼­ ›§À»¶§
+        public void UpdateData() //ë‚¨ì´ ì±„íŒ…ì—ì„œ ì»ì„ë•Œ
         {
             _currentContentPos = CachedScrollRect.content.anchoredPosition.y;
             _changedHeight = CachedScrollRect.content.sizeDelta.y - _preContentHeight;

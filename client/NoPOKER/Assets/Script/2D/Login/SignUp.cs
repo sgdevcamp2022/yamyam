@@ -1,4 +1,4 @@
-using UnityEngine;
+ï»¿using UnityEngine;
 using TMPro;
 using System.Net.Http;
 using System.Threading.Tasks;
@@ -50,7 +50,7 @@ public class SignUp : MonoBehaviour
             WindowController.Instance.SendAlertMessage(LoginAlertMessage.Blank);
             return;
         }
-        //¾ÆÀÌµğ Áßº¹ È®ÀÎ
+        //ì•„ì´ë”” ì¤‘ë³µ í™•ì¸
         if (!(_pw.text.Equals(_checkPw.text)))
         {
             WindowController.Instance.SendAlertMessage(LoginAlertMessage.IncorrectPW);

@@ -1,4 +1,4 @@
-using UnityEngine;
+ï»¿using UnityEngine;
 
 public class LobbyWindowController : MonoBehaviour
 {
@@ -33,7 +33,7 @@ public class LobbyWindowController : MonoBehaviour
 
     public void Active2MatchingWindow()
     {
-        //Match Å¬·¡½º¿¡´Ù°¡ 2ÀÎ/4ÀÎ ³ª´²¼­ ¾Ë¸± ¼ö ÀÖµµ·ÏÇÏ±â.
+        //Match í´ë˜ìŠ¤ì—ë‹¤ê°€ 2ì¸/4ì¸ ë‚˜ëˆ ì„œ ì•Œë¦´ ìˆ˜ ìˆë„ë¡í•˜ê¸°.
         _matchingWindow.SetActive(true);
     }
 
@@ -60,7 +60,7 @@ public class LobbyWindowController : MonoBehaviour
 
     public void ActiveAlertWindow(LobbyAlertMessage message)
     {
-        //AlertMessage¿¡ µû¶ó ´Ù¸£°Ô µÇµµ·Ï 
+        //AlertMessageì— ë”°ë¼ ë‹¤ë¥´ê²Œ ë˜ë„ë¡ 
         switch(message)
         {
             case LobbyAlertMessage.RejectInvite:

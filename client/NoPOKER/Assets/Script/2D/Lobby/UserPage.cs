@@ -1,4 +1,4 @@
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
 using System.Net.Http;
 using System.Threading.Tasks;
@@ -79,7 +79,7 @@ public class UserPage : MonoBehaviour
     }
 
     IEnumerator SettingUserPageUI()
-        {
+    {
         yield return new WaitUntil(() => _response!=null);
         _uiUserPage.SetUserPage(_userPageData);
        LobbyWindowController.Instance.ActiveMyPageWindow();
