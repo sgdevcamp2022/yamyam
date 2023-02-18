@@ -137,7 +137,7 @@ class ActivateAccount(View):
         except (TypeError, ValueError, OverflowError, User.DoesNotExist):
             user = None
 
-        if user is not None and user.is_active == False:
+        if user is not None and user.is_active is False:
             if check_account_activate_token(user.nickname, token):
                 user.activate()
                 return render(request, 'accounts/accounts_register_success.html')
@@ -198,6 +198,8 @@ class LoginAccount(APIView):
     )
     def post(self, request):
         user = get_object_or_404(User, username=request.data.get("username"))
+        if user.is_active == False:
+            return Response(status=status.HTTP_404_NOT_FOUND)
         username = user.username
         if user.check_password(request.data.get('password')):
             access_token = issue_token(username, days=0, hours=6)
@@ -284,7 +286,7 @@ class CheckAccessToken(APIView):
     )
     def get(self, request):
         try:
-            access_token = jwt.decode(
+            jwt.decode(
                 request.headers['Access-Token'], SECRET_KEY, ALGORITHM)
             return Response(status=status.HTTP_200_OK)
         except (jwt.exceptions.InvalidTokenError):

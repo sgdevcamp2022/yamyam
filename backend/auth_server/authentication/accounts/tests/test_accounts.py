@@ -153,15 +153,17 @@ class AccountsTests(TestCase):
         self.assertTemplateUsed(
             response, 'accounts/accounts_withdraw_success.html')
         with self.assertRaises(User.DoesNotExist):
-            user = User.objects.get(pk=1)
+            User.objects.get(pk=1)
 
     def test_handle_account_get(self):
         response = self.client.get(self.handle_account_1_url)
         self.assertEqual(response.status_code, 200)
+        '''
         data = json.loads(response.content)
         content = {'nickname': 'nickname1', 'victory': 0, 'loose': 0,
                    'date_joined': str(datetime.datetime.now())}
-        # self.assertEqual(content, data)
+        self.assertEqual(content, data)
+        '''
 
     def test_account_post(self):
         User.objects.get_or_create(id=2,
