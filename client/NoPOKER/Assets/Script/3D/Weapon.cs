@@ -8,8 +8,15 @@ public class Weapon : MonoBehaviour
     public Type type;
     public int damage;
     public float rate;
+    public int maxAmmo;
+    public int currentAmmo;
+
     public BoxCollider meleeArea;
     public TrailRenderer trailEffect;
+    public Transform bulletPosition;
+    public GameObject bullet;
+    public Transform bulletCasePosition;
+    public GameObject bulletCase;
 
     public void Use()
     {
@@ -18,6 +25,11 @@ public class Weapon : MonoBehaviour
             StopCoroutine("Swing");
             StartCoroutine("Swing");
 
+        }
+        else if (type == Type.Range && currentAmmo > 0)
+        {
+            currentAmmo--;
+            StartCoroutine("Shot");
         }
     }
     IEnumerator Swing()
@@ -32,6 +44,17 @@ public class Weapon : MonoBehaviour
         trailEffect.enabled = false;
         yield break;
     }
-
+    IEnumerator Shot()
+    {
+        GameObject instantBullet = Instantiate(bullet, bulletPosition.position, bulletPosition.rotation);
+        Rigidbody bulletRigid = instantBullet.GetComponent<Rigidbody>();
+        bulletRigid.velocity = bulletPosition.forward * 50;
+        yield return null;
+        GameObject instantCase = Instantiate(bulletCase, bulletCasePosition.position, bulletCasePosition.rotation);
+        Rigidbody caseRigid = instantCase.GetComponent<Rigidbody>();
+        Vector3 caseVec = bulletCasePosition.forward * Random.Range(-3, -2) + Vector3.up * Random.Range(2, 3);
+        caseRigid.AddForce(caseVec, ForceMode.Impulse);
+        caseRigid.AddTorque(Vector3.up * 10, ForceMode.Impulse);
+    }
 
 }

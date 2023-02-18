@@ -8,11 +8,18 @@ public class Indian : MonoBehaviour
     public GameObject[] weapons;
     public bool[] hasWeapons;
 
+    public Camera followCamera;
+    
+
+    public int ammo;
+    public int maxAmmo;
+
     float horizonAxis;
     float verticalAxis;
     bool walkDown;
     bool jumpDown;
     bool fireDown;
+    bool reloadDown;
     bool interactDown;
     bool swapDown1;
     bool swapDown2;
@@ -21,6 +28,7 @@ public class Indian : MonoBehaviour
     bool isJump;
     bool isDodge;
     bool isSwap;
+    bool isReload;
     bool isFireReady;
 
     Vector3 moveVector;
@@ -48,6 +56,7 @@ public class Indian : MonoBehaviour
         Turn();
         Jump();
         Attack();
+        Reload();
         Dodge();
         Swap();
         Interaction();
@@ -59,7 +68,8 @@ public class Indian : MonoBehaviour
         verticalAxis = Input.GetAxisRaw("Vertical");
         walkDown = Input.GetButton("Walk");
         jumpDown = Input.GetButtonDown("Jump");
-        fireDown = Input.GetButtonDown("Fire1");
+        fireDown = Input.GetButton("Fire1");
+        reloadDown = Input.GetButtonDown("Reload");
         interactDown = Input.GetButtonDown("Interaction");
         swapDown1 = Input.GetButtonDown("Swap1");
         swapDown2 = Input.GetButtonDown("Swap2");
@@ -83,7 +93,21 @@ public class Indian : MonoBehaviour
 
     void Turn()
     {
+        // 키보드에 의한 회전
         transform.LookAt(transform.position + moveVector);
+        // 마우스에 의한 회전
+        if (fireDown) 
+        {
+            Ray ray = followCamera.ScreenPointToRay(Input.mousePosition);
+            RaycastHit rayHit;
+            if (Physics.Raycast(ray, out rayHit, 100))
+            {
+                Vector3 nextVector = rayHit.point - transform.position;
+                nextVector.y = 0;
+                transform.LookAt(transform.position + nextVector);
+            }
+        }
+        
     }
 
     void Jump()
@@ -108,11 +132,34 @@ public class Indian : MonoBehaviour
         if(fireDown && isFireReady && !isDodge && !isSwap)
         {
             equipWeapon.Use();
-            anime.SetTrigger("doSwing");
+            anime.SetTrigger(equipWeapon.type == Weapon.Type.Melee ? "doSwing" : "doShot");
             fireDelay = 0;
         }
     }
 
+    void Reload()
+    {
+        if (equipWeapon == null)
+            return;
+        if (equipWeapon.type == Weapon.Type.Melee)
+            return;
+        if (ammo == 0)
+            return;
+        if(reloadDown && !isJump && !isDodge && !isSwap && isFireReady)
+        {
+            anime.SetTrigger("doReload");
+            isReload = true;
+            Invoke("ReloadOut", 2f);
+        }
+    }
+        
+    void ReloadOut()
+    {
+        int reAmmo = ammo < equipWeapon.maxAmmo ? ammo : equipWeapon.maxAmmo;
+        equipWeapon.currentAmmo = reAmmo;
+        ammo -= reAmmo;
+        isReload = false;
+    }
     void Dodge()
     {
         if (jumpDown && moveVector != Vector3.zero && !isJump && !isDodge)
@@ -176,9 +223,7 @@ public class Indian : MonoBehaviour
     private void OnTriggerStay(Collider other)
     {
         if (other.tag == "Weapon")
-            nearObject = other.gameObject;
-
-        Debug.Log(nearObject.name);
+            nearObject = other.gameObject; 
     }
 
     private void OnTriggerExit(Collider other)
