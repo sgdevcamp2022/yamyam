@@ -56,25 +56,28 @@ public class UserPage : MonoBehaviour
 
     public async Task UserPageWebRequest(int id)
     {
-        _response = null;
-        _pageData = new JsonUserPageData();
+        if(await Auth.AuthToken()) //Token 인증성공!
+        {
 
-        _httpClient = new HttpClient();
-        _userPageUrl.Clear();
-        _userPageUrl.Append("http://127.0.0.1:8000/accounts/");
-        _userPageUrl.Append(id);
-        _userPageUrl.Append("/");
-        _response = await _httpClient.GetAsync(_userPageUrl.ToString());
-        _userPageData = JsonUtility.FromJson<JsonUserPageData>(_response.Content.ReadAsStringAsync().Result);
-        Debug.Log(_response.Content.ReadAsStringAsync().Result);
+            _response = null;
+            _pageData = new JsonUserPageData();
 
-        Debug.Log("Name : " + _userPageData.GetNickName());
-        Debug.Log("userPageData : " + _userPageData.GetJoinDate());
-        Debug.Log("Loose : " + _userPageData.GetLoose());
-        Debug.Log("Victory : " + _userPageData.GetVictory());
+            _httpClient = new HttpClient();
+            _userPageUrl.Clear();
+            _userPageUrl.Append("http://127.0.0.1:8000/accounts/");
+            _userPageUrl.Append(id);
+            _userPageUrl.Append("/");
+            _response = await _httpClient.GetAsync(_userPageUrl.ToString());
+            _userPageData = JsonUtility.FromJson<JsonUserPageData>(_response.Content.ReadAsStringAsync().Result);
 
+            StartCoroutine(SettingUserPageUI());
+        }
+        else //인증실패!
+        {
+            LobbyWindowController.Instance.ActiveAlertWindow(LobbyAlertMessage.FailAuth);
+        }
 
-        StartCoroutine(SettingUserPageUI());       
+ 
     }
 
     IEnumerator SettingUserPageUI()

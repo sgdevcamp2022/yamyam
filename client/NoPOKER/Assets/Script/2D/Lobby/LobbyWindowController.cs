@@ -61,17 +61,7 @@ public class LobbyWindowController : MonoBehaviour
 
     public void ActiveAlertWindow(LobbyAlertMessage message)
     {
-        //AlertMessage에 따라 다르게 되도록 
-        switch(message)
-        {
-            case LobbyAlertMessage.RejectInvite:
-                _lobbyAlert.SetAlertContent(LobbyAlertMessage.RejectInvite);
-                break;
-            case LobbyAlertMessage.Logout:
-                _lobbyAlert.SetAlertContent(LobbyAlertMessage.Logout);
-                break;
-        }
-
+        _lobbyAlert.SetAlertContent(message);
         _alertWindow.SetActive(true);
     }
 
