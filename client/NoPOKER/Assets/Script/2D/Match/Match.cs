@@ -10,6 +10,13 @@ using Newtonsoft.Json;
 using StompHelper;
 using Unity.VisualScripting;
 
+
+public enum MatchMessagetype {
+    MATCH,
+    MATCH_DONE,
+    ERROR
+}
+
 public class MatchSendData
 {
     public string sender = "aaa";
@@ -52,6 +59,7 @@ public class Match : MonoBehaviour
         Debug.Log("headers: " + message.Headers);
         Debug.Log("body: " + message.Body);
 
+      
 
         _sb.Clear();
         _sb.Append("destination:");
@@ -64,6 +72,31 @@ public class Match : MonoBehaviour
             StompMessage subscribeMessage = new StompMessage(StompCommand.SUBSCRIBE, "", headers);
             _socket.Send(messageParser.Serialize(subscribeMessage));
         }
+        else if(message.Command == StompCommand.MESSAGE)
+        {
+            MatchSendData _matchData = JsonConvert.DeserializeObject<MatchSendData>(message.Body);
+
+
+            switch(Enum.Parse(typeof(MatchMessagetype) , _matchData.type))
+            {
+                case MatchMessagetype.MATCH:
+
+                    break;
+                case MatchMessagetype.MATCH_DONE:
+                    //게임서버 열기.
+                    PokerGameSocket.Instance.PokerGameSocketConnect();
+                    //게임ID
+                    //매칭서버 닫기.
+
+                    break;
+                case MatchMessagetype.ERROR:
+
+                    break;
+
+            }
+
+        }
+
 
         // TODO : e.Data -> user-name 이 존재하는 경우에 추출
     }
