@@ -198,6 +198,8 @@ class LoginAccount(APIView):
     )
     def post(self, request):
         user = get_object_or_404(User, username=request.data.get("username"))
+        if user.is_active == False:
+            return Response(status=status.HTTP_404_NOT_FOUND)
         username = user.username
         if user.check_password(request.data.get('password')):
             access_token = issue_token(username, days=0, hours=6)
