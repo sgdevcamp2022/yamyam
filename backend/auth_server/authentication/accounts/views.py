@@ -198,7 +198,7 @@ class LoginAccount(APIView):
     )
     def post(self, request):
         user = get_object_or_404(User, username=request.data.get("username"))
-        if user.is_active == False:
+        if user.is_active is False:
             return Response(status=status.HTTP_404_NOT_FOUND)
         username = user.username
         if user.check_password(request.data.get('password')):
@@ -288,7 +288,7 @@ class CheckAccessToken(APIView):
         try:
             jwt.decode(
                 request.headers['Access-Token'], SECRET_KEY, ALGORITHM)
-            return Response(status=status.HTTP_200_OK)
+            return Response(headers={'new-api-url': request.headers['x-original-uri']}, status=status.HTTP_200_OK)
         except (jwt.exceptions.InvalidTokenError):
             return Response(status=status.HTTP_401_UNAUTHORIZED)
 
@@ -344,7 +344,8 @@ class CheckRefreshToken(APIView):
                 return Response(status=status.HTTP_200_OK,
                                 headers={
                                     'Access-Token': access_token,
-                                    'Refresh-Token': refresh_token
+                                    'Refresh-Token': refresh_token,
+                                    'new-api-url': request.headers['x-original-uri'],
                                 })
         except (jwt.exceptions.InvalidTokenError):
             return Response(status=status.HTTP_401_UNAUTHORIZED)

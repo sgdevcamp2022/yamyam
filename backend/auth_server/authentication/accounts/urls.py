@@ -14,7 +14,7 @@ urlpatterns = [
     path('check_refresh_token/', CheckRefreshToken.as_view(),
          name='check_refresh_token'),
     path('find_username/', FindUsername.as_view(), name='find_username'),
-    path('password_reset', PasswordReset.as_view(),
+    path('password_reset/', PasswordReset.as_view(),
          name='password_reset'),
     path('reset/<uidb64>/<token>/', PasswordResetConfirm.as_view(),
          name='password_reset_confirm'),

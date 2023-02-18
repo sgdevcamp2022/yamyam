@@ -1,0 +1,44 @@
+version: "3.8"
+
+services:
+  auth:
+    build: ./auth_server
+    command: python manage.py runserver 0.0.0.0:8000
+    volumes:
+      - ./auth_server/:/usr/src/auth/
+    ports:
+      - 8000:8000
+    env_file:
+      - ./.env.auth.dev
+    depends_on:
+      - db
+      - redis
+  lobby:
+    build: ./lobby_server
+    command: python manage.py runserver 0.0.0.0:8001
+    volumes:
+      - ./lobby_server/:/usr/src/lobby/
+    ports:
+      - 8001:8001
+    env_file:
+      - ./.env.lobby.dev
+    depends_on:
+      - redis
+  db:
+    image: postgres:14.6-alpine
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/
+    environment:
+      - POSTGRES_USER=root
+      - POSTGRES_PASSWORD=12345678
+      - POSTGRES_DB=nopoker
+      - TZ=Asia/Seoul
+  redis:
+    image: redis:7.0.7
+    expose:
+      - 6379
+    environment:
+      - TZ=Asia/Seoul
+
+volumes:
+  postgres_data:
