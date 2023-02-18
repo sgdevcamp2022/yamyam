@@ -34,7 +34,6 @@ public class Match : MonoBehaviour
 
     public WebSocket _socket = null;
     private StringBuilder _matchType = new StringBuilder();
-    private StringBuilder _sb = new StringBuilder();
     private string username = "";
     private StompMessageParser messageParser = new StompMessageParser();
 
@@ -58,11 +57,6 @@ public class Match : MonoBehaviour
         Debug.Log("command: " + message.Command);
         Debug.Log("headers: " + message.Headers);
         Debug.Log("body: " + message.Body);
-
-      
-
-        _sb.Clear();
-        _sb.Append("destination:");
 
         if (message.Command == StompCommand.CONNECTED)
         {

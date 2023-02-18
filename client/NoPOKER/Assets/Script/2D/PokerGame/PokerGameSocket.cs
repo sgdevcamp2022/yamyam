@@ -80,6 +80,17 @@ public class PokerGameSocket : MonoBehaviour
         if (message.Command == StompCommand.CONNECTED)
         {
             Debug.Log("게임서버 연결되었습니다~");
+
+            if (message.Command == StompCommand.CONNECTED)
+            {/*
+                Dictionary<string, string> headers = new Dictionary<string, string>();
+                headers.Add("destination", "/topic/match/" + message.Headers.GetValueOrDefault("user-name"));
+                headers.Add("id", "sub0");
+                StompMessage subscribeMessage = new StompMessage(StompCommand.SUBSCRIBE, "", headers);
+                _socket.Send(messageParser.Serialize(subscribeMessage));*/
+
+            }
+
         }
     }
 }
