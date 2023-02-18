@@ -1,0 +1,56 @@
+version: "3.8"
+
+services:
+  auth:
+    build:
+      context: ./auth_server
+      dockerfile: Dockerfile.prod
+    command: gunicorn config.wsgi:application --bind 0.0.0.0:8000
+    volumes:
+      - static_volume:/home/backend/auth/staticfiles
+    expose:
+      - 8000
+    env_file:
+      - ./.env.auth.prod
+    depends_on:
+      - db
+      - redis
+  lobby:
+    build:
+      context: ./lobby_server
+      dockerfile: Dockerfile.prod
+    command: daphne -b 0.0.0.0 -p 8001 config.asgi:application
+    expose:
+      - 8001
+    env_file:
+      - ./.env.lobby.prod
+    depends_on:
+      - redis
+      - auth
+  db:
+    image: postgres:14.6-alpine
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/
+    env_file:
+      - ./.env.auth.prod.db
+  redis:
+    image: redis:7.0.7
+    expose:
+      - 6379
+    environment:
+      - TZ=Asia/Seoul
+  nginx:
+    build: ./nginx
+    volumes:
+      - static_volume:/home/backend/auth/staticfiles
+    ports:
+      - 1337:80
+    depends_on:
+      - auth
+      - lobby
+    environment:
+      - TZ=Asia/Seoul
+
+volumes:
+  postgres_data:
+  static_volume:
