@@ -17,8 +17,8 @@ public class DestroyUser : MonoBehaviour {
     void Start()
     {
         _destroyButton.onClick.AddListener(() => LobbyWindowController.Instance.InActiveDestroyUserWindow());
+        _destroyButton.onClick.AddListener(() => Logout.LogOutWebRequest());
         _destroyButton.onClick.AddListener(() => DestroyUserWebRequest());
-         _destroyButton.onClick.AddListener(() => GameManager.Instance.ChangeScene(Scenes.LoginScene));
     }
 
 
@@ -37,8 +37,6 @@ public class DestroyUser : MonoBehaviour {
         Debug.Log("resposne : " + _response);
         Debug.Log("resposne Content: " + _response.Content);
 
-
-        LobbyWindowController.Instance.ActiveAlertWindow(LobbyAlertMessage.Logout);
 
     }
 }

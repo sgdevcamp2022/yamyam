@@ -1,4 +1,4 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Collections.Generic;
 using System.Net.Http;
 using System.Text;
@@ -9,10 +9,10 @@ using System.Net.Http.Headers;
 public class Logout : MonoBehaviour
 {
     [SerializeField] Button _logoutButton;
-    HttpClient _httpClient;
+    static HttpClient _httpClient;
     HttpContent _httpContent;
-    HttpResponseMessage _response;
-    string _logoutUrl = "http://127.0.0.1:8000/accounts/logout/";
+    static HttpResponseMessage _response;
+    static string _logoutUrl = "http://127.0.0.1:8000/accounts/logout/";
 
 
     void Start()
@@ -20,27 +20,33 @@ public class Logout : MonoBehaviour
         _logoutButton.onClick.AddListener(() => LobbyWindowController.Instance.ActiveAlertWindow(LobbyAlertMessage.Logout));
         _logoutButton.onClick.AddListener(() => LobbyWindowController.Instance.InActiveSettingWindow());
         _logoutButton.onClick.AddListener(() => LogOutWebRequest());
+
     }
 
 
-    public async Task LogOutWebRequest()
+    public static async Task LogOutWebRequest()
     {
+        if (await Auth.AuthToken()) 
+        {
+            Debug.Log("로그아웃 이전 : " + Crypto.AESDecrypt128(CryptoType.RefreshToken));
+
+            _httpClient = new HttpClient();
+            _httpClient.DefaultRequestHeaders.TryAddWithoutValidation("Refresh-Token", Crypto.AESDecrypt128(CryptoType.RefreshToken));
+            _response = await _httpClient.GetAsync(_logoutUrl);
+
+            Debug.Log("resposne : " + _response);
+            Debug.Log("resposne Content: " + _response.Content);
 
 
-        Debug.Log("로그아웃 이전 : " + Crypto.AESDecrypt128(CryptoType.RefreshToken));
-
-
-        _httpClient = new HttpClient();
-        _httpClient.DefaultRequestHeaders.TryAddWithoutValidation("Refresh-Token", Crypto.AESDecrypt128(CryptoType.RefreshToken));
-        _response = await _httpClient.GetAsync(_logoutUrl);
-
-        Debug.Log("resposne : " + _response);
-        Debug.Log("resposne Content: " + _response.Content);
-
-
-        FileIO.ResetKey();
-        LobbyWindowController.Instance.ActiveAlertWindow(LobbyAlertMessage.Logout);
-
+            FileIO.ResetKey();
+            LobbyWindowController.Instance.ActiveAlertWindow(LobbyAlertMessage.Logout);
+        }
+        else 
+        {
+            LobbyWindowController.Instance.ActiveAlertWindow(LobbyAlertMessage.FailAuth);
+        }
     }
+
+   
 
 }

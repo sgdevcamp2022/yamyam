@@ -1,17 +1,18 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using TMPro;
 public enum LobbyAlertMessage
 {
     RejectInvite,
-    Logout
+    Logout,
+    FailAuth
 }
 public class LobbyAlert : MonoBehaviour
 {
     [SerializeField] private TMP_Text _alertContent;
     private LobbyAlertMessage _alertState;
-    private string[] _alertMessage = { "님이 초대를 거절하였습니다.", "로그인화면으로 이동합니다." };
+    private string[] _alertMessage = { "님이 초대를 거절하였습니다.", "로그인화면으로 이동합니다."  ,"인증에 실패하였습니다.\n로그인화면으로 이동합니다."};
 
 
     public void SetAlertContent(LobbyAlertMessage message)
@@ -24,7 +25,8 @@ public class LobbyAlert : MonoBehaviour
     {
         switch(_alertState)
         {
-            case LobbyAlertMessage.Logout:               
+            case LobbyAlertMessage.Logout:
+            case LobbyAlertMessage.FailAuth:
                 GameManager.Instance.ChangeScene(Scenes.LoginScene);
                 LobbyWindowController.Instance.InActiveAlertWindow();
                 break;
