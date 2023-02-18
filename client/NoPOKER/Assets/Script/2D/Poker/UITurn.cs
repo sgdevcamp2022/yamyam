@@ -1,4 +1,4 @@
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
@@ -67,7 +67,7 @@ public class UITurn : MonoBehaviour
         {
             _stopTimer = true;
             FinishTurn();
-            Batting.Instance.Call();         
+            Batting.Instance.Die();         
         }
     }
 

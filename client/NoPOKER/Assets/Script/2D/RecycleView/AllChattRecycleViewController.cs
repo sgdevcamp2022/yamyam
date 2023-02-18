@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+ï»¿using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -17,19 +17,12 @@ namespace UI
         {
             TableData = new List<UICellData>()
             {
-                new UICellData { Name="" , Chat = "ÇÑ±ÛÇÑ±ÛÇÑ±ÛÇÑ±ÛÇÑ±ÛÇÑ±ÛÇÑ±ÛÇÑ±ÛÇÑ±ÛÇÑ±ÛÇÑ±ÛÇÑ±ÛÇÑ±ÛÇÑ±ÛÇÑ±ÛÇÑ±ÛÇÑ±Û"},
-                new UICellData { Name="°×Àß¾Ë" , Chat = "CONTENTCONTENTCONTENTCONTENTCONTENTCONTENTC"},
-                /*new UICellData { Name="¾ä¾ä" , Chat = "¾ä¾ä ÆÀ È­ÀÌÆÃ!¾ä¾ä ÆÀ È­ÀÌÆÃ!¾ä¾ä ÆÀ È­ÀÌÆÃ!¾ä¾ä ÆÀ È­ÀÌÆÃ!¾ä¾ä ÆÀ È­ÀÌÆÃ!" +
-                "¾ä¾ä ÆÀ È­ÀÌÆÃ!¾ä¾ä ÆÀ È­ÀÌÆÃ!¾ä¾ä ÆÀ È­ÀÌÆÃ!¾ä¾ä ÆÀ È­ÀÌÆÃ!¾ä¾ä ÆÀ È­ÀÌÆÃ!¾ä¾ä ÆÀ È­ÀÌÆÃ!¾ä¾ä ÆÀ È­ÀÌÆÃ!" +
-                "¾ä¾ä ÆÀ È­ÀÌÆÃ!¾ä¾ä ÆÀ È­ÀÌÆÃ!¾ä¾ä ÆÀ È­ÀÌÆÃ!¾ä¾ä ÆÀ È­ÀÌÆÃ!"},*/
-                new UICellData { Name="½º¸¶ÀÏ°ÔÀÌÆ®" , Chat = "À©ÅÍµ¥ºêÄ·ÇÁ¿¡ ¿À½Å°É È¯¿µÇÕ´Ï´Ù!"},
-                new UICellData { Name="ÀÌ»ç´Ô" , Chat = "PMP ¸ñÇ¥¿¡ ¸Â¾Æ¿ä? ±×°Ô??"},
-                new UICellData { Name="¿ë¿ë" , Chat = "¿ë¿ëÃ¼¸¦ ¾²¸é È­°¡Ç®¸®´Â ¸¶¹ıÀÌ »ı°Ü¿ä"},
-               new UICellData { Name="NoPOKER" , Chat = "NoPOKER Is Funny!!!NoPOKER Is Funny!!!NoPOKER Is Funny!!!NoPOKER Is Funny!!!NoPOKER Is Funny!!!NoPOKER Is Funny!!!NoPOKER Is Funny!!!NoPOKER Is Funny!!!"},
-               // new UICellData { Name="³È³È³È³È³È³È³È³È³È³È³È" , Chat = "¿Ö ³È³ÈÀÌ ¾Æ´Ï°í ¾ä¾äÀÎ°ÅÁÒ?"},
-               // new UICellData { Name="ÂÁÂÁ" , Chat = "±×·¸°ÔÄ¡¸é ÂÁÂÁµµ ÇÒ¸» ÀÖ´Âµ¥¿ä ±×·¸Áö¾Ê³ª¿ä"},
-               // new UICellData { Name="¾ä¾ä" , Chat = "¿µ¾î·Î ¾²±â°¡ ÆíÇÏ°í °£´ÜÇÏÀİ¾Æ¿ä, ±Í¿±°í;;"}
-
+                new UICellData { Name="" , Chat = "í•œê¸€í•œê¸€í•œê¸€í•œê¸€í•œê¸€í•œê¸€í•œê¸€í•œê¸€í•œê¸€í•œê¸€í•œê¸€í•œê¸€í•œê¸€í•œê¸€í•œê¸€í•œê¸€í•œê¸€"},
+                new UICellData { Name="ê²œì˜ì•Œ" , Chat = "CONTENTCONTENTCONTENTCONTENTCONTENTCONTENTC"},
+                new UICellData { Name="ìŠ¤ë§ˆì¼ê²Œì´íŠ¸" , Chat = "ìœˆí„°ë°ë¸Œìº í”„ì— ì˜¤ì‹ ê±¸ í™˜ì˜í•©ë‹ˆë‹¤!"},
+                new UICellData { Name="ì´ì‚¬ë‹˜" , Chat = "PMP ëª©í‘œì— ë§ì•„ìš”? ê·¸ê²Œ??"},
+                new UICellData { Name="ìš©ìš©" , Chat = "ìš©ìš©ì²´ë¥¼ ì“°ë©´ í™”ê°€í’€ë¦¬ëŠ” ë§ˆë²•ì´ ìƒê²¨ìš”"},
+               new UICellData { Name="NoPOKER" , Chat = "NoPOKER Is Funny!!!NoPOKER Is Funny!!!NoPOKER Is Funny!!!NoPOKER Is Funny!!!NoPOKER Is Funny!!!NoPOKER Is Funny!!!NoPOKER Is Funny!!!NoPOKER Is Funny!!!"}
             };
 
             InitializeTableView();
@@ -41,7 +34,7 @@ namespace UI
         {
             TableData.Add(data);
         }
-        public void UpdateMyData() //º»ÀÎÀÌ ¾´ Ã¤ÆÃÀÌ ¾÷µ¥ÀÌÆ® µÇµµ·Ï.
+        public void UpdateMyData() //ë³¸ì¸ì´ ì“´ ì±„íŒ…ì´ ì—…ë°ì´íŠ¸ ë˜ë„ë¡.
         {
           
             InitializeTableView();        
@@ -49,7 +42,7 @@ namespace UI
             OnScrollPoschanged(new Vector2(0f, -0.01f));
         }
 
-        public void UpdateData() //³²ÀÌ Ã¤ÆÃ¿¡¼­ ›§À»¶§
+        public void UpdateData() //ë‚¨ì´ ì±„íŒ…ì—ì„œ ì»ì„ë•Œ
         {
             _currentContentPos = CachedScrollRect.content.anchoredPosition.y;
             _changedHeight = CachedScrollRect.content.sizeDelta.y - _preContentHeight;

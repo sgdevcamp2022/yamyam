@@ -1,4 +1,4 @@
-using System.Collections;
+ï»¿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using TMPro;
@@ -53,7 +53,7 @@ public class UITeam : MonoBehaviour
 
     public void ExitTeam()
     {
-        //TeamÅ¬·¡½º¿¡ ¼­¹öÅë½Å: ÆÀ³ª°¡±â
+        //Teamí´ë˜ìŠ¤ì— ì„œë²„í†µì‹ : íŒ€ë‚˜ê°€ê¸°
         LobbyWindowController.Instance.InActiveTeamWindow();
         LobbyWindowController.Instance.ActiveAllChatWindow();
     }

@@ -1,14 +1,21 @@
-
+﻿
 using UnityEngine;
 using System;
 using System.IO;
 using System.Security.Cryptography;
 using System.Text;
+
+public enum CryptoType {
+    AccessToken,
+    RefreshToken
+}
+
 public class Crypto : MonoBehaviour
 {
+
     private static readonly string s_key = Encoding.UTF8.GetString(FileIO.GetKeyFile()).Substring(0,16);
 
-    public static string AESEncrypt128(string target)
+    public static string AESEncrypt128(string target , CryptoType type)
     {
         byte[] _tokenBytes = Encoding.UTF8.GetBytes(target);
         RijndaelManaged rijndael = new RijndaelManaged();
@@ -28,15 +35,36 @@ public class Crypto : MonoBehaviour
 
         _cryptoStream.Close();
         _memoryStream.Close();
-        FileIO.SaveTokenFile(_encryptString);
+
+        switch(type)
+        {
+            case CryptoType.AccessToken:
+                FileIO.SaveTokenFile(_encryptString);
+                break;
+            case CryptoType.RefreshToken:
+                FileIO.SaveReTokenFile(_encryptString);
+                break;
+        }
+      
+
+
         return _encryptString;
 
     }
   
 
-    public static string AESDecrypt128()
+    public static string AESDecrypt128(CryptoType type)
     {
-        byte[] _encryptBytes = Convert.FromBase64String(FileIO.GetTokenFile());
+        byte[] _encryptBytes= null;
+        switch (type)
+        {
+            case CryptoType.AccessToken:
+                _encryptBytes = Convert.FromBase64String(FileIO.GetTokenFile());
+                break;
+            case CryptoType.RefreshToken:
+                _encryptBytes = Convert.FromBase64String(FileIO.GetReTokenFile());
+                break;
+        }
 
         RijndaelManaged rijndael = new RijndaelManaged();
         rijndael.Mode = CipherMode.CBC;

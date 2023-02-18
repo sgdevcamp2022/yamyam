@@ -201,8 +201,8 @@ class LobbyConsumer(JsonWebsocketConsumer):
         self.user_nickname = self.scope["url_route"]["kwargs"]["user_nickname"]
         self.notification_group_name = "notification_%s" % self.user_id
         self.user_info = "%s_%s" % (self.user_id, self.user_nickname)
-
         self.accept()
+
         async_to_sync(self.channel_layer.group_add)(
             self.notification_group_name, self.channel_name
         )
@@ -211,10 +211,14 @@ class LobbyConsumer(JsonWebsocketConsumer):
         )
 
         user_list = caches['default']._cache.get_client().keys("*")
-        temp = []
+        user_json = []
         for user in user_list:
-            temp.append(user.decode('utf-8'))
-        user_json = json.dumps(temp)
+            temp = user.decode('utf-8')[3:].split("_")
+            content = {
+                "id": temp[0],
+                "nickname": temp[1],
+            }
+            user_json.append(content)
         self.send_json(
             {
                 "type": "user_list",
@@ -225,7 +229,10 @@ class LobbyConsumer(JsonWebsocketConsumer):
             "lobby",
             {
                 "type": "user_join",
-                "user_info": self.user_info,
+                "user": {
+                    "id": self.user_id,
+                    "nickname": self.user_nickname
+                }
             }
         )
         caches['default'].set(self.user_info, "")
@@ -241,7 +248,10 @@ class LobbyConsumer(JsonWebsocketConsumer):
             "lobby",
             {
                 "type": "user_leave",
-                "user_info": self.user_info
+                "user": {
+                    "id": self.user_id,
+                    "nickname": self.user_nickname
+                }
             }
         )
         caches['default'].delete(self.user_info)
@@ -286,7 +296,7 @@ class LobbyConsumer(JsonWebsocketConsumer):
                     "type": "inviter_playing",
                 }
             )
-        if caches['team'].get(leader) != None:
+        if caches['team'].get(leader) is not None:
             team_json = json.loads(caches['team'].get(leader))
             if len(team_json["invitees"]) == 3:
                 self.send_json({
@@ -348,7 +358,7 @@ class LobbyConsumer(JsonWebsocketConsumer):
         leader = "%s_%s" % (leader_id, leader_nickname)
         if caches['default'].get(leader) == "invitee":
             return
-        if caches['team'].get(leader) != None:
+        if caches['team'].get(leader) is not None:
             return
         # inviter have no team, invitee have no team
         invitee_json_str = '[{"id": %d, "nickname": "%s"}]' % (

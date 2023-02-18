@@ -1,10 +1,10 @@
-using System.Collections;
+ï»¿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
 public class Team : MonoBehaviour
 {
-    //ÆÀ ¼­¹öÅë½ÅÀ» ´ã´çÇÏ´Â ºÎºĞ:
+    //íŒ€ ì„œë²„í†µì‹ ì„ ë‹´ë‹¹í•˜ëŠ” ë¶€ë¶„:
     static Team s_instance = null;
     public static Team Instance { get => s_instance; }
     [SerializeField] UITeam _uiTeam;
@@ -23,18 +23,18 @@ public class Team : MonoBehaviour
     public void Invite(string name)
     {
 
-        //¹Ş´Â°Å test¿ë
+        //ë°›ëŠ”ê±° testìš©
         LobbyWindowController.Instance.ActiveInviteTeamWindow(name);
         //
     }
 
-    public void AcceptedInvite() //ÃÊ´ëÇÑ »ó´ë°¡ ¼ö¶ôÀ» ÇÏ¿´´Ù¸é
+    public void AcceptedInvite() //ì´ˆëŒ€í•œ ìƒëŒ€ê°€ ìˆ˜ë½ì„ í•˜ì˜€ë‹¤ë©´
     {
-        //ÆÀ¿ø Ãß°¡.
+        //íŒ€ì› ì¶”ê°€.
         List<string> members = new List<string>();
-        members.Add("¾ä¾ä");
-        members.Add("‡œ‡œ");
-        //ÆÀ È­¸é º¸ÀÌµµ·Ï.
+        members.Add("ì–Œì–Œ");
+        members.Add("ë‡¸ë‡¸");
+        //íŒ€ í™”ë©´ ë³´ì´ë„ë¡.
         _uiTeam.SetTeamMember(members);
         LobbyWindowController.Instance.ActiveTeamWindow();
         
@@ -42,7 +42,7 @@ public class Team : MonoBehaviour
 
     public void RejectedInvite()
     {
-        //°ÅÀı´çÇß´Ü ¸Ş¼¼Áö º¸ÀÌ°ÔÇÏ±â.
+        //ê±°ì ˆë‹¹í–ˆë‹¨ ë©”ì„¸ì§€ ë³´ì´ê²Œí•˜ê¸°.
         LobbyWindowController.Instance.ActiveAlertWindow(LobbyAlertMessage.RejectInvite);
     }
 

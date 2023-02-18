@@ -1,13 +1,21 @@
-using UnityEngine;
+Ôªøusing UnityEngine;
 using TMPro;
 using System.Net.Http;
 using System.Threading.Tasks;
 using System.Text;
+using Newtonsoft.Json.Linq;
 
-public class LoginData
+
+public class JsonLoginData
 {
     public string username;
     public string password;
+}
+
+public class JsonUserData 
+{
+    public int id;
+    public string nickname;
 }
 
 public class Login : MonoBehaviour
@@ -15,8 +23,16 @@ public class Login : MonoBehaviour
     [SerializeField] private TMP_InputField _id;
     [SerializeField] private TMP_InputField _pw;
 
-     public string _token = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJ2ZWxvcGVydC5jb20iLCJleHAiOiIxNDg1MjcwMDAwMDAwIiwiaHR0cHM6Ly92ZWxvcGVydC5jb20vand0X2NsYWltcy9pc19hZG1pbiI6dHJ1ZSwidXNlcklkIjoiMTEwMjgzNzM3MjcxMDIiLCJ1c2VybmFtZSI6InZlbG9wZXJ0In0.WE5fMufM0NDSVGJ8cAolXGkyB5RmYwCto1pQwDIqo2w";
+    string _AccessToken = "";
+    string _RefreshToken = "";
 
+    HttpClient _httpClient;
+    HttpContent _httpContent;
+    JsonLoginData _loginData;
+    HttpResponseMessage _response;
+    JsonUserData _userJson;
+
+    string _loginUrl = "http://127.0.0.1:8000/accounts/login/";
 
     public void RequestLogin()
     {
@@ -25,39 +41,64 @@ public class Login : MonoBehaviour
             WindowController.Instance.SendAlertMessage(LoginAlertMessage.Blank);
             return;
         }
-        ResetPwWebRequest();
+        LoginWebRequest();
     }
 
-    async Task ResetPwWebRequest()
+    
+
+    async Task LoginWebRequest()
     {
-        LoginData _data = new LoginData();
-        _data.username = _id.text;
-        _data.password = _pw.text;
-        HttpClient _httpClient = new HttpClient();
-        HttpContent _httpContent = new StringContent(JsonUtility.ToJson(_data), Encoding.UTF8, "application/json");
-        string _url = "http://127.0.0.1:8000/accounts/login/";
-        using HttpResponseMessage _response = await _httpClient.PostAsync(_url, _httpContent);
+        _loginData = new JsonLoginData();
+        _loginData.username = _id.text;
+        _loginData.password = _pw.text;
+        _httpClient = new HttpClient();
+        _httpContent = new StringContent(JsonUtility.ToJson(_loginData), Encoding.UTF8, "application/json");
+        
+        _response = await _httpClient.PostAsync(_loginUrl, _httpContent);
+
+
+      
 
         switch ((int)_response.StatusCode)
         {
             case 200:
+                _userJson = JsonUtility.FromJson<JsonUserData>(_response.Content.ReadAsStringAsync().Result);
                 SucceedLoginWebRequest();
                 break;
             case 404:
                 WindowController.Instance.SendAlertMessage(LoginAlertMessage.NotFound);
+                FileIO.ResetKey();
                 break;
         }
     }
 
+
+    
     public void SucceedLoginWebRequest()
     {
-        Debug.Log("ø¯∫ª: " + _token);
-        //_token¿∫ º≠πˆ∑Œ∫Œ≈Õ πﬁæ∆ø¬∞™¿ª πŸ∑Œ ≥÷æÓ¡÷¥¬∞…∑Œ.
-        _token = Crypto.AESEncrypt128(_token);
-        Debug.Log("AES æœ»£»≠ : " + _token);
+        foreach (var i in _response.Headers.GetValues("Access-Token"))
+        {
+            _AccessToken = i;
+        }
+        foreach (var i in _response.Headers.GetValues("Refresh-Token"))
+        {
+            _RefreshToken = i;
+        }
 
-        _token = Crypto.AESDecrypt128();
-        Debug.Log("AES ∫π»£»≠ : " + _token);
+        Debug.Log("refresh-token = " + _RefreshToken);
+
+
+        //_tokenÏùÄ ÏÑúÎ≤ÑÎ°úÎ∂ÄÌÑ∞ Î∞õÏïÑÏò®Í∞íÏùÑ Î∞îÎ°ú ÎÑ£Ïñ¥Ï£ºÎäîÍ±∏Î°ú.
+        _AccessToken = Crypto.AESEncrypt128(_AccessToken, CryptoType.AccessToken);
+        _RefreshToken = Crypto.AESEncrypt128(_RefreshToken, CryptoType.RefreshToken);
+
+        UserInfo.Instance.SetUserInfo(_userJson.id, _userJson.nickname);
+
+        /*Î≥µÌò∏ÌôîÌÖåÏä§Ìä∏Ïö©.
+        _AccessToken = Crypto.AESDecrypt128(CryptoType.AccessToken);
+        _RefreshToken = Crypto.AESDecrypt128(CryptoType.RefreshToken);
+        Debug.Log("AES Î≥µÌò∏Ìôî : " + _AccessToken);
+        Debug.Log("AES Î≥µÌò∏Ìôî : " + _RefreshToken);*/
         GameManager.Instance.ChangeScene(Scenes.LobbyScene);
     }
 }

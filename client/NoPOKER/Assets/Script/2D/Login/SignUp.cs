@@ -1,4 +1,4 @@
-using UnityEngine;
+ï»¿using UnityEngine;
 using TMPro;
 using System.Net.Http;
 using System.Threading.Tasks;
@@ -50,7 +50,7 @@ public class SignUp : MonoBehaviour
             WindowController.Instance.SendAlertMessage(LoginAlertMessage.Blank);
             return;
         }
-        //¾ÆÀÌµğ Áßº¹ È®ÀÎ
+        //ì•„ì´ë”” ì¤‘ë³µ í™•ì¸
         if (!(_pw.text.Equals(_checkPw.text)))
         {
             WindowController.Instance.SendAlertMessage(LoginAlertMessage.IncorrectPW);
@@ -77,6 +77,8 @@ public class SignUp : MonoBehaviour
         string _url = "http://127.0.0.1:8000/accounts/";
         using HttpResponseMessage response = await _httpClient.PostAsync(_url, _httpContent);
 
+       // Debug.Log("result = " + response.Content.ReadAsStringAsync().Result);
+       // Debug.Log("response = " + response);
         switch ((int)response.StatusCode)
         {
             case 201:

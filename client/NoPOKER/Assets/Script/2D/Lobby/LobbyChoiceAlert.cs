@@ -1,4 +1,4 @@
-using UnityEngine;
+ï»¿using UnityEngine;
 using TMPro;
 using System.Text;
 
@@ -12,7 +12,7 @@ public class LobbyChoiceAlert : MonoBehaviour
 {
     [SerializeField] private TMP_Text _alertContent;
 
-    private string[] _twoAlertMessage = {"°ÔÀÓÀ» Á¾·áÇÏ½Ã°Ú½À´Ï±î?",  "´ÔÀÌ ÆÀÃÊ´ë¸¦ ÇÏ¿´½À´Ï´Ù.\n¼ö¶ô ÇÏ½Ã°Ú½À´Ï±î?" };
+    private string[] _twoAlertMessage = {"ê²Œì„ì„ ì¢…ë£Œí•˜ì‹œê² ìŠµë‹ˆê¹Œ?",  "ë‹˜ì´ íŒ€ì´ˆëŒ€ë¥¼ í•˜ì˜€ìŠµë‹ˆë‹¤.\nìˆ˜ë½ í•˜ì‹œê² ìŠµë‹ˆê¹Œ?" };
     private LobbyChoiceAlertMessage _alertMessage;
     private StringBuilder _stingBuilder = new StringBuilder();
 
@@ -32,7 +32,7 @@ public class LobbyChoiceAlert : MonoBehaviour
 
     public void ClickedAcceptButton()
     {
-        /*¾î¶²°É ¼ö¶ôÇß³Ä¿¡ µû¶ó ÇØ´ç ±â´É¿¡ ¸Â´Â Å¬·¡½º¿¡ Àü´Ş.*/
+        /*ì–´ë–¤ê±¸ ìˆ˜ë½í–ˆëƒì— ë”°ë¼ í•´ë‹¹ ê¸°ëŠ¥ì— ë§ëŠ” í´ë˜ìŠ¤ì— ì „ë‹¬.*/
         switch(_alertMessage)
         {
             case LobbyChoiceAlertMessage.InviteTeam:
@@ -44,14 +44,14 @@ public class LobbyChoiceAlert : MonoBehaviour
 
     public void ClickedRejectButton()
     {
-        /*¾î¶²°É °ÅÀıÇß³Ä¿¡ µû¶óÇØ´ç ±â´É¿¡ ¸Â´Â Å¬·¡½º¿¡ Àü´Ş
-        switch(_alertMessage) ¹®À¸·Î ºĞ±âÁ¡ ³ª´­¿¹Á¤*/
+        /*ì–´ë–¤ê±¸ ê±°ì ˆí–ˆëƒì— ë”°ë¼í•´ë‹¹ ê¸°ëŠ¥ì— ë§ëŠ” í´ë˜ìŠ¤ì— ì „ë‹¬
+        switch(_alertMessage) ë¬¸ìœ¼ë¡œ ë¶„ê¸°ì  ë‚˜ëˆŒì˜ˆì •*/
         switch (_alertMessage)
         {
             case LobbyChoiceAlertMessage.InviteTeam:
-                //test¿ë
+                //testìš©
                 Team.Instance.RejectedInvite();
-                //¿ø·¡´Â Team.Instance.RejectInvite();
+                //ì›ë˜ëŠ” Team.Instance.RejectInvite();
                 break;
         }
         LobbyWindowController.Instance.InActiveChoiceAlertWindow();
