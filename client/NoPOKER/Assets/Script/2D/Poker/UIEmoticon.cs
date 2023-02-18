@@ -1,4 +1,4 @@
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
@@ -25,26 +25,26 @@ public class UIEmoticon : MonoBehaviour
     private void _buttonSetting()
     {
 
-        //_emoticonButtons[(int)EmoticonType.Smile].onClick.AddListener : �������� �̸�Ƽ�� ����ߴٰ� �۽��ϱ�.
+        //_emoticonButtons[(int)EmoticonType.Smile].onClick.AddListener : 서버에게 이모티콘 사용했다고 송신하기.
         _emoticonButtons[(int)EmoticonType.Smile].onClick.AddListener(() => ShowEmoticon(0, EmoticonType.Smile));
 
-        //_emoticonButtons[(int)EmoticonType.Smile].onClick.AddListener : �������� �̸�Ƽ�� ����ߴٰ� �۽��ϱ�.
+        //_emoticonButtons[(int)EmoticonType.Smile].onClick.AddListener : 서버에게 이모티콘 사용했다고 송신하기.
         _emoticonButtons[(int)EmoticonType.Sad].onClick.AddListener(() => ShowEmoticon(0, EmoticonType.Sad));
 
-        //_emoticonButtons[(int)EmoticonType.Smile].onClick.AddListener : �������� �̸�Ƽ�� ����ߴٰ� �۽��ϱ�.
+        //_emoticonButtons[(int)EmoticonType.Smile].onClick.AddListener : 서버에게 이모티콘 사용했다고 송신하기.
         _emoticonButtons[(int)EmoticonType.Tear].onClick.AddListener(() => ShowEmoticon(0, EmoticonType.Tear));
 
-        //_emoticonButtons[(int)EmoticonType.Smile].onClick.AddListener : �������� �̸�Ƽ�� ����ߴٰ� �۽��ϱ�.
+        //_emoticonButtons[(int)EmoticonType.Smile].onClick.AddListener : 서버에게 이모티콘 사용했다고 송신하기.
         _emoticonButtons[(int)EmoticonType.Angry].onClick.AddListener(() => ShowEmoticon(0, EmoticonType.Angry));
 
-        //_emoticonButtons[(int)EmoticonType.Smile].onClick.AddListener : �������� �̸�Ƽ�� ����ߴٰ� �۽��ϱ�.
+        //_emoticonButtons[(int)EmoticonType.Smile].onClick.AddListener : 서버에게 이모티콘 사용했다고 송신하기.
         _emoticonButtons[(int)EmoticonType.Surprise].onClick.AddListener(() => ShowEmoticon(0, EmoticonType.Surprise));
 
     }
 
     public void ShowEmoticon(int who, EmoticonType type)
     {
-        //���� �̸�Ƽ���� ��� �������� �ִ����̶��, ����ϰ� ���ο� �̸�Ƽ�� �������� �ϱ�
+        //이전 이모티콘이 계속 보여지고 있는중이라면, 취소하고 새로운 이모티콘 보여지게 하기
         if (_playersEmoticonView[who] != null)
         {
             StopCoroutine(_playersEmoticonView[who]);        

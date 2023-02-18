@@ -1,6 +1,6 @@
-using UnityEngine;
+ï»¿using UnityEngine;
 using TMPro;
-public enum AlertMessage
+public enum LoginAlertMessage
 {
     Blank,
     IncorrectPW,
@@ -19,12 +19,12 @@ public class Alert : MonoBehaviour
     [SerializeField] private TMP_Text _alertTitle;
     [SerializeField] private TMP_Text _alertContent;
 
-    private string[] _alertMessage = {"ºóÄ­ÀÌ ¾ø´ÂÁö ´Ù½Ã È®ÀÎÇØÁÖ¼¼¿ä", "ºñ¹Ğ¹øÈ£°¡ ¼­·Î ÀÏÄ¡ÇÏÁö¾Ê½À´Ï´Ù.", "Ã£À» ¼ö ¾ø´Â »ç¿ëÀÚÀÔ´Ï´Ù."
-                                        ,"ÀÌ¸ŞÀÏ·Î ÀÎÁõ¸µÅ©¸¦ º¸³Â½À´Ï´Ù.\nÈ®ÀÎÇØÁÖ¼¼¿ä", "ÀÌ¸ŞÀÏ·Î ¾ÆÀÌµğ¸¦ º¸³Â½À´Ï´Ù.\nÈ®ÀÎÇØÁÖ¼¼¿ä",
-                                        "ÀÌ¸ŞÀÏ·Î Àç¼³Á¤ ¸µÅ©¸¦ º¸³Â½À´Ï´Ù.\n30ºĞ³»·Î È®ÀÎÇØÁÖ¼¼¿ä", "ÀÌ¸ŞÀÏ Çü½ÄÀ» ´Ù½Ã È®ÀÎÇØÁÖ¼¼¿ä",
-                                        "ÀÌ¹Ì »ç¿ëÁßÀÎ IDÀÔ´Ï´Ù.", "ÀÌ¹Ì »ç¿ëÁßÀÎ ´Ğ³×ÀÓÀÔ´Ï´Ù.", "ÀÌ¹Ì »ç¿ëÁßÀÎ ÀÌ¸ŞÀÏÀÔ´Ï´Ù."};
+    private string[] _alertMessage = {"ë¹ˆì¹¸ì´ ì—†ëŠ”ì§€ ë‹¤ì‹œ í™•ì¸í•´ì£¼ì„¸ìš”", "ë¹„ë°€ë²ˆí˜¸ê°€ ì„œë¡œ ì¼ì¹˜í•˜ì§€ì•ŠìŠµë‹ˆë‹¤.", "ì°¾ì„ ìˆ˜ ì—†ëŠ” ì‚¬ìš©ìì…ë‹ˆë‹¤."
+                                        ,"ì´ë©”ì¼ë¡œ ì¸ì¦ë§í¬ë¥¼ ë³´ëƒˆìŠµë‹ˆë‹¤.\ní™•ì¸í•´ì£¼ì„¸ìš”", "ì´ë©”ì¼ë¡œ ì•„ì´ë””ë¥¼ ë³´ëƒˆìŠµë‹ˆë‹¤.\ní™•ì¸í•´ì£¼ì„¸ìš”",
+                                        "ì´ë©”ì¼ë¡œ ì¬ì„¤ì • ë§í¬ë¥¼ ë³´ëƒˆìŠµë‹ˆë‹¤.\n30ë¶„ë‚´ë¡œ í™•ì¸í•´ì£¼ì„¸ìš”", "ì´ë©”ì¼ í˜•ì‹ì„ ë‹¤ì‹œ í™•ì¸í•´ì£¼ì„¸ìš”",
+                                        "ì´ë¯¸ ì‚¬ìš©ì¤‘ì¸ IDì…ë‹ˆë‹¤.", "ì´ë¯¸ ì‚¬ìš©ì¤‘ì¸ ë‹‰ë„¤ì„ì…ë‹ˆë‹¤.", "ì´ë¯¸ ì‚¬ìš©ì¤‘ì¸ ì´ë©”ì¼ì…ë‹ˆë‹¤."};
 
-    public void SetAlertContent(AlertMessage message)
+    public void SetAlertContent(LoginAlertMessage message)
     {
         _alertContent.text = _alertMessage[(int)message];
     }

@@ -1,17 +1,44 @@
-using System.Collections;
+ï»¿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-class Player
+public enum PokerState
+{
+    die,
+    batting,
+    call
+}
+
+public class PokerPlayer
 {
     string _name;
     int _chip;
+    PokerState _state = PokerState.batting;
 
-    public void SettingPlayer(string name, int chip)
+    public PokerPlayer(string name, int chip)
     {
         _name = name;
         _chip = chip;
     }
+
+    public void SetState(PokerState state)
+    {
+        _state = state;
+    }
+    public PokerState GetState()
+    {
+        return _state;
+    }
+
+    public void AddChip(int chip)
+    {
+        _chip += chip;
+    }
+    public void SubChip(int chip)
+    {
+        _chip -= chip;
+    }
+
 }
 
 public class PokerGameManager : MonoBehaviour
@@ -21,16 +48,33 @@ public class PokerGameManager : MonoBehaviour
 
     [SerializeField] float _turnTiem = 10f;
     [SerializeField] private UITurn _turn;
+    [SerializeField] private Card _card;
     private int _peopleNum = 4;
     public int PeopleNum { get => _peopleNum; }
     private bool _isBattingFinish = false;
     public bool IsBattingFinish { get => _isBattingFinish; }
-    private List<Player> _playerOrder = new List<Player>();
+    public List<PokerPlayer> PlayerOrder = new List<PokerPlayer>();
+    private List<string> _playerNames = new List<string>();
     public float TurnTime { get => _turnTiem; }
     private int _order = 4;
+    public int NowTurn { get => _order % PeopleNum; }
     private int _gameProcessNum = 0;
+    private int _distributeNum = 0;
+    public int DistributeNum { get => _distributeNum; }
+    private int _dieNum = 0;
+    private bool _pokerFinish = false;
+    public bool PokerFinish { get => _pokerFinish; }
 
 
+    public void UpDieNum()
+    {
+        _dieNum++;
+    }
+
+    public void UpDistributeNum()
+    {
+        _distributeNum++;
+    }
 
     private void Awake()
     {
@@ -43,6 +87,7 @@ public class PokerGameManager : MonoBehaviour
         _turn.StartTurn(_order% _peopleNum);
     }
 
+
     public void Init()
     {
         if (s_instance == null)
@@ -51,20 +96,21 @@ public class PokerGameManager : MonoBehaviour
 
     public void SettingGame()
     {
+        _playerNames.Add("ëƒ ëƒ ëƒ ëƒ ëƒ ëƒ ");
+        _playerNames.Add("ì–Œì–Œ");
+        _playerNames.Add("ì©ì©");
+        _playerNames.Add("ë‡¸ë‡¸");
 
         for (int i = 0; i < PeopleNum; i++)
         {
-            _playerOrder.Add(new Player());
+            PlayerOrder.Add(new PokerPlayer(_playerNames[i],90));
         }         
-        _playerOrder[0].SettingPlayer("³È³È³È³È³È³È", 90);
-        _playerOrder[1].SettingPlayer("¾ä¾ä", 90);
-       // _playerOrder[2].SettingPlayer("ÂÁÂÁ", 90);
-       // _playerOrder[3].SettingPlayer("‡œ‡œ", 90);
-
         Batting.Instance.SettingRoundBatting(_peopleNum * 10);
+
+        _card.DistributeCard();
     }
 
-    /*[0] Àº ¹«Á¶°Ç ÀÚ±âÀÚ½Å. [1] Àº ÀÚ±â ¹Ù·Î ´ÙÀ½Â÷·Ê. [2]´Â ±×´Ù´ÙÀ½ [3]Àº ±×´Ù´Ù´ÙÀ½
+    /*[0] ì€ ë¬´ì¡°ê±´ ìê¸°ìì‹ . [1] ì€ ìê¸° ë°”ë¡œ ë‹¤ìŒì°¨ë¡€. [2]ëŠ” ê·¸ë‹¤ë‹¤ìŒ [3]ì€ ê·¸ë‹¤ë‹¤ë‹¤ìŒ
     public void SettingPlayerOrder()
     {
 
@@ -72,50 +118,105 @@ public class PokerGameManager : MonoBehaviour
 
     public void FinishTurn()
     {
-        _isBattingFinish = true;
-        _turn.ClearTurnUI();
-        if ((_order + 1) % _peopleNum == 0)
+       
+        if (_dieNum == _peopleNum-1) // í•œëª…ë¹¼ê³  ëª¨ë‘ê°€ ë‹¤ì´ë¥¼ í–ˆì„ ê²½ìš°,
         {
-            _gameProcessNum++;
-            Debug.Log("È½¼ö ´Ã¾î³². ÇöÀç : " + _gameProcessNum);
+            Debug.Log("die num = " + _dieNum);
+            FinishPokerGame();
+            AllDie();
+            //ë³¸ì¸ ì¹´ë“œ ê³µê°œ ë˜ë©´ì„œ, ë² íŒ…ëœì¹© ê·¸ í•œëª…ì—ê²Œë¡œ ëª°ë¹µ           
         }
-        _order++;
-
-        if (_gameProcessNum < 3)
+        else
         {
-            //¼­¹öÅë½Å : ÅÏÀÌ ³¡³µ´Ù°í ¾Ë¸². 
-            /*¼­¹öÅë½Å : ¼­¹ö·ÎºÎÅÍ ¹Ş¾Æ¿Â Á¤º¸·Î 
-             * ¸ğµÎ ÄİÀ» ÇßÀ» °æ¿ì È­¸éÀüÈ¯
-             * ¸ğµÎ ´ÙÀÌ¸¦ ÇßÀ»°æ¿ì °á°ú º¸¿©ÁÜ
-             * 
-            Debug.Log("ÇöÀç order: " + _order);
-            if () //¸ğµç ÀÎ¿øÀÌ CallÀ» ÇÒ °æ¿ì 
+            _isBattingFinish = true;
+            _turn.ClearTurnUI();
+            Debug.Log("Finish Turn");
+            if ((_order + 1) % _peopleNum == 0)
+            {
+                _gameProcessNum++;
+                Debug.Log("íšŸìˆ˜ ëŠ˜ì–´ë‚¨. í˜„ì¬ : " + _gameProcessNum);
+            }
+            _order++;
+
+
+            Debug.Log("In else" );
+            if (_gameProcessNum < 3)
+            {
+                //ì„œë²„í†µì‹  : í„´ì´ ëë‚¬ë‹¤ê³  ì•Œë¦¼. 
+                /*ì„œë²„í†µì‹  : ì„œë²„ë¡œë¶€í„° ë°›ì•„ì˜¨ ì •ë³´ë¡œ 
+                 * ëª¨ë‘ ì½œì„ í–ˆì„ ê²½ìš° í™”ë©´ì „í™˜
+                 * ëª¨ë‘ ë‹¤ì´ë¥¼ í–ˆì„ê²½ìš° ê²°ê³¼ ë³´ì—¬ì¤Œ
+                 * 
+                Debug.Log("í˜„ì¬ order: " + _order);
+                if () //ëª¨ë“  ì¸ì›ì´ Callì„ í•  ê²½ìš° 
+                {
+                    Change3DGame();
+                }
+                else if() //1ëª…ì„ ì œì™¸í•œ ëª¨ë“ ì‚¬ëŒì´ Dieë¥¼ í•  ê²½ìš°
+                {
+                    //ë‹¤ìŒì‚¬ëŒì´ ëˆì„ ë‹¤ ê°€ì§€ëŠ”ê±¸ë¡œ !
+                }
+                */
+                _isBattingFinish = false;
+                //ë”°ë¡œ ì§„í–‰ë˜ëŠ”ê²Œ ì—†ë‹¤ë©´ ë‹¤ìŒ í„´ìœ¼ë¡œ ì§„í–‰í•  ìˆ˜ ìˆë„ë¡í•¨.
+                if (PlayerOrder[NowTurn].GetState() == PokerState.die)
+                {
+                    FinishTurn();
+                }
+                else
+                {
+                    NextTurn();
+                }
+
+            }
+            else
             {
                 Change3DGame();
             }
-            else if() //1¸íÀ» Á¦¿ÜÇÑ ¸ğµç»ç¶÷ÀÌ Die¸¦ ÇÒ °æ¿ì
-            {
-                //´ÙÀ½»ç¶÷ÀÌ µ·À» ´Ù °¡Áö´Â°É·Î !
-            }
-            */
-            _isBattingFinish = false;
-            //µû·Î ÁøÇàµÇ´Â°Ô ¾ø´Ù¸é ´ÙÀ½ ÅÏÀ¸·Î ÁøÇàÇÒ ¼ö ÀÖµµ·ÏÇÔ.
-            NextTurn();
         }
-        else
-        {            
-            Change3DGame();        
-        }
+
     }
+
+    public void FinishPokerGame()
+    {
+        _pokerFinish = true;
+        _turn.StopAllTurn();
+        _card.OpenMyCard();
+    }
+
+    public void AllDie()
+    {
+        _card.OpenMyCard();
+        SendWinnerMessage();
+    }
+
+    public void SendWinnerMessage()
+    {
+        Batting.Instance.Win();
+    }
+
+    public void ResetPokerGame()
+    {
+        //Start();
+    }
+
+
 
     public void Change3DGame()
     {
-        //3D°ÔÀÓÀüÈ¯.
-        Debug.Log("3D°ÔÀÓÀ¸·Î ÀüÈ¯µË´Ï´Ù.");
+        //3Dê²Œì„ì „í™˜.
+        Debug.Log("3Dê²Œì„ìœ¼ë¡œ ì „í™˜ë©ë‹ˆë‹¤.");
     }
 
     public void NextTurn()
     { 
         _turn.StartTurn(_order % _peopleNum);
     }
+
+    public void ChangePlayerState(PokerState state)
+    {
+        PlayerOrder[NowTurn].SetState(state);
+    }
+
+
 }

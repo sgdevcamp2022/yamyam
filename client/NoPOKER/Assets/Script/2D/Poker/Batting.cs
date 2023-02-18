@@ -1,4 +1,4 @@
-using UnityEngine;
+ï»¿using UnityEngine;
 
 public class Batting : MonoBehaviour
 {
@@ -44,7 +44,8 @@ public class Batting : MonoBehaviour
         _canPayChip = _checkMyChip(raiseChip);
         if (_canPayChip)
         {
-            _uiBatting.SetPlayerBattingResult(0, raiseChip.ToString());
+            _uiBatting.SetPlayerBattingResult(PokerGameManager.Instance.NowTurn, raiseChip.ToString());
+            PersonSound.Instance.PlayRaiseSound();
             _payChip(raiseChip, false);
         }
     }
@@ -54,16 +55,21 @@ public class Batting : MonoBehaviour
         _canPayChip = _checkMyChip(_callBattingChip);
         if (_canPayChip)
         {
-            _uiBatting.SetPlayerBattingResult(0, "Äİ");
+            _uiBatting.SetPlayerBattingResult(PokerGameManager.Instance.NowTurn, "ì½œ");
+            PersonSound.Instance.PlayCallSound();
             _payChip(_callBattingChip, true);
         }      
     }
 
     public void Die()
     {
-        // ¼­¹öÅë½Å : ÇØ´ç ÇÃ·¹ÀÌ¾î°¡ ´ÙÀÌÇß´Ù´Â°É ¾Ë¸®±â.
-        // ÅÏÀ» ³Ñ±âµµ·ÏÇÔ.
-        _uiBatting.SetPlayerBattingResult(0,"´ÙÀÌ");
+        // ì„œë²„í†µì‹  : í•´ë‹¹ í”Œë ˆì´ì–´ê°€ ë‹¤ì´í–ˆë‹¤ëŠ”ê±¸ ì•Œë¦¬ê¸°.
+        // í„´ì„ ë„˜ê¸°ë„ë¡í•¨.
+        _uiBatting.SetPlayerBattingResult(PokerGameManager.Instance.NowTurn, "ë‹¤ì´");
+        _uiBatting.ActiveDieView(PokerGameManager.Instance.NowTurn);
+        PokerGameManager.Instance.UpDieNum();
+        PersonSound.Instance.PlayDieSound();
+        PokerGameManager.Instance.ChangePlayerState(PokerState.die);
         PokerGameManager.Instance.FinishTurn();
     }
 
@@ -75,25 +81,50 @@ public class Batting : MonoBehaviour
         _uiBatting.SettingCanBattingChip();
         _uiBatting.ChangeBattingChip();
 
-        // (ÄİÀ» ÇßÀ»°æ¿ì)¼­¹öÅë½Å : ÇØ´ç ÇÃ·¹ÀÌ¾î°¡ ÄİÇß´Ù´Â°É ¾Ë¸®±â.
-        // ¼­¹öÅë½Å : Ä¨À» ÁöºÒÇÔ, ÀüÃ¼ º£ÆÃ±İ¾× Áõ°¡ ¾Ë¸²
-        // ÅÏÀ» ³Ñ±âµµ·ÏÇÔ.
+        _uiBatting.ShowBattingChipMoveCenter(batting);
+        // (ì½œì„ í–ˆì„ê²½ìš°)ì„œë²„í†µì‹  : í•´ë‹¹ í”Œë ˆì´ì–´ê°€ ì½œí–ˆë‹¤ëŠ”ê±¸ ì•Œë¦¬ê¸°.
+        // ì„œë²„í†µì‹  : ì¹©ì„ ì§€ë¶ˆí•¨, ì „ì²´ ë² íŒ…ê¸ˆì•¡ ì¦ê°€ ì•Œë¦¼
+        // í„´ì„ ë„˜ê¸°ë„ë¡í•¨.
         PokerGameManager.Instance.FinishTurn();
     }
 
-    ////////////////////////////////////////¼­¹ö¸¦ ÅëÇØ ¹ŞÀ»ºÎºĞ..../////////////////////////////////////
+    ////////////////////////////////////////ì„œë²„ë¥¼ í†µí•´ ë°›ì„ë¶€ë¶„..../////////////////////////////////////
     /// <summary>
-    /// ¼­¹ö ¼ö½ÅÀ» ÅëÇØ ¶ó¿îµå º£ÆÃ ±İ¾×ÀÌ ¿Ã¶ó°¬À» °æ¿ì.
+    /// ì„œë²„ ìˆ˜ì‹ ì„ í†µí•´ ë¼ìš´ë“œ ë² íŒ… ê¸ˆì•¡ì´ ì˜¬ë¼ê°”ì„ ê²½ìš°.
     /// </summary>
     public void RaiseRoundBatting(int raise) 
     {
         _roundBattingChip += raise;
         _callBattingChip += raise;
-        //UIÂÊ¿¡µµ º¯°æ»çÇ×À» ¹İ¿µÇØ¾ßÇÔ..
+        //UIìª½ì—ë„ ë³€ê²½ì‚¬í•­ì„ ë°˜ì˜í•´ì•¼í•¨..
     }
 
     public void SettingRoundBatting(int roundBatting)
     {
         _roundBattingChip = roundBatting;
     }
+
+    public void Win() //ëª¨ë‘ ë‹¤ì´ë¥¼ í–ˆì„ ê²½ìš° ë§ˆì§€ë§‰ í•œ ì‚¬ëŒì—ê²Œ ëˆì„ ëª°ì•„ì¤Œ.
+    {
+        for (int i = 0; i < PokerGameManager.Instance.PeopleNum; i++)
+        {
+            if (PokerGameManager.Instance.PlayerOrder[i].GetState() != PokerState.die)
+            {
+                PokerGameManager.Instance.PlayerOrder[i].AddChip(_roundBattingChip);
+                //Reset ë² íŒ… ì¹©
+                ResetBattingChip();
+                //ë² íŒ…ì¹© ê·¸ ì‚¬ëŒí•œí…Œ ê°€ëŠ”ê±° UIì ìœ¼ë¡œ ë³´ì—¬ì£¼ê¸°
+                _uiBatting.ShowBattingChipMovePlayer(i);
+                Debug.Log("winnerì°¾ìŒ~!");
+            }
+        }
+        //ë‹¤ì‹œ í¬ì»¤ê²Œì„ ì‹œì‘.
+    }
+    public void ResetBattingChip()
+    {
+        _roundBattingChip = 0;
+        _callBattingChip = 10;
+    }
+
+
 }

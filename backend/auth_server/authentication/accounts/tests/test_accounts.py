@@ -15,12 +15,12 @@ from authentication.accounts.models import User
 
 class AccountCreateTests(TestCase):
     def setUp(self):
-        self.create_account_url = reverse('accounts:create_account')
+        self.account_url = reverse('accounts:create_account')
 
     def test_create_account(self):
         post = {"username": "user2", "nickname": "nickname2", "email": "user2@example.com",
                 "password": "password2"}
-        response = self.client.post(self.create_account_url, post)
+        response = self.client.post(self.account_url, post)
         data = json.loads(response.content)
         self.assertEqual(response.status_code, 201)
         content = {"username": "user2", "nickname": "nickname2",
@@ -32,7 +32,8 @@ class AccountsTests(TestCase):
     def setUp(self):
         User.objects.get_or_create(id=1,
                                    username="user1", nickname="nickname1", email="user1@example.com", password=make_password('password1'))
-        self.create_account_url = reverse('accounts:create_account')
+        self.account_url = reverse('accounts:create_account')
+        self.list_account_url = reverse('accounts:list_account')
         self.get_activate_url = reverse('accounts:activate_account', kwargs={
                                         "uidb64": urlsafe_base64_encode(force_bytes(1)), "token": hashlib.sha256('nickname1'.encode('utf-8')).hexdigest()})
         self.login_account_url = reverse('accounts:login_account')
@@ -43,14 +44,17 @@ class AccountsTests(TestCase):
         self.password_reset_valid_url = reverse('accounts:password_reset_confirm', kwargs={
             "uidb64": urlsafe_base64_encode(force_bytes(1)), "token": "set-password"
         })
-        self.handle_account_url = reverse('accounts:handle_account', kwargs={
+        self.handle_account_1_url = reverse('accounts:handle_account', kwargs={
             "id": 1
+        })
+        self.handle_account_2_url = reverse('accounts:handle_account', kwargs={
+            "id": 2
         })
 
     def test_create_duplicated_username_account(self):
         post = {"username": "user1", "nickname": "nickname2", "email": "user2@example.com",
                 "password": "password2"}
-        response = self.client.post(self.create_account_url, post)
+        response = self.client.post(self.account_url, post)
         data = json.loads(response.content)
         self.assertEqual(response.status_code, 400)
         content = {"username": ['user with this username already exists.']}
@@ -59,7 +63,7 @@ class AccountsTests(TestCase):
     def test_create_duplicated_nickname_account(self):
         post = {"username": "user2", "nickname": "nickname1", "email": "user2@example.com",
                 "password": "password2"}
-        response = self.client.post(self.create_account_url, post)
+        response = self.client.post(self.account_url, post)
         data = json.loads(response.content)
         self.assertEqual(response.status_code, 400)
         content = {"nickname": ['user with this nickname already exists.']}
@@ -68,7 +72,7 @@ class AccountsTests(TestCase):
     def test_create_duplicated_email_account(self):
         post = {"username": "user2", "nickname": "nickname2", "email": "user1@example.com",
                 "password": "password2"}
-        response = self.client.post(self.create_account_url, post)
+        response = self.client.post(self.account_url, post)
         data = json.loads(response.content)
         self.assertEqual(response.status_code, 400)
         content = {"email": ['user with this email already exists.']}
@@ -82,7 +86,9 @@ class AccountsTests(TestCase):
     def test_login_account(self):
         post = {"username": "user1", "password": "password1"}
         response = self.client.post(self.login_account_url, post)
+        content = {"id": 1, "nickname": "nickname1"}
         self.assertEqual(response.status_code, 200)
+        self.assertEqual(content, json.loads(response.content))
         self.assertEqual(response.has_header('Access-Token'), True)
         self.assertEqual(response.has_header('Refresh-Token'), True)
 
@@ -136,7 +142,7 @@ class AccountsTests(TestCase):
         self.assertTrue(u.check_password("password12345"))
 
     def test_handle_account_delete_integrate(self):
-        response = self.client.delete(self.handle_account_url)
+        response = self.client.delete(self.handle_account_1_url)
         self.assertEqual(response.status_code, 200)
         self.assertEqual(len(mail.outbox), 1)
         self.assertEqual(mail.outbox[0].subject,
@@ -147,12 +153,36 @@ class AccountsTests(TestCase):
         self.assertTemplateUsed(
             response, 'accounts/accounts_withdraw_success.html')
         with self.assertRaises(User.DoesNotExist):
-            user = User.objects.get(pk=1)
+            User.objects.get(pk=1)
 
     def test_handle_account_get(self):
-        response = self.client.get(self.handle_account_url)
+        response = self.client.get(self.handle_account_1_url)
         self.assertEqual(response.status_code, 200)
+        '''
         data = json.loads(response.content)
         content = {'nickname': 'nickname1', 'victory': 0, 'loose': 0,
                    'date_joined': str(datetime.datetime.now())}
-        # self.assertEqual(content, data)
+        self.assertEqual(content, data)
+        '''
+
+    def test_account_post(self):
+        User.objects.get_or_create(id=2,
+                                   username="user2", nickname="nickname2", email="user2@example.com", password=make_password('password2'))
+        post = {
+            "players": [
+                {
+                    "id": 1,
+                    "result": "WIN"
+                },
+                {
+                    "id": 2,
+                    "result": "LOOSE"
+                }
+            ]
+        }
+        response = self.client.post(self.list_account_url, post)
+        self.assertEqual(response.status_code, 200)
+        response = self.client.get(self.handle_account_1_url)
+        self.assertEqual(1, json.loads(response.content)["victory"])
+        response = self.client.get(self.handle_account_2_url)
+        self.assertEqual(1, json.loads(response.content)["loose"])

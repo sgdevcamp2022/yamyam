@@ -1,4 +1,4 @@
-using System.Collections;
+ï»¿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -6,14 +6,12 @@ public class Card : MonoBehaviour
 {
     [SerializeField]private UICard _uiCard;
     private int[] _playerCards = new int[4];
-    
-    private void Awake()
-    {
-        DistributeCard();
-    }
 
-    private void DistributeCard()//³ªÁß¿¡ ¼­¹ö·ÎºÎÅÍ ÇÃ·¹ÀÌ¾î Ä«µåÁ¤º¸µéÀ» ¹Ş¾Æ¿À´Â ¿ªÇÒÀ» ÇÔ.
+
+
+    public void  DistributeCard()//ë‚˜ì¤‘ì— ì„œë²„ë¡œë¶€í„° í”Œë ˆì´ì–´ ì¹´ë“œì •ë³´ë“¤ì„ ë°›ì•„ì˜¤ëŠ” ì—­í• ì„ í•¨.
     {
+
         for(int i=0;i<PokerGameManager.Instance.PeopleNum; i++)
         {
             _playerCards[i] = Random.Range(0, 10);
@@ -27,5 +25,10 @@ public class Card : MonoBehaviour
                 _uiCard.SettingCard4(_playerCards);
                 break;
         }    
+    }
+
+    public void OpenMyCard()
+    {
+        _uiCard.ShowMyCard();
     }
 }
