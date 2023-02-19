@@ -215,7 +215,7 @@ class LobbyConsumer(JsonWebsocketConsumer):
         for user in user_list:
             temp = user.decode('utf-8')[3:].split("_")
             content = {
-                "id": temp[0],
+                "id": int(temp[0]),
                 "nickname": temp[1],
             }
             user_json.append(content)
