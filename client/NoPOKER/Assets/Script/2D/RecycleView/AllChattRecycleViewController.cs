@@ -1,10 +1,10 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
 namespace UI
 {
-    public class AllChattRecycleViewController : UIRecycleViewController<UICellData>
+    public class AllChattRecycleViewController : UIRecycleViewController<UIChattData>
     {
         [SerializeField] RectTransform _scroll;
         [SerializeField] ScrollRect _scrollRect;
@@ -15,14 +15,14 @@ namespace UI
         private float _changedHeight;
         public void LoadAllChattingData()
         {
-            TableData = new List<UICellData>()
-            {
-                new UICellData { Name="" , Chat = "한글한글한글한글한글한글한글한글한글한글한글한글한글한글한글한글한글"},
-                new UICellData { Name="겜잘알" , Chat = "CONTENTCONTENTCONTENTCONTENTCONTENTCONTENTC"},
-                new UICellData { Name="스마일게이트" , Chat = "윈터데브캠프에 오신걸 환영합니다!"},
-                new UICellData { Name="이사님" , Chat = "PMP 목표에 맞아요? 그게??"},
-                new UICellData { Name="용용" , Chat = "용용체를 쓰면 화가풀리는 마법이 생겨요"},
-               new UICellData { Name="NoPOKER" , Chat = "NoPOKER Is Funny!!!NoPOKER Is Funny!!!NoPOKER Is Funny!!!NoPOKER Is Funny!!!NoPOKER Is Funny!!!NoPOKER Is Funny!!!NoPOKER Is Funny!!!NoPOKER Is Funny!!!"}
+            TableData = new List<UIChattData>()
+            {/*
+                new UIChattData { Name="" , Chat = "한글한글한글한글한글한글한글한글한글한글한글한글한글한글한글한글한글"},
+                new UIChattData { Name="겜잘알" , Chat = "CONTENTCONTENTCONTENTCONTENTCONTENTCONTENTC"},
+                new UIChattData { Name="스마일게이트" , Chat = "윈터데브캠프에 오신걸 환영합니다!"},
+                new UIChattData { Name="이사님" , Chat = "PMP 목표에 맞아요? 그게??"},
+                new UIChattData { Name="용용" , Chat = "용용체를 쓰면 화가풀리는 마법이 생겨요"},
+               new UIChattData { Name="NoPOKER" , Chat = "NoPOKER Is Funny!!!NoPOKER Is Funny!!!NoPOKER Is Funny!!!NoPOKER Is Funny!!!NoPOKER Is Funny!!!NoPOKER Is Funny!!!NoPOKER Is Funny!!!NoPOKER Is Funny!!!"}*/
             };
 
             InitializeTableView();
@@ -30,7 +30,7 @@ namespace UI
             _scroll.SetInsetAndSizeFromParentEdge(RectTransform.Edge.Left, 0, 0);
         }
 
-        public void AddData(UICellData data)
+        public void AddData(UIChattData data)
         {
             TableData.Add(data);
         }

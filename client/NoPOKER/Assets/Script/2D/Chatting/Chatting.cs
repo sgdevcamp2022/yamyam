@@ -1,4 +1,4 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UI;
@@ -28,7 +28,7 @@ public class Chatting : MonoBehaviour
             s_instance = this;
     }
 
-   public void SendChatting(UICellData chattingData)
+   public void SendChatting(UIChattData chattingData)
     {
         switch(_chattMode)
         {
