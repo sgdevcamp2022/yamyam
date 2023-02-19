@@ -15,7 +15,9 @@ docker-compose로 backend를 손쉽게 설치
 
 ## development version docker-compose
 
-nginx가 빠진 버전
+- nginx, gunicorn, daphne가 빠진 버전
+- 인증 서비스 : 8000 포트
+- 로비 서비스 : 8001 포트
 
 #### 빌드
 
@@ -26,12 +28,13 @@ nginx가 빠진 버전
 #### 다시 빌드하기 전에 down 명령어를 꼭 해야 함
 
 ```
-  $ docker-compose up -d --build
+  $ docker-compose down -v
 ```
 
 ## production version docker-compose
 
-development version에서 nginx가 추가 됨
+- development version에서 nginx, gunicorn, daphne가 추가 됨
+- 모든 서비스가 1337 포트로 통신함
 
 #### 빌드
 
