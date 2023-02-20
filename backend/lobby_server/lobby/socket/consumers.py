@@ -163,27 +163,20 @@ class LobbyConsumer(JsonWebsocketConsumer):
     def game_start_send(self, data):
         leader_id = data["leader"]["id"]
         leader = "%s_%s" % (leader_id, data["leader"]["nickname"])
-        invitees = data["invitees"]
+        invitee = data["invitee"]
         caches['default'].set(leader, "game")
-        if len(invitees) == 0:
+        if invitee == {}:
             return
-        for invitee in invitees:
-            temp = "%s_%s" % (invitee["id"], invitee["nickname"])
-            caches['default'].set(temp, "game")
+        temp = "%s_%s" % (invitee["id"], invitee["nickname"])
+        caches['default'].set(temp, "game")
         caches['team'].delete(leader)
-        async_to_sync(self.channel_layer.group_send)(
-            "team_%s" % leader_id,
-            {
-                'type': 'game_start',
-                "leader_id": leader_id,
-            }
+        async_to_sync(self.channel_layer.group_discard)(
+            "team_%s" % leader_id, self.channel_name
         )
 
     def game_exit_send(self, data):
-        players = data["players"]
-        for player in players:
-            temp = "%s_%s" % (player["id"], player["nickname"])
-            caches['default'].set(temp, "")
+        player = data["player"]
+        caches['default'].set("%s_%s" % (player["id"], player["nickname"]), "")
 
     types = {
         'lobby_message': lobby_message_send,
@@ -404,11 +397,6 @@ class LobbyConsumer(JsonWebsocketConsumer):
         self.send_json(event)
 
     def no_invitee(self, event):
-        async_to_sync(self.channel_layer.group_discard)(
-            "team_%s" % event["leader_id"], self.channel_name
-        )
-
-    def game_start(self, event):
         async_to_sync(self.channel_layer.group_discard)(
             "team_%s" % event["leader_id"], self.channel_name
         )
