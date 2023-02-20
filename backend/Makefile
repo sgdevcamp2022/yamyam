@@ -2,6 +2,7 @@
 
 COMPOSE_LOCAL := -f docker-compose.yml
 COMPOSE_PRODUCTION := -f docker-compose.prod.yml
+COMPOSE_ALL_FILE := -f docker-compose.yml -f docker-compose.prod.yml
 
 compose_v2_not_supported = $(shell command docker compose 2> /dev/null)
 ifeq (,$(compose_v2_not_supported))
@@ -33,7 +34,7 @@ cs:             ## collect static backend files made by python
 	$(DOCKER_COMPOSE_COMMAND) ${COMPOSE_PRODUCTION} exec auth python manage.py collectstatic --no-input --clear
 
 down:           ## remove all container
-	$(DOCKER_COMPOSE_COMMAND) ${COMPOSE_PRODUCTION} down -v
+	$(DOCKER_COMPOSE_COMMAND) ${COMPOSE_ALL_FILE} down -v
 
 help:           ## Show this help.
 	@echo "Make Application Docker Images and Containers using Docker-Compose files in 'docker' Dir."
