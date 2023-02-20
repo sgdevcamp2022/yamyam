@@ -15,7 +15,7 @@ public class Chatting : MonoBehaviour
     [SerializeField] AllChattRecycleViewController _allChattingRecycleViewController;
     [SerializeField] TeamChattRecycleViewController _teamChattingRecycleViewController;
     [SerializeField] GameObject _teamChattingUI;
-    LobbyMessageSocketData _MessageData = new LobbyMessageSocketData();
+    DefaultMessageSocketData _MessageData = new DefaultMessageSocketData();
 
     private ChattMode _chattMode = ChattMode.All;
     public bool IsReceiveMessage = false;
@@ -54,13 +54,16 @@ public class Chatting : MonoBehaviour
                 _allChattingRecycleViewController.AddData(new UIChattData { Name = chattingData.Name, Chat = chattingData.Chat } );
                 _allChattingRecycleViewController.UpdateMyData();
                 break;
-            case ChattMode.Team:  
-                _teamChattingRecycleViewController.AddData(chattingData);
+            case ChattMode.Team:
+                _MessageData.TeamMessageSetting(chattingData.Chat);
+                LobbyConnect.Instance.SendTeamChattMessage(_MessageData);
+
+                _teamChattingRecycleViewController.AddData(new UIChattData { Name = chattingData.Name, Chat = chattingData.Chat });
                 _teamChattingRecycleViewController.UpdateMyData();
                 break;
         }
     }
-    public void ReceiveChatting(LobbyMessageSocketData receiveData)
+    public void ReceiveChatting(DefaultMessageSocketData receiveData)
     { 
         _MessageData = receiveData;   
     }

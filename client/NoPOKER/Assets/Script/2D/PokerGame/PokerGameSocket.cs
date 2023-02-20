@@ -94,6 +94,7 @@ public class PokerGameSocket : MonoBehaviour
         Debug.Log("gameRoom ID = " + GameRoomID);
         Dictionary<string, string> headers = new Dictionary<string, string>();
         headers.Add("destination", "/topic/game/" + GameRoomID);
+        headers.Add("id", UserInfo.Instance.UserID.ToString());
         headers.Add("userId", UserInfo.Instance.UserID.ToString());
         headers.Add("nickName", UserInfo.Instance.NickName.ToString());
         StompMessage message = new StompMessage(StompCommand.SUBSCRIBE, "", headers);

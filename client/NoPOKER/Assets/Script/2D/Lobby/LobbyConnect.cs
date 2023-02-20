@@ -23,11 +23,11 @@ public enum LobbySocketType
     game_exit,
     team_list,
     user_leave,
-
+    team_message
 }
 
 
-public class LobbyMessageSocketData {
+public class DefaultMessageSocketData {
 
     public string type;
     public int id;
@@ -37,6 +37,15 @@ public class LobbyMessageSocketData {
     public void LobbyMessageSetting(string message)
     {
         type = "lobby_message";
+        id = UserInfo.Instance.UserID;
+        nickname = UserInfo.Instance.NickName;
+        this.type = type;
+        this.message = message;
+    }
+
+    public void TeamMessageSetting(string message)
+    {
+        type = "team_message";
         id = UserInfo.Instance.UserID;
         nickname = UserInfo.Instance.NickName;
         this.type = type;
@@ -152,11 +161,16 @@ public class LobbyConnect : MonoBehaviour {
             switch (Enum.Parse(typeof(LobbySocketType), _messageType.type))
             {
                 case LobbySocketType.lobby_message:
-                    LobbyMessageSocketData _lobbyData = JsonConvert.DeserializeObject<LobbyMessageSocketData>(e.Data);
+                    DefaultMessageSocketData _lobbyData = JsonConvert.DeserializeObject<DefaultMessageSocketData>(e.Data);
                     Chatting.Instance.ReceiveChatting(_lobbyData);
                     Chatting.Instance.IsReceiveMessage = true;
                     break;
-            case LobbySocketType.user_join:
+                case LobbySocketType.team_message:
+                   // DefaultMessageSocketData _teamChattData = JsonConvert.DeserializeObject<DefaultMessageSocketData>(e.Data);
+                   // Chatting.Instance.ReceiveChatting(_lobbyData);
+                   // Chatting.Instance.IsReceiveMessage = true;
+                    break;
+                case LobbySocketType.user_join:
                 //유저리스트 업데이트. 한명들어온거 반영
                 try
                 {
@@ -196,16 +210,18 @@ public class LobbyConnect : MonoBehaviour {
                     UserList.Instance.IsUserCountChanged = LobbyUserChangeType.Sub;
                     break;
                 case LobbySocketType.leader_exit:
-                    LobbyWindowController.Instance.InActiveTeamWindow();
-                    LobbyWindowController.Instance.InActiveTeamChatWindow();
+                    {
+                        Team.Instance.TeamType = LobbySocketType.leader_exit;
+                        Team.Instance.ChangedRequestState = true;
+                    }
                     break;
                 case LobbySocketType.invitee_exit:
                     TeamSocketData _newTeamData = JsonConvert.DeserializeObject<TeamSocketData>(e.Data);
                     Debug.Log("Length : " + _newTeamData.invitees.Length);
                     if(_newTeamData.invitees.Length == 0 )
                     {
-                        LobbyWindowController.Instance.InActiveTeamWindow();
-                        LobbyWindowController.Instance.InActiveTeamChatWindow();
+                        Team.Instance.TeamType = LobbySocketType.invitee_exit;
+                        Team.Instance.ChangedRequestState = true;
                     }
                     else
                     {
@@ -247,7 +263,7 @@ public class LobbyConnect : MonoBehaviour {
         _lobbySocket.Send(JsonConvert.SerializeObject(sendMessage));
     }
 
-    public void SendAllChattMessage(LobbyMessageSocketData sendMessage)
+    public void SendAllChattMessage(DefaultMessageSocketData sendMessage)
     {
         sendMessage.type = "lobby_message";
         _lobbySocket.Send(JsonConvert.SerializeObject(sendMessage));
@@ -261,7 +277,7 @@ public class LobbyConnect : MonoBehaviour {
     {
         _lobbySocket.Send(JsonConvert.SerializeObject(sendMessage));
     }
-    public void SendTeamChattMessage(LobbyMessageSocketData sendMessage)
+    public void SendTeamChattMessage(DefaultMessageSocketData sendMessage)
     {
         sendMessage.type = "team_message";
         _lobbySocket.Send(JsonConvert.SerializeObject(sendMessage));

@@ -43,6 +43,8 @@ public class Team : MonoBehaviour
                     break;
                 case LobbySocketType.invitee_exit:
                 case LobbySocketType.leader_exit:
+                    LobbyWindowController.Instance.InActiveTeamWindow();
+                    LobbyWindowController.Instance.InActiveTeamChatWindow();
                     break;
             }
             ChangedRequestState = false;
