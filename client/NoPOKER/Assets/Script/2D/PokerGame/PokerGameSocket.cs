@@ -16,6 +16,7 @@ public class PokerGameSocket : MonoBehaviour
     public static PokerGameSocket Instance { get => s_instance; }
     WebSocket _socket;
     private StompMessageParser messageParser = new StompMessageParser();
+    public int GameRoomID;
 
     private void Start()
     {
@@ -34,9 +35,9 @@ public class PokerGameSocket : MonoBehaviour
     {
 
         _socket = new WebSocket("ws://15.165.8.102:8004/poker-ws");
-        _socket.OnMessage += ws_OnMessage; //서버에서 유니티 쪽으로 메세지가 올 경우 실행할 함수를 등록한다.
-        _socket.OnOpen += ws_OnOpen;//서버가 연결된 경우 실행할 함수를 등록한다
-        _socket.OnClose += ws_OnClose;//서버가 닫힌 경우 실행할 함수를 등록한다.
+        _socket.OnMessage += ws_OnMessage; 
+        _socket.OnOpen += ws_OnOpen;
+        _socket.OnClose += ws_OnClose;
         _socket.Connect();
     }
     private void SendStompConnect()
@@ -75,22 +76,28 @@ public class PokerGameSocket : MonoBehaviour
 
     private void ws_OnMessage(object sender, MessageEventArgs e)
     {
-        StompMessage message = messageParser.Deserialize(e.Data);
+        Debug.Log(e.Data);
 
+        StompMessage message = messageParser.Deserialize(e.Data);
+        Debug.Log("command: " + message.Command);
+        Debug.Log("headers: " + message.Headers);
+        Debug.Log("body: " + message.Body);
         if (message.Command == StompCommand.CONNECTED)
         {
             Debug.Log("게임서버 연결되었습니다~");
 
-            if (message.Command == StompCommand.CONNECTED)
-            {/*
-                Dictionary<string, string> headers = new Dictionary<string, string>();
-                headers.Add("destination", "/topic/match/" + message.Headers.GetValueOrDefault("user-name"));
-                headers.Add("id", "sub0");
-                StompMessage subscribeMessage = new StompMessage(StompCommand.SUBSCRIBE, "", headers);
-                _socket.Send(messageParser.Serialize(subscribeMessage));*/
-
-            }
-
+                SendStompSubscribe();
         }
+    }
+    private void SendStompSubscribe()
+    {
+        Debug.Log("gameRoom ID = " + GameRoomID);
+        Dictionary<string, string> headers = new Dictionary<string, string>();
+        headers.Add("destination", "/topic/game/" + GameRoomID);
+        headers.Add("userId", UserInfo.Instance.UserID.ToString());
+        headers.Add("nickName", UserInfo.Instance.NickName.ToString());
+        StompMessage message = new StompMessage(StompCommand.SUBSCRIBE, "", headers);
+
+        _socket.Send(messageParser.Serialize(message));
     }
 }

@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using TMPro;
 using System.Text;
 
@@ -25,7 +25,7 @@ public class LobbyChoiceAlert : MonoBehaviour
     {
         _alertMessage = message;
         _stingBuilder.Clear();
-        _stingBuilder.Append(UserInfo.Instance.NickName);
+        _stingBuilder.Append(who);
         _stingBuilder.Append(_twoAlertMessage[(int)message]);
         _alertContent.text = _stingBuilder.ToString();
     }
@@ -36,7 +36,9 @@ public class LobbyChoiceAlert : MonoBehaviour
         switch(_alertMessage)
         {
             case LobbyChoiceAlertMessage.InviteTeam:
-                Team.Instance.AcceptedInvite(); 
+                Team.Instance._inviteRequestData.type = "invite_accept";
+                LobbyConnect.Instance.SendInviteAccept(Team.Instance._inviteRequestData);
+               // Team.Instance.AcceptedInvite(); 
                 break;
         }
         LobbyWindowController.Instance.InActiveChoiceAlertWindow();

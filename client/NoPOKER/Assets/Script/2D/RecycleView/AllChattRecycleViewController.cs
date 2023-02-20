@@ -1,3 +1,4 @@
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
@@ -16,13 +17,7 @@ namespace UI
         public void LoadAllChattingData()
         {
             TableData = new List<UIChattData>()
-            {/*
-                new UIChattData { Name="" , Chat = "한글한글한글한글한글한글한글한글한글한글한글한글한글한글한글한글한글"},
-                new UIChattData { Name="겜잘알" , Chat = "CONTENTCONTENTCONTENTCONTENTCONTENTCONTENTC"},
-                new UIChattData { Name="스마일게이트" , Chat = "윈터데브캠프에 오신걸 환영합니다!"},
-                new UIChattData { Name="이사님" , Chat = "PMP 목표에 맞아요? 그게??"},
-                new UIChattData { Name="용용" , Chat = "용용체를 쓰면 화가풀리는 마법이 생겨요"},
-               new UIChattData { Name="NoPOKER" , Chat = "NoPOKER Is Funny!!!NoPOKER Is Funny!!!NoPOKER Is Funny!!!NoPOKER Is Funny!!!NoPOKER Is Funny!!!NoPOKER Is Funny!!!NoPOKER Is Funny!!!NoPOKER Is Funny!!!"}*/
+            {
             };
 
             InitializeTableView();
@@ -36,8 +31,8 @@ namespace UI
         }
         public void UpdateMyData() //본인이 쓴 채팅이 업데이트 되도록.
         {
-          
-            InitializeTableView();        
+           
+            InitializeTableView();
             _scrollRect.verticalNormalizedPosition = 0.0f;
             OnScrollPoschanged(new Vector2(0f, -0.01f));
         }
@@ -51,7 +46,6 @@ namespace UI
             CachedScrollRect.content.anchoredPosition = new Vector2(0f, _currentContentPos);
             InitializeTableView();
             OnScrollPoschanged(new Vector2(0f, -0.01f));
-            //_scroll.SetInsetAndSizeFromParentEdge(RectTransform.Edge.Left, 0, 0);
         }
 
         protected override void Start()
@@ -75,7 +69,7 @@ namespace UI
         }
         private int CheckEnglishByte(string text)
         {
-            int _byteCount = System.Text.Encoding.Default.GetByteCount(text); ;
+            int _byteCount = System.Text.Encoding.Default.GetByteCount(text);
             for (int i = 0; i < text.Length; i++)
             {
                 if ('a' <= text[i] && text[i] <= 'z' ||
