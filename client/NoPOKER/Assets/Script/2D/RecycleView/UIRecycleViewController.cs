@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+using System;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -21,7 +22,7 @@ namespace UI
 
         public RectTransform CachedRectTransform => GetComponent<RectTransform>();
         public ScrollRect CachedScrollRect => GetComponent<ScrollRect>();
-        public Vector2 SizeDelta;
+        //public Vector2 SizeDelta;
 
         protected virtual void Start()
         {
@@ -34,7 +35,7 @@ namespace UI
             UpdateScrollViewSize();
             UpdateVisibleRect();
 
-            if(_cells.Count <1)
+            if (_cells.Count <1)
             {
                 Vector2 cellTop = new Vector2(0f, -_padding.top);
                 for(int i=0;i<TableData.Count; i++)
@@ -85,12 +86,10 @@ namespace UI
                     _contentHeight += _spacingHeight;
                 }
             }
+            Vector2 _sizeDelta = CachedScrollRect.content.sizeDelta;
+            _sizeDelta.y = _padding.top + _contentHeight + _padding.bottom;
 
-            SizeDelta = CachedScrollRect.content.sizeDelta;
-            //Vector2 _sizeDelta = new Vector2(0f, 0f);
-            SizeDelta.y = _padding.top + _contentHeight + _padding.bottom;
-           
-            CachedScrollRect.content.sizeDelta = SizeDelta;
+            CachedScrollRect.content.sizeDelta = _sizeDelta;
         }
 
         private UIRecycleViewCell<T> CreateCellForIndex(int index)

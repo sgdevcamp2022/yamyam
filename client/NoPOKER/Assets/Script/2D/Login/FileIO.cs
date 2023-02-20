@@ -4,9 +4,9 @@ using UnityEngine;
 using System.IO;
 public class FileIO : MonoBehaviour
 {
-    static string _filePath = "Assets/Script/Common/Secret/secret.txt";
-    static string _fileRePath = "Assets/Script/Common/Secret/secretR.txt";
-    static string _filekeyPath = "Assets/Script/Common/secretK.txt";
+    static string _filePath = Application.streamingAssetsPath + "/Secret/secret.txt";//"Assets/Script/Common/Secret/secret.txt";
+    static string _fileRePath = Application.streamingAssetsPath + "/Secret/secretR.txt";//"Assets/Script/Common/Secret/secretR.txt";
+    static string _filekeyPath = Application.streamingAssetsPath + "/secretK.txt";// "Assets/Script/Common/secretK.txt";
     static StreamWriter _sw;
     static private StreamReader _fileReader;
     static string _content;
@@ -45,6 +45,8 @@ public class FileIO : MonoBehaviour
 
     public static byte[] GetKeyFile()
     {
+        Debug.Log("STREAM PATH : " + Application.streamingAssetsPath);
+        Debug.Log(_filekeyPath);
         _fileReader = new StreamReader(_filekeyPath);
         _content = _fileReader.ReadLine();
         _fileReader.Close();

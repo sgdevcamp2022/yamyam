@@ -1,4 +1,4 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -92,10 +92,14 @@ public class PokerGameManager : MonoBehaviour
     {
         if (s_instance == null)
             s_instance = this;
+
+        DontDestroyOnLoad(this);
     }
 
     public void SettingGame()
     {
+
+
         _playerNames.Add("냠냠냠냠냠냠");
         _playerNames.Add("얌얌");
         _playerNames.Add("쩝쩝");

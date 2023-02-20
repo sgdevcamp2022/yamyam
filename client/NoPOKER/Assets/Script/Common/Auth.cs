@@ -30,7 +30,10 @@ public class Auth : MonoBehaviour
                 Debug.Log("AccessToken 인증실패 ㅠ");
                 return await AuthRefreshToken();
             default:
-                Debug.Log("AccessToken 인증실패 ㅠ");
+                
+                Debug.Log("AccessToken 401말고 다른 오류로 인한 인증실패 ㅠ");
+                Debug.Log("ERRORCODE : " + (int)_response.StatusCode);
+                Debug.Log("RESPONSE : " + _response);
                 return await AuthRefreshToken();
         }
         /*
@@ -72,7 +75,9 @@ public class Auth : MonoBehaviour
                 Debug.Log("RefreshToken 인증실패!");
                 return false;
             default:
-                Debug.Log("RefreshToken 인증실패 ㅠ");
+                Debug.Log("RefreshToken 401말고 다른 오류로 인한 인증실패 ㅠ");
+                Debug.Log("ERRORCODE : " + (int)_response.StatusCode);
+                Debug.Log("RESPONSE : " + _response);
                 return false;
         }
         /*

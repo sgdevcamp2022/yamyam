@@ -10,6 +10,10 @@ public class UserInfo : MonoBehaviour
     public string NickName { get => _userNickName; }
     private int _userID;
     public int UserID { get => _userID; }
+    private bool _isLeader = true;
+    public bool IsLeader { get => _isLeader; }
+    private LobbyUserSocketData _userSocketData;
+    public LobbyUserSocketData UserSocketData { get => _userSocketData; }
     private void Start()
     {
         Init();
@@ -27,5 +31,12 @@ public class UserInfo : MonoBehaviour
     {
         _userID = id;
         _userNickName = nickName;
+
+        _userSocketData = new LobbyUserSocketData(id, nickName);
+    }
+
+    public void SetLeaderState(bool state)
+    {
+        _isLeader = state;
     }
 }

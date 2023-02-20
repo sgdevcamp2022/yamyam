@@ -100,5 +100,6 @@ public class Login : MonoBehaviour
         Debug.Log("AES 복호화 : " + _AccessToken);
         Debug.Log("AES 복호화 : " + _RefreshToken);*/
         GameManager.Instance.ChangeScene(Scenes.LobbyScene);
+        //LobbyConnect.Instance.LobbyServerConnect();
     }
 }
