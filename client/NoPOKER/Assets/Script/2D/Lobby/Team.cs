@@ -13,10 +13,10 @@ public class Team : MonoBehaviour
     public bool ChangedRequestState = false;
     public LobbySocketType TeamType = LobbySocketType.None;
     private TeamSocketData _teamData = new TeamSocketData();
-    LobbyUserSocketData _leader;
-    public LobbyUserSocketData LeaderData { get => _leader; }
-    LobbyUserSocketData[] _invitees = new LobbyUserSocketData[4];
-    public LobbyUserSocketData[] TeamMemberData { get => _invitees; }
+    UserSocketData _leader;
+    public UserSocketData LeaderData { get => _leader; }
+    UserSocketData[] _invitees = new UserSocketData[4];
+    public UserSocketData[] TeamMemberData { get => _invitees; }
     private void Start()
     {
         Init();
@@ -51,9 +51,9 @@ public class Team : MonoBehaviour
         }
     }
 
-    public void SendInviteRequest(LobbyUserSocketData InviteUserData)
+    public void SendInviteRequest(UserSocketData InviteUserData)
     {
-        LobbyUserSocketData inviter = new LobbyUserSocketData(UserInfo.Instance.UserID, UserInfo.Instance.NickName);
+        UserSocketData inviter = new UserSocketData(UserInfo.Instance.UserID, UserInfo.Instance.NickName);
         _inviteRequestData.SetInviteRequestSocketData(inviter, InviteUserData);
         LobbyConnect.Instance.SendInviteRequest(_inviteRequestData);
     }
@@ -77,9 +77,9 @@ public class Team : MonoBehaviour
 
     public void SetTeamData(TeamSocketData receivedData)
     {
-        _invitees = new LobbyUserSocketData[4];
+        _invitees = new UserSocketData[4];
            _teamData = receivedData;
-        _leader = new LobbyUserSocketData(receivedData.leader.id, receivedData.leader.nickname) ;
+        _leader = new UserSocketData(receivedData.leader.id, receivedData.leader.nickname) ;
         _invitees = receivedData.invitees;   
 
         if(_leader.id != UserInfo.Instance.UserID)

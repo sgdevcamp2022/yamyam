@@ -30,6 +30,7 @@ public enum LobbySocketType
 public class DefaultMessageSocketData {
 
     public string type;
+    public int leader_id;
     public int id;
     public string nickname;
     public string message;
@@ -46,6 +47,7 @@ public class DefaultMessageSocketData {
     public void TeamMessageSetting(string message)
     {
         type = "team_message";
+        leader_id = Team.Instance.LeaderData.id;
         id = UserInfo.Instance.UserID;
         nickname = UserInfo.Instance.NickName;
         this.type = type;
@@ -55,14 +57,14 @@ public class DefaultMessageSocketData {
 
 public class LobbyUserListSocketData {
     public string type;
-    public LobbyUserSocketData[] users;
+    public UserSocketData[] users;
 }
 
-public class LobbyUserSocketData {
+public class UserSocketData {
     public int id;
     public string nickname;
 
-    public LobbyUserSocketData(int id, string nickname)
+    public UserSocketData(int id, string nickname)
     {
         this.id = id;
         this.nickname = nickname;
@@ -71,7 +73,7 @@ public class LobbyUserSocketData {
 
 public class DefaultUserSocketData {
     public string type;
-   public LobbyUserSocketData user;
+   public UserSocketData user;
 }
 
 
@@ -81,10 +83,10 @@ public class LobbyMessageType {
 
 public class InviteRequestSocketData {
     public string type = "invite_request";
-    public LobbyUserSocketData inviter;
-    public LobbyUserSocketData invitee;
+    public UserSocketData inviter;
+    public UserSocketData invitee;
 
-    public void SetInviteRequestSocketData(LobbyUserSocketData inviter , LobbyUserSocketData invitee)
+    public void SetInviteRequestSocketData(UserSocketData inviter , UserSocketData invitee)
     {
         this.inviter = inviter;
         this.invitee = invitee;
@@ -93,15 +95,15 @@ public class InviteRequestSocketData {
 
 public class TeamSocketData {
     public string type;
-    public LobbyUserSocketData leader;
-    public LobbyUserSocketData[] invitees;
+    public UserSocketData leader;
+    public UserSocketData[] invitees;
 }
 
 public class TeamMemberExitSocketData {
     public string type;
-    public LobbyUserSocketData requester;
-    public LobbyUserSocketData leader;
-    public LobbyUserSocketData[] invitees;
+    public UserSocketData requester;
+    public UserSocketData leader;
+    public UserSocketData[] invitees;
 }
 
 public class LobbyConnect : MonoBehaviour {
@@ -109,6 +111,8 @@ public class LobbyConnect : MonoBehaviour {
     public static LobbyConnect Instance { get => s_instance; }
     WebSocket _lobbySocket;
     StringBuilder _urlBuilder = new StringBuilder();
+    LobbyUserListSocketData _userListData;
+    public LobbyUserListSocketData UserListData { get => _userListData; }
     private void Awake()
     {
         Init();
@@ -163,12 +167,14 @@ public class LobbyConnect : MonoBehaviour {
                 case LobbySocketType.lobby_message:
                     DefaultMessageSocketData _lobbyData = JsonConvert.DeserializeObject<DefaultMessageSocketData>(e.Data);
                     Chatting.Instance.ReceiveChatting(_lobbyData);
+                    Chatting.Instance.SetChattingMode(ChattMode.All);
                     Chatting.Instance.IsReceiveMessage = true;
                     break;
                 case LobbySocketType.team_message:
-                   // DefaultMessageSocketData _teamChattData = JsonConvert.DeserializeObject<DefaultMessageSocketData>(e.Data);
-                   // Chatting.Instance.ReceiveChatting(_lobbyData);
-                   // Chatting.Instance.IsReceiveMessage = true;
+                    DefaultMessageSocketData _teamChattData = JsonConvert.DeserializeObject<DefaultMessageSocketData>(e.Data);
+                    Chatting.Instance.ReceiveChatting(_teamChattData);
+                    Chatting.Instance.SetChattingMode(ChattMode.Team);
+                    Chatting.Instance.IsReceiveMessage = true;
                     break;
                 case LobbySocketType.user_join:
                 //유저리스트 업데이트. 한명들어온거 반영
@@ -185,7 +191,7 @@ public class LobbyConnect : MonoBehaviour {
                 }
                 break;
                 case LobbySocketType.user_list:
-                    LobbyUserListSocketData _userListData = JsonConvert.DeserializeObject<LobbyUserListSocketData>(e.Data);
+                   _userListData = JsonConvert.DeserializeObject<LobbyUserListSocketData>(e.Data);
                     Debug.Log(_userListData);
                     UserList.Instance.SetUserList(_userListData);
                     UserList.Instance.IsUserCountChanged = LobbyUserChangeType.Setting;
@@ -280,6 +286,7 @@ public class LobbyConnect : MonoBehaviour {
     public void SendTeamChattMessage(DefaultMessageSocketData sendMessage)
     {
         sendMessage.type = "team_message";
+        sendMessage.leader_id = Team.Instance.LeaderData.id;
         _lobbySocket.Send(JsonConvert.SerializeObject(sendMessage));
     }
 }

@@ -34,12 +34,28 @@ public class Chatting : MonoBehaviour
     {
         if(IsReceiveMessage)
         {
-            if (_MessageData.id != UserInfo.Instance.UserID)
+            switch(_chattMode)
             {
-                _allChattingRecycleViewController.AddData(new UIChattData { Name = _MessageData.nickname, Chat = _MessageData.message });
-               _allChattingRecycleViewController.UpdateData();
+                case ChattMode.All:
+                    if (_MessageData.id != UserInfo.Instance.UserID)
+                    {
+                        _allChattingRecycleViewController.AddData(new UIChattData { Name = _MessageData.nickname, Chat = _MessageData.message });
+                        _allChattingRecycleViewController.UpdateData();
+                    }
+                    IsReceiveMessage = false;
+                    break;
+
+                case ChattMode.Team:
+                    if (_MessageData.id != UserInfo.Instance.UserID)
+                    {
+                        _teamChattingRecycleViewController.AddData(new UIChattData { Name = _MessageData.nickname, Chat = _MessageData.message });
+                        _teamChattingRecycleViewController.UpdateData();
+                    }
+                    IsReceiveMessage = false;
+                    break;
+                    break;
             }
-            IsReceiveMessage = false;
+           
         }
     }
 

@@ -26,7 +26,7 @@ namespace UI
         public void OnClickedButton()
         {
             if(UserInfo.Instance.IsLeader)
-            Team.Instance.SendInviteRequest(new LobbyUserSocketData(_data.Id, _data.Name));
+            Team.Instance.SendInviteRequest(new UserSocketData(_data.Id, _data.Name));
         }
     }
 }

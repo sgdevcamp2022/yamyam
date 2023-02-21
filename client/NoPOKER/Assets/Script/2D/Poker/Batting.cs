@@ -72,7 +72,7 @@ public class Batting : MonoBehaviour
         _uiBatting.ActiveDieView(PokerGameManager.Instance.NowTurn);
         PokerGameManager.Instance.UpDieNum();
         PersonSound.Instance.PlayDieSound();
-        PokerGameManager.Instance.ChangePlayerState(PokerState.die);
+        PokerGameManager.Instance.ChangePlayerState(BattingState.die);
         PokerGameManager.Instance.FinishTurn();
     }
 
@@ -111,7 +111,7 @@ public class Batting : MonoBehaviour
     {
         for (int i = 0; i < PokerGameManager.Instance.PeopleNum; i++)
         {
-            if (PokerGameManager.Instance.PlayerOrder[i].GetState() != PokerState.die)
+            if (PokerGameManager.Instance.PlayerOrder[i].GetState() != BattingState.die)
             {
                 PokerGameManager.Instance.PlayerOrder[i].AddChip(_roundBattingChip);
                 //Reset 베팅 칩
