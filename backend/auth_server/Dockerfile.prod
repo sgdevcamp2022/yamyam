@@ -33,6 +33,8 @@ ENV HOME=/home/backend
 ENV AUTH_HOME=/home/backend/auth
 RUN mkdir $AUTH_HOME
 RUN mkdir $AUTH_HOME/staticfiles
+ENV AUTH_LOG=/var/log/lobby
+RUN mkdir $AUTH_LOG
 WORKDIR $AUTH_HOME
 
 RUN apk update && apk add libpq
@@ -47,6 +49,7 @@ RUN chmod +x $AUTH_HOME/entrypoint.prod.sh
 COPY . $AUTH_HOME
 
 RUN chown -R backend:backend $AUTH_HOME
+RUN chown -R backend:backend $AUTH_LOG
 
 USER backend
 
