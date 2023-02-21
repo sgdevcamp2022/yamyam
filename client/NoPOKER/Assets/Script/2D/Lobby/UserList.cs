@@ -14,20 +14,26 @@ public class UserList : MonoBehaviour
 {
     private static UserList s_instance = null;
     public static UserList Instance { get => s_instance; }
-    List<LobbyUserSocketData> _users = new List<LobbyUserSocketData>();
+    List<UserSocketData> _users = new List<UserSocketData>();
     [SerializeField] AllUserRecycleViewController _allUserRecycleViewController = new AllUserRecycleViewController();
     LobbyUserListSocketData _userList = new LobbyUserListSocketData();
-    LobbyUserSocketData _user;
+    UserSocketData _user;
     public LobbyUserChangeType IsUserCountChanged = LobbyUserChangeType.None;
-    void Start()
+
+
+    private void Awake()
     {
-        Init();
+       StartCoroutine(Init());
     }
 
-    public void Init()
+    IEnumerator  Init()
     {
+        yield return null;
         if (s_instance == null)
             s_instance = this;
+
+        _userList = LobbyConnect.Instance.UserListData;
+      
     }
     private void Update()
     {
@@ -36,10 +42,10 @@ public class UserList : MonoBehaviour
             switch(IsUserCountChanged)
             {
                 case LobbyUserChangeType.Setting:
-                    _allUserRecycleViewController.SetDatas(_userList.users);
+                    StartCoroutine(SetDatas());
                     break;
                 case LobbyUserChangeType.Add:
-                    _allUserRecycleViewController.AddData(new LobbyUserSocketData(_user.id, _user.nickname));
+                    _allUserRecycleViewController.AddData(new UserSocketData(_user.id, _user.nickname));
                     break;
                 case LobbyUserChangeType.Sub:
                     _allUserRecycleViewController.DeleteData(_user);
@@ -50,11 +56,18 @@ public class UserList : MonoBehaviour
         }
     }
 
+
+    IEnumerator SetDatas()
+    {
+        yield return new WaitUntil(() => _userList.users != null);
+        _allUserRecycleViewController.SetDatas(_userList.users);
+    }
+
     public void JoinUser(DefaultUserSocketData newData) //한명 더 들어왔을 때
     {
 
         Debug.Log("JoinUser userNickName = " + newData.user.nickname);
-        _user =  new LobbyUserSocketData(newData.user.id, newData.user.nickname);
+        _user =  new UserSocketData(newData.user.id, newData.user.nickname);
     }
     
      public void SetUserList(LobbyUserListSocketData userList)
@@ -64,7 +77,7 @@ public class UserList : MonoBehaviour
 
     public void LeaveUser(DefaultUserSocketData leaveData) //한명이 빠졌을 때
     {
-        _user = new LobbyUserSocketData(leaveData.user.id, leaveData.user.nickname);
+        _user = new UserSocketData(leaveData.user.id, leaveData.user.nickname);
     }
  
 

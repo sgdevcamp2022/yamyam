@@ -2,11 +2,17 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public enum PokerState
+public enum BattingState
 {
     die,
     batting,
-    call
+    call,
+}
+
+public enum PokerGameState {
+
+    FOCUS,
+    RRESULT
 }
 
 public class PokerPlayer
@@ -14,7 +20,7 @@ public class PokerPlayer
     public int _id;
     public string _name;
     int _chip;
-    PokerState _state = PokerState.batting;
+    BattingState _state = BattingState.batting;
 
     public PokerPlayer(int id, string name, int chip)
     {
@@ -23,11 +29,11 @@ public class PokerPlayer
         _chip = chip;
     }
 
-    public void SetState(PokerState state)
+    public void SetState(BattingState state)
     {
         _state = state;
     }
-    public PokerState GetState()
+    public BattingState GetState()
     {
         return _state;
     }
@@ -58,9 +64,10 @@ public class PokerGameManager : MonoBehaviour
     public bool IsBattingFinish { get => _isBattingFinish; }
     public List<PokerPlayer> PlayerOrder = new List<PokerPlayer>();
     private List<string> _playerNames = new List<string>();
+    
     public float TurnTime { get => _turnTiem; }
     private int _order = 4;
-    public int NowTurn { get => _order % _peopleNum; }
+    public int NowTurn;
     private int _gameProcessNum = 0;
     private int _distributeNum = 0;
     public int DistributeNum { get => _distributeNum; }
@@ -73,6 +80,26 @@ public class PokerGameManager : MonoBehaviour
     private int _startPoint;
     private int _callNum = 0;
     private int _alivePeople;
+    public bool ReceiveSocketFlag = false;
+    
+    public PokerGameState _pokerGameState;
+
+
+    private void Update()
+    {
+        if(ReceiveSocketFlag)
+        {
+            switch(_pokerGameState)
+            {
+                case PokerGameState.FOCUS:
+                    _turn.StartTurn(NowTurn);
+                    break;
+
+            }
+
+            ReceiveSocketFlag = false;
+        }
+    }
 
     public void UpCallNum()
     {
@@ -103,7 +130,9 @@ public class PokerGameManager : MonoBehaviour
     private void Start()
     {
         SettingGame();
-        _turn.StartTurn(NowTurn);
+       // _turn.StartTurn(NowTurn);
+       // _turn.StartTurn(_order% _peopleNum);
+
     }
 
 
@@ -112,29 +141,17 @@ public class PokerGameManager : MonoBehaviour
         if (s_instance == null)
             s_instance = this;
 
+        _peopleNum = PokerGameSocket.Instance.GetPokerGamePeopleNum;
         DontDestroyOnLoad(this);
     }
 
     public void SettingGame()
     {
-
-        /*
-        _playerNames.Add("냠냠냠냠냠냠");
-        _playerNames.Add("얌얌");
-        _playerNames.Add("쩝쩝");
-        _playerNames.Add("뇸뇸");
-
-
-        for (int i = 0; i < PeopleNum; i++)
-        {
-            PlayerOrder.Add(new PokerPlayer(_playerNames[i],90));
-        }    */
         _alivePeople = _peopleNum;
         GetPlayerOrder();
-        SetPlayerPosition();
+        SetPlayerPosition();                   
 
         Batting.Instance.SettingRoundBatting(_peopleNum * 10);
-
         _card.DistributeCard();
     }
 
@@ -144,14 +161,19 @@ public class PokerGameManager : MonoBehaviour
 
     }*/
 
-       public void GetPlayerOrder() //�÷��̾� �� ������
+    public void GetPlayerOrder() //�÷��̾� �� ������
     {
-        //test : 4���̶�� ���
-        PlayerOrder.Add(new PokerPlayer(1, "�ȳȳȳ�",90));
-        PlayerOrder.Add(new PokerPlayer(2, "����",90));
-        PlayerOrder.Add(new PokerPlayer(3, "��農",90));
-        PlayerOrder.Add(new PokerPlayer(4, "�����",90));
+        for(int i=0;i<PokerGameSocket.Instance.GetPokerGamePeopleNum;i++)
+        {
+            PlayerOrder.Add(new PokerPlayer(
+                PokerGameSocket.Instance.GetGamePlayersList[i].id,
+                PokerGameSocket.Instance.GetGamePlayersList[i].nickname,
+                PokerGameSocket.Instance.GetGamePlayersList[i].currentChip)
+                );
+        }
     }
+
+
 
     public void FinishTurn()
     {
@@ -173,7 +195,7 @@ public class PokerGameManager : MonoBehaviour
             _isBattingFinish = true;
             _turn.ClearTurnUI();
             Debug.Log("Finish Turn");
-            _order++;
+          //  _order++;
             if (NowTurn == _startPoint-1)
             {
                 _gameProcessNum++;
@@ -199,7 +221,7 @@ public class PokerGameManager : MonoBehaviour
                 */
                 _isBattingFinish = false;
                 //따로 진행되는게 없다면 다음 턴으로 진행할 수 있도록함.
-                if (PlayerOrder[NowTurn].GetState() == PokerState.die)
+                if (PlayerOrder[NowTurn].GetState() == BattingState.die)
                 {
                     FinishTurn();
                 }
@@ -242,20 +264,11 @@ public class PokerGameManager : MonoBehaviour
 
     public void SetPlayerPosition()
     {
-        /*  ����
-         *  1. �޾ƿ� ���� �� �̸��� ����ִ��� ã��, ��(ex. 0)�� ����ϱ�. , _playerNames.Add(���̸�)
-            2. �� ����+1���� (1~) ������� ����  for��� ����.
-            3. �� ����� _playerNames.Add ��.
-            4. �� 0���� �� ���ڱ��� for��� ����.
-            5. �� ����� _playerNames.Add ��.
-            �׷�, ����0���� �ڸ��� ���, ������ ����� �׵ڷ� ����.
-            �̷��� �ڸ���ġ�� �ϵ�����.
-            �׷��� �� 2���� ����Ʈ�� ���.
-            �Ѱ���, ���� �÷��̾� ��  PokerOrder
-            �ٸ� �Ѱ��� , ���� �߽���� �� ��ġ��. playerNames
-         */
+       
         FindMyName();
-        if (_myOrder != _peopleNum - 1) //���� ���� �� �ƴ϶��
+
+        
+        if (_myOrder != _peopleNum - 1) 
         {
             for (int i = _myOrder + 1; i < _peopleNum; i++)
             {
@@ -277,7 +290,7 @@ public class PokerGameManager : MonoBehaviour
             }
             
         }
-        _order = (_peopleNum + _startPoint - 1);
+      //  _order = (_peopleNum + _startPoint - 1);
 
 
         for (int i = 0; i < _playerNames.Count; i++)
@@ -313,7 +326,7 @@ public class PokerGameManager : MonoBehaviour
         _turn.StartTurn(NowTurn);
     }
 
-    public void ChangePlayerState(PokerState state)
+    public void ChangePlayerState(BattingState state)
     {
         PlayerOrder[NowTurn].SetState(state);
     }

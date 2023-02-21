@@ -15,7 +15,7 @@ public class Chatting : MonoBehaviour
     [SerializeField] AllChattRecycleViewController _allChattingRecycleViewController;
     [SerializeField] TeamChattRecycleViewController _teamChattingRecycleViewController;
     [SerializeField] GameObject _teamChattingUI;
-    LobbyMessageSocketData _MessageData = new LobbyMessageSocketData();
+    DefaultMessageSocketData _MessageData = new DefaultMessageSocketData();
 
     private ChattMode _chattMode = ChattMode.All;
     public bool IsReceiveMessage = false;
@@ -34,12 +34,28 @@ public class Chatting : MonoBehaviour
     {
         if(IsReceiveMessage)
         {
-            if (_MessageData.id != UserInfo.Instance.UserID)
+            switch(_chattMode)
             {
-                _allChattingRecycleViewController.AddData(new UIChattData { Name = _MessageData.nickname, Chat = _MessageData.message });
-               _allChattingRecycleViewController.UpdateData();
+                case ChattMode.All:
+                    if (_MessageData.id != UserInfo.Instance.UserID)
+                    {
+                        _allChattingRecycleViewController.AddData(new UIChattData { Name = _MessageData.nickname, Chat = _MessageData.message });
+                        _allChattingRecycleViewController.UpdateData();
+                    }
+                    IsReceiveMessage = false;
+                    break;
+
+                case ChattMode.Team:
+                    if (_MessageData.id != UserInfo.Instance.UserID)
+                    {
+                        _teamChattingRecycleViewController.AddData(new UIChattData { Name = _MessageData.nickname, Chat = _MessageData.message });
+                        _teamChattingRecycleViewController.UpdateData();
+                    }
+                    IsReceiveMessage = false;
+                    break;
+                    break;
             }
-            IsReceiveMessage = false;
+           
         }
     }
 
@@ -54,13 +70,16 @@ public class Chatting : MonoBehaviour
                 _allChattingRecycleViewController.AddData(new UIChattData { Name = chattingData.Name, Chat = chattingData.Chat } );
                 _allChattingRecycleViewController.UpdateMyData();
                 break;
-            case ChattMode.Team:  
-                _teamChattingRecycleViewController.AddData(chattingData);
+            case ChattMode.Team:
+                _MessageData.TeamMessageSetting(chattingData.Chat);
+                LobbyConnect.Instance.SendTeamChattMessage(_MessageData);
+
+                _teamChattingRecycleViewController.AddData(new UIChattData { Name = chattingData.Name, Chat = chattingData.Chat });
                 _teamChattingRecycleViewController.UpdateMyData();
                 break;
         }
     }
-    public void ReceiveChatting(LobbyMessageSocketData receiveData)
+    public void ReceiveChatting(DefaultMessageSocketData receiveData)
     { 
         _MessageData = receiveData;   
     }

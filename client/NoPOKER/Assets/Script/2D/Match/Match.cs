@@ -28,14 +28,29 @@ public class MatchSendData
 
 public class Match : MonoBehaviour
 {
+    private static Match s_instance = null;
+    public static Match Instance { get => s_instance; }
+
     [SerializeField] private List<GameObject> _loadingObject = new List<GameObject>();
     private IEnumerator _loadingCoroutine;
     private IEnumerator _loadingUICoroutine;
 
     public WebSocket _socket = null;
     private StringBuilder _matchType = new StringBuilder();
+    public StringBuilder GetMatchType { get => _matchType; }
     private string username = "";
     private StompMessageParser messageParser = new StompMessageParser();
+
+    private void Start()
+    {
+        Init();
+    }
+
+    private void Init()
+    {
+        if (s_instance == null)
+            s_instance = this;
+    }
 
     public void SetMatch2()
     {

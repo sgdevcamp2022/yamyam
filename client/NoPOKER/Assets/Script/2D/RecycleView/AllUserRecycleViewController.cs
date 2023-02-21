@@ -14,10 +14,12 @@ namespace UI
         float _preContentHeight;
         float _currentContentPos;
         private float _changedHeight;
-        public bool IsChangedUserList = false;
+        public bool IsChangedUserList = false;       
 
         public void LoadAllChattingData()
         {
+            //SetDatas(UserList.Instance..users);
+
             TableData = new List<UICellUserData>()
             {
               
@@ -30,16 +32,16 @@ namespace UI
         }
 
 
-        public void SetDatas(LobbyUserSocketData[] users)
-        {
+        public void SetDatas(UserSocketData[] users)
+        {/*
             for(int i=0;i<users.Length;i++)
             {
                 TableData.Add(new UICellUserData {Id=users[i].id , Name = users[i].nickname, Invite = true});
             }
-            UpdateData();
+            UpdateData();*/
         }
 
-        public void AddData(LobbyUserSocketData user)
+        public void AddData(UserSocketData user)
         {
             Debug.Log("AddData userNickName = " +user.nickname);
             if (user.id != UserInfo.Instance.UserID)
@@ -49,7 +51,7 @@ namespace UI
             UpdateData();
         }
 
-        public void DeleteData(LobbyUserSocketData user)
+        public void DeleteData(UserSocketData user)
         {
             Debug.Log("Now TableData Count = " + TableData.Count);
             for(int i=0;i< TableData.Count;i++)
@@ -89,6 +91,7 @@ namespace UI
         {
             base.Start();
             LoadAllChattingData();
+
         }
     }
 }

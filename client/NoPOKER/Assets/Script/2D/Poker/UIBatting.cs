@@ -104,7 +104,7 @@ public class UIBatting : MonoBehaviour
     public void ActiveDieView(int who)
     {       
         _dieView[who].SetActive(true);
-        PokerGameManager.Instance.PlayerOrder[who].SetState(PokerState.die);
+        PokerGameManager.Instance.PlayerOrder[who].SetState(BattingState.die);
     }
 
     public void SetPlayerBattingResult(int who, string text)

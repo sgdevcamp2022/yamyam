@@ -1,4 +1,4 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -14,15 +14,15 @@ public class Card : MonoBehaviour
 
         for(int i=0;i<PokerGameManager.Instance.PeopleNum; i++)
         {
-            _playerCards[i] = Random.Range(0, 10);
+            _playerCards[i] = PokerGameSocket.Instance.GetGamePlayersList[i].card;
         }
         switch(PokerGameManager.Instance.PeopleNum)
         {
             case 2:
-                _uiCard.SettingCard2(_playerCards);
+                _uiCard.SettingCard(_playerCards);
                 break;
             case 4:
-                _uiCard.SettingCard4(_playerCards);
+                _uiCard.SettingCard(_playerCards);
                 break;
         }    
     }
