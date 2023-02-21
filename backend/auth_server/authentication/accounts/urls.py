@@ -1,9 +1,10 @@
 from django.urls import path
-from .views import CreateAccount, ActivateAccount, LoginAccount, LogoutAccount, CheckAccessToken, CheckRefreshToken, FindUsername, PasswordReset, PasswordResetConfirm, HandleAccount, WithdrawAccount
+from .views import CreateAccount, ListAccount, ActivateAccount, LoginAccount, LogoutAccount, CheckAccessToken, CheckRefreshToken, FindUsername, PasswordReset, PasswordResetConfirm, HandleAccount, WithdrawAccount
 
 app_name = 'accounts'
 urlpatterns = [
     path('', CreateAccount.as_view(), name='create_account'),
+    path('list/', ListAccount.as_view(), name='list_account'),
     path('activate/<uidb64>/<token>/',
          ActivateAccount.as_view(), name='activate_account'),
     path('login/', LoginAccount.as_view(), name='login_account'),
@@ -13,7 +14,7 @@ urlpatterns = [
     path('check_refresh_token/', CheckRefreshToken.as_view(),
          name='check_refresh_token'),
     path('find_username/', FindUsername.as_view(), name='find_username'),
-    path('password_reset', PasswordReset.as_view(),
+    path('password_reset/', PasswordReset.as_view(),
          name='password_reset'),
     path('reset/<uidb64>/<token>/', PasswordResetConfirm.as_view(),
          name='password_reset_confirm'),

@@ -111,15 +111,19 @@ public class PokerGameManager : MonoBehaviour
     {
         if (s_instance == null)
             s_instance = this;
+
+        DontDestroyOnLoad(this);
     }
 
     public void SettingGame()
     {
+
         /*
-        _playerNames.Add("³È³È³È³È³È³È");
-        _playerNames.Add("¾ä¾ä");
-        _playerNames.Add("½º±¸½ÄÅ¹");
-        _playerNames.Add("‡œ‡œ");
+        _playerNames.Add("ëƒ ëƒ ëƒ ëƒ ëƒ ëƒ ");
+        _playerNames.Add("ì–Œì–Œ");
+        _playerNames.Add("ì©ì©");
+        _playerNames.Add("ë‡¸ë‡¸");
+
 
         for (int i = 0; i < PeopleNum; i++)
         {
@@ -134,32 +138,32 @@ public class PokerGameManager : MonoBehaviour
         _card.DistributeCard();
     }
 
-    /*[0] Àº ¹«Á¶°Ç ÀÚ±âÀÚ½Å. [1] Àº ÀÚ±â ¹Ù·Î ´ÙÀ½Â÷·Ê. [2]´Â ±×´Ù´ÙÀ½ [3]Àº ±×´Ù´Ù´ÙÀ½
+    /*[0] ì€ ë¬´ì¡°ê±´ ìê¸°ìì‹ . [1] ì€ ìê¸° ë°”ë¡œ ë‹¤ìŒì°¨ë¡€. [2]ëŠ” ê·¸ë‹¤ë‹¤ìŒ [3]ì€ ê·¸ë‹¤ë‹¤ë‹¤ìŒ
     public void SettingPlayerOrder()
     {
 
     }*/
 
-       public void GetPlayerOrder() //ÇÃ·¹ÀÌ¾î ¼ø¼­ °¡Á®¿À±â
+       public void GetPlayerOrder() //ï¿½Ã·ï¿½ï¿½Ì¾ï¿½ ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
     {
-        //test : 4¸íÀÌ¶ó´Â °¡Á¤
-        PlayerOrder.Add(new PokerPlayer(1, "³È³È³È³È",90));
-        PlayerOrder.Add(new PokerPlayer(2, "‡œ‡œ",90));
-        PlayerOrder.Add(new PokerPlayer(3, "¿è¿è¾²",90));
-        PlayerOrder.Add(new PokerPlayer(4, "¾ä¾ä¾ä¾ä",90));
+        //test : 4ï¿½ï¿½ï¿½Ì¶ï¿½ï¿½ ï¿½ï¿½ï¿½
+        PlayerOrder.Add(new PokerPlayer(1, "ï¿½È³È³È³ï¿½",90));
+        PlayerOrder.Add(new PokerPlayer(2, "ï¿½ï¿½ï¿½ï¿½",90));
+        PlayerOrder.Add(new PokerPlayer(3, "ï¿½ï¿½è¾²",90));
+        PlayerOrder.Add(new PokerPlayer(4, "ï¿½ï¿½ï¿½ï¿½ï¿½",90));
     }
 
     public void FinishTurn()
     {
        
-        if (_dieNum == _peopleNum-1) // ÇÑ¸í»©°í ¸ğµÎ°¡ ´ÙÀÌ¸¦ ÇßÀ» °æ¿ì,
+        if (_dieNum == _peopleNum-1) // í•œëª…ë¹¼ê³  ëª¨ë‘ê°€ ë‹¤ì´ë¥¼ í–ˆì„ ê²½ìš°,
         {
             Debug.Log("die num = " + _dieNum);
             FinishPokerGame();
             AllDie();
-            //º»ÀÎ Ä«µå °ø°³ µÇ¸é¼­, º£ÆÃµÈÄ¨ ±× ÇÑ¸í¿¡°Ô·Î ¸ô»§           
+            //ë³¸ì¸ ì¹´ë“œ ê³µê°œ ë˜ë©´ì„œ, ë² íŒ…ëœì¹© ê·¸ í•œëª…ì—ê²Œë¡œ ëª°ë¹µ           
         }
-        else if(_callNum == _alivePeople) //»ì¾Æ ÀÖ´Â ¸ğµÎ°¡ ÄİÀ» ÇßÀ» °æ¿ì 
+        else if(_callNum == _alivePeople) //ï¿½ï¿½ï¿½ ï¿½Ö´ï¿½ ï¿½ï¿½Î°ï¿½ ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ 
         {
             FinishPokerGame();
             Change3DGame();
@@ -173,28 +177,28 @@ public class PokerGameManager : MonoBehaviour
             if (NowTurn == _startPoint-1)
             {
                 _gameProcessNum++;
-                Debug.Log("È½¼ö ´Ã¾î³². ÇöÀç : " + _gameProcessNum);
+                Debug.Log("íšŸìˆ˜ ëŠ˜ì–´ë‚¨. í˜„ì¬ : " + _gameProcessNum);
             }
 
             if (_gameProcessNum < 3)
             {
-                //¼­¹öÅë½Å : ÅÏÀÌ ³¡³µ´Ù°í ¾Ë¸². 
-                /*¼­¹öÅë½Å : ¼­¹ö·ÎºÎÅÍ ¹Ş¾Æ¿Â Á¤º¸·Î 
-                 * ¸ğµÎ ÄİÀ» ÇßÀ» °æ¿ì È­¸éÀüÈ¯
-                 * ¸ğµÎ ´ÙÀÌ¸¦ ÇßÀ»°æ¿ì °á°ú º¸¿©ÁÜ
+                //ì„œë²„í†µì‹  : í„´ì´ ëë‚¬ë‹¤ê³  ì•Œë¦¼. 
+                /*ì„œë²„í†µì‹  : ì„œë²„ë¡œë¶€í„° ë°›ì•„ì˜¨ ì •ë³´ë¡œ 
+                 * ëª¨ë‘ ì½œì„ í–ˆì„ ê²½ìš° í™”ë©´ì „í™˜
+                 * ëª¨ë‘ ë‹¤ì´ë¥¼ í–ˆì„ê²½ìš° ê²°ê³¼ ë³´ì—¬ì¤Œ
                  * 
-                Debug.Log("ÇöÀç order: " + _order);
-                if () //¸ğµç ÀÎ¿øÀÌ CallÀ» ÇÒ °æ¿ì 
+                Debug.Log("í˜„ì¬ order: " + _order);
+                if () //ëª¨ë“  ì¸ì›ì´ Callì„ í•  ê²½ìš° 
                 {
                     Change3DGame();
                 }
-                else if() //1¸íÀ» Á¦¿ÜÇÑ ¸ğµç»ç¶÷ÀÌ Die¸¦ ÇÒ °æ¿ì
+                else if() //1ëª…ì„ ì œì™¸í•œ ëª¨ë“ ì‚¬ëŒì´ Dieë¥¼ í•  ê²½ìš°
                 {
-                    //´ÙÀ½»ç¶÷ÀÌ µ·À» ´Ù °¡Áö´Â°É·Î !
+                    //ë‹¤ìŒì‚¬ëŒì´ ëˆì„ ë‹¤ ê°€ì§€ëŠ”ê±¸ë¡œ !
                 }
                 */
                 _isBattingFinish = false;
-                //µû·Î ÁøÇàµÇ´Â°Ô ¾ø´Ù¸é ´ÙÀ½ ÅÏÀ¸·Î ÁøÇàÇÒ ¼ö ÀÖµµ·ÏÇÔ.
+                //ë”°ë¡œ ì§„í–‰ë˜ëŠ”ê²Œ ì—†ë‹¤ë©´ ë‹¤ìŒ í„´ìœ¼ë¡œ ì§„í–‰í•  ìˆ˜ ìˆë„ë¡í•¨.
                 if (PlayerOrder[NowTurn].GetState() == PokerState.die)
                 {
                     FinishTurn();
@@ -238,20 +242,20 @@ public class PokerGameManager : MonoBehaviour
 
     public void SetPlayerPosition()
     {
-        /*  ·ÎÁ÷
-         *  1. ¹Ş¾Æ¿Â ¼ø¼­¿¡¼­ ³» ÀÌ¸§ÀÌ ¾îµğÀÖ´ÂÁö Ã£°í, ¼ø¼­(ex. 0)¸¦ ±â¾ïÇÏ±â. , _playerNames.Add(³»ÀÌ¸§)
-            2. ³» ¼ıÀÚ+1ºÎÅÍ (1~) »ç¶÷¼ö±îÁö µµ´Â  for¹®À» ½ÃÀÛ.
-            3. ±× »ç¶÷µéÀ» _playerNames.Add ÇÔ.
-            4. ¼ø¼­ 0ºÎÅÍ ³» ¼ıÀÚ±îÁö for¹®À» µ¹¸².
-            5. ±× »ç¶÷µéÀ» _playerNames.Add ÇÔ.
-            ±×·³, ³ª´Â0ºÎÅÍ ÀÚ¸®¸¦ Àâ°í, ³ª¸ÓÁö »ç¶÷µéÀº ±×µÚ·Î ÂßÂß.
-            ÀÌ·¸°Ô ÀÚ¸®¹èÄ¡¸¦ ÇÏµµ·ÏÇÔ.
-            ±×·¯¸é ÃÑ 2°³ÀÇ ¸®½ºÆ®°¡ »ı±è.
-            ÇÑ°³´Â, °ÔÀÓ ÇÃ·¹ÀÌ¾î ¼ø¼­  PokerOrder
-            ´Ù¸¥ ÇÑ°³´Â , ³ª¸¦ Áß½ÉÀ¸·Î ÇÑ ¹èÄ¡¼ø¼­. playerNames
+        /*  ï¿½ï¿½ï¿½ï¿½
+         *  1. ï¿½Ş¾Æ¿ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ ï¿½Ì¸ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½Ö´ï¿½ï¿½ï¿½ Ã£ï¿½ï¿½, ï¿½ï¿½(ex. 0)ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½Ï±ï¿½. , _playerNames.Add(ï¿½ï¿½ï¿½Ì¸ï¿½)
+            2. ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½+1ï¿½ï¿½ï¿½ï¿½ (1~) ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½  forï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½.
+            3. ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ _playerNames.Add ï¿½ï¿½.
+            4. ï¿½ï¿½ 0ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ ï¿½ï¿½ï¿½Ú±ï¿½ï¿½ï¿½ forï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½.
+            5. ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ _playerNames.Add ï¿½ï¿½.
+            ï¿½×·ï¿½, ï¿½ï¿½ï¿½ï¿½0ï¿½ï¿½ï¿½ï¿½ ï¿½Ú¸ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½, ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½×µÚ·ï¿½ ï¿½ï¿½ï¿½ï¿½.
+            ï¿½Ì·ï¿½ï¿½ï¿½ ï¿½Ú¸ï¿½ï¿½ï¿½Ä¡ï¿½ï¿½ ï¿½Ïµï¿½ï¿½ï¿½ï¿½ï¿½.
+            ï¿½×·ï¿½ï¿½ï¿½ ï¿½ï¿½ 2ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½Æ®ï¿½ï¿½ ï¿½ï¿½ï¿½.
+            ï¿½Ñ°ï¿½ï¿½ï¿½, ï¿½ï¿½ï¿½ï¿½ ï¿½Ã·ï¿½ï¿½Ì¾ï¿½ ï¿½ï¿½  PokerOrder
+            ï¿½Ù¸ï¿½ ï¿½Ñ°ï¿½ï¿½ï¿½ , ï¿½ï¿½ï¿½ï¿½ ï¿½ß½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ ï¿½ï¿½Ä¡ï¿½ï¿½. playerNames
          */
         FindMyName();
-        if (_myOrder != _peopleNum - 1) //³»°¡ ¸¶Áö¸· ¼ø¼­°¡ ¾Æ´Ï¶ó¸é
+        if (_myOrder != _peopleNum - 1) //ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ ï¿½Æ´Ï¶ï¿½ï¿½
         {
             for (int i = _myOrder + 1; i < _peopleNum; i++)
             {
@@ -300,8 +304,8 @@ public class PokerGameManager : MonoBehaviour
 
     public void Change3DGame()
     {
-        //3D°ÔÀÓÀüÈ¯.
-        Debug.Log("3D°ÔÀÓÀ¸·Î ÀüÈ¯µË´Ï´Ù.");
+        //3Dê²Œì„ì „í™˜.
+        Debug.Log("3Dê²Œì„ìœ¼ë¡œ ì „í™˜ë©ë‹ˆë‹¤.");
     }
 
     public void NextTurn()

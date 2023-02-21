@@ -1,4 +1,6 @@
+import json
 import jwt
+import logging
 
 from django.contrib.auth.tokens import default_token_generator
 from django.core.exceptions import ImproperlyConfigured, ValidationError
@@ -21,6 +23,8 @@ from .serializers import CreateUserSerializer, RetreiveUserSerializer, ResetPass
 from .hash import check_account_activate_token, make_token
 from .utils import issue_token
 from config.base import SECRET_KEY, ALGORITHM, SITE_URL
+
+logger = logging.getLogger('auth')
 
 
 class CreateAccount(generics.GenericAPIView):
@@ -74,15 +78,70 @@ class CreateAccount(generics.GenericAPIView):
         )
 
 
+class ListAccount(APIView):
+    @extend_schema(
+        summary="사용자의 리스트를 받고 승, 패를 업데이트함",
+        request=inline_serializer(
+            "result_update", {"id": serializers.IntegerField(), "result": serializers.CharField()}),
+        responses={
+            status.HTTP_200_OK: OpenApiResponse(
+                response=None,
+                description="Update result successfully."
+            ),
+            status.HTTP_404_NOT_FOUND: OpenApiResponse(
+                response=None,
+                description="Update failed."
+            )
+        },
+        examples=[
+            OpenApiExample(
+                request_only=True,
+                summary="Response Body Example입니다.",
+                name="success_example",
+                value={
+                    "players": [
+                        {
+                            "id": 1,
+                            "result": "WIN",
+                        },
+                        {
+                            "id": 2,
+                            "result": "LOOSE",
+                        },
+                        {
+                            "id": 3,
+                            "result": "LOOSE",
+                        },
+                        {
+                            "id": 4,
+                            "result": "LOOSE",
+                        },
+                    ]}
+            ),
+        ]
+    )
+    def post(self, request, format=None):
+        players = request.data.getlist("players")
+        for player in players:
+            temp = json.loads(player.replace("'", "\""))
+            user = get_object_or_404(User, id=temp["id"])
+            if temp["result"] == "WIN":
+                user.winner()
+            else:
+                user.looser()
+        return Response(status=status.HTTP_200_OK)
+
+
 class ActivateAccount(View):
     def get(self, request, uidb64, token, *args, **kwargs):
         try:
             uid = force_str(urlsafe_base64_decode(uidb64))
             user = User.objects.get(pk=uid)
-        except (TypeError, ValueError, OverflowError, User.DoesNotExist):
+        except (TypeError, ValueError, OverflowError, User.DoesNotExist) as e:
+            logger.exception(e)
             user = None
 
-        if user is not None and user.is_active == False:
+        if user is not None and user.is_active is False:
             if check_account_activate_token(user.nickname, token):
                 user.activate()
                 return render(request, 'accounts/accounts_register_success.html')
@@ -96,8 +155,9 @@ class LoginAccount(APIView):
             "login", {"username": serializers.CharField(), "password": serializers.CharField()}),
         responses={
             status.HTTP_200_OK: OpenApiResponse(
-                response=None,
-                description="Login successfully, and Access Token and Refresh Token are issued at Header."
+                response=inline_serializer(
+                    "login_success", {"id": serializers.IntegerField(), "nickname": serializers.CharField()}),
+                description="Login successfully, and Access Token and Refresh Token are issued at Header. And return id and username in body."
             ),
             status.HTTP_404_NOT_FOUND: OpenApiResponse(
                 response=None,
@@ -128,11 +188,22 @@ class LoginAccount(APIView):
                     "username": "user1",
                     "password": "password1",
                 }
+            ),
+            OpenApiExample(
+                response_only=True,
+                summary="Response Body Example입니다.",
+                name="success_example",
+                value={
+                    "id": 1,
+                    "nickname": "nickname1",
+                }
             )
         ]
     )
     def post(self, request):
         user = get_object_or_404(User, username=request.data.get("username"))
+        if user.is_active is False:
+            return Response(status=status.HTTP_404_NOT_FOUND)
         username = user.username
         if user.check_password(request.data.get('password')):
             access_token = issue_token(username, days=0, hours=6)
@@ -142,11 +213,15 @@ class LoginAccount(APIView):
             else:
                 cache.delete(username)
                 cache.set(username, refresh_token, 60*60*24*14)
-            return Response(status=status.HTTP_200_OK,
-                            headers={
-                                'Access-Token': access_token,
-                                'Refresh-Token': refresh_token
-                            })
+            logger.info("(%s, %s)is login", user.id, user.nickname)
+            return Response(data={
+                "id": user.id,
+                "nickname": user.nickname
+            }, status=status.HTTP_200_OK,
+                headers={
+                'Access-Token': access_token,
+                'Refresh-Token': refresh_token
+            })
         else:
             return Response(status=status.HTTP_404_NOT_FOUND)
 
@@ -186,7 +261,8 @@ class LogoutAccount(APIView):
             else:
                 cache.delete(username)
                 return Response(status=status.HTTP_200_OK)
-        except (jwt.exceptions.InvalidTokenError):
+        except (jwt.exceptions.InvalidTokenError) as e:
+            logger.exception(e)
             return Response(status=status.HTTP_404_NOT_FOUND)
 
 
@@ -216,10 +292,11 @@ class CheckAccessToken(APIView):
     )
     def get(self, request):
         try:
-            access_token = jwt.decode(
+            jwt.decode(
                 request.headers['Access-Token'], SECRET_KEY, ALGORITHM)
-            return Response(status=status.HTTP_200_OK)
-        except (jwt.exceptions.InvalidTokenError):
+            return Response(headers={'new-api-url': request.headers['x-original-uri']}, status=status.HTTP_200_OK)
+        except (jwt.exceptions.InvalidTokenError) as e:
+            logger.exception(e)
             return Response(status=status.HTTP_401_UNAUTHORIZED)
 
 
@@ -274,9 +351,11 @@ class CheckRefreshToken(APIView):
                 return Response(status=status.HTTP_200_OK,
                                 headers={
                                     'Access-Token': access_token,
-                                    'Refresh-Token': refresh_token
+                                    'Refresh-Token': refresh_token,
+                                    'new-api-url': request.headers['x-original-uri'],
                                 })
-        except (jwt.exceptions.InvalidTokenError):
+        except (jwt.exceptions.InvalidTokenError) as e:
+            logger.exception(e)
             return Response(status=status.HTTP_401_UNAUTHORIZED)
 
 
@@ -302,6 +381,7 @@ class FindUsername(APIView):
             'username': user.username,
         })
         user.email_user('Here is your NoPOKER ID', message)
+        logger.info("user find username by email : %s", user.email)
         return Response(status=status.HTTP_200_OK)
 
 
@@ -343,6 +423,7 @@ class PasswordReset(APIView):
                 'token': default_token_generator.make_token(user),
             })
             user.email_user('NoPOKER Password reset', message)
+            logger.info("user change password by email : %s", user.email)
             return Response(status=status.HTTP_200_OK)
         else:
             return Response(status=status.HTTP_404_NOT_FOUND)
@@ -404,8 +485,9 @@ class PasswordResetConfirm(View):
             OverflowError,
             User.DoesNotExist,
             ValidationError
-        ):
+        ) as e:
             user = None
+            logger.exception(e)
         return user
 
 
@@ -477,6 +559,7 @@ class HandleAccount(generics.GenericAPIView):
             'token': make_token(user.nickname),
         })
         user.email_user('Withdraw Your NoPOKER Account', message)
+        logger.info("user want to withdraw account by email : %s", user.email)
         return Response(status=status.HTTP_200_OK)
 
 
@@ -485,7 +568,8 @@ class WithdrawAccount(View):
         try:
             uid = force_str(urlsafe_base64_decode(uidb64))
             user = User.objects.get(pk=uid)
-        except (TypeError, ValueError, OverflowError, User.DoesNotExist):
+        except (TypeError, ValueError, OverflowError, User.DoesNotExist) as e:
+            logger.exception(e)
             user = None
 
         if user is not None:

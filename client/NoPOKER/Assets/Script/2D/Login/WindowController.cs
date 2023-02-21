@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 
 public class WindowController : MonoBehaviour
 {
@@ -60,7 +60,7 @@ public class WindowController : MonoBehaviour
         _alertWindow.SetActive(false);
     }
 
-    public void SendAlertMessage(AlertMessage alert)
+    public void SendAlertMessage(LoginAlertMessage alert)
     {
         _alert.SetAlertContent(alert);
         _alertWindow.SetActive(true);

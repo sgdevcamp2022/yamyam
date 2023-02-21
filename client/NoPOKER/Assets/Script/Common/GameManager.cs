@@ -34,4 +34,9 @@ public class GameManager : MonoBehaviour
     {
         SceneManager.LoadScene((int)sceneNum);
     }
+
+    public Scenes CheckNowScene()
+    {
+        return (Scenes)SceneManager.GetActiveScene().buildIndex;
+    }
 }

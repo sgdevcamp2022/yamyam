@@ -10,6 +10,7 @@ djangorestframework==3.14.0
 djlint==1.19.13
 drf-spectacular==0.25.1
 EditorConfig==0.12.3
+gunicorn==20.1.0
 html-tag-names==0.1.2
 html-void-elements==0.1.0
 inflection==0.5.1

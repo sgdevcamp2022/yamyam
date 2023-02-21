@@ -47,24 +47,24 @@ public class SignUp : MonoBehaviour
     {
         if (_id.text.Equals(_blank) || _pw.text.Equals(_blank) || _checkPw.text.Equals(_blank) || _name.text.Equals(_blank) || _email.text.Equals(_blank))
         {
-            WindowController.Instance.SendAlertMessage(AlertMessage.Blank);
+            WindowController.Instance.SendAlertMessage(LoginAlertMessage.Blank);
             return;
         }
-        //æ∆¿Ãµ ¡ﬂ∫π »Æ¿Œ
+        //ÏïÑÏù¥Îîî Ï§ëÎ≥µ ÌôïÏù∏
         if (!(_pw.text.Equals(_checkPw.text)))
         {
-            WindowController.Instance.SendAlertMessage(AlertMessage.IncorrectPW);
+            WindowController.Instance.SendAlertMessage(LoginAlertMessage.IncorrectPW);
             return;
         }
         if(!IsValidEmail(_email.text))
         {
-            WindowController.Instance.SendAlertMessage(AlertMessage.IncorrectEmail);
+            WindowController.Instance.SendAlertMessage(LoginAlertMessage.IncorrectEmail);
             return;
         }
 
-        ResetPwWebRequest();
+        SignUpRequest();
     }
-    async Task ResetPwWebRequest()
+    async Task SignUpRequest()
     {
         SignUpData data = new SignUpData();
         data.username = _id.text;
@@ -77,6 +77,8 @@ public class SignUp : MonoBehaviour
         string _url = "http://127.0.0.1:8000/accounts/";
         using HttpResponseMessage response = await _httpClient.PostAsync(_url, _httpContent);
 
+       // Debug.Log("result = " + response.Content.ReadAsStringAsync().Result);
+       // Debug.Log("response = " + response);
         switch ((int)response.StatusCode)
         {
             case 201:
@@ -86,26 +88,27 @@ public class SignUp : MonoBehaviour
                 JObject _obj = JObject.Parse(response.Content.ReadAsStringAsync().Result);
                 if (_obj["username"] != null)
                 {
-                    WindowController.Instance.SendAlertMessage(AlertMessage.DuplicateID);
+                    WindowController.Instance.SendAlertMessage(LoginAlertMessage.DuplicateID);
                     return;
                 }
                 else if (_obj["nickname"] != null)
                 {
-                    WindowController.Instance.SendAlertMessage(AlertMessage.DuplicateNickName);
+                    WindowController.Instance.SendAlertMessage(LoginAlertMessage.DuplicateNickName);
                     return;
                 }
                 else if (_obj["email"] != null)
                 {
-                    WindowController.Instance.SendAlertMessage(AlertMessage.DuplicateEmail);
+                    WindowController.Instance.SendAlertMessage(LoginAlertMessage.DuplicateEmail);
                     return;
                 }
+
                 break;
         }
     }
 
     public void SucceedSignUpWebRequest()
     {
-            WindowController.Instance.SendAlertMessage(AlertMessage.EmailLink);
+            WindowController.Instance.SendAlertMessage(LoginAlertMessage.EmailLink);
             gameObject.SetActive(false);
     }
 
