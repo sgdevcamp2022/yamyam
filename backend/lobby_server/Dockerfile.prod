@@ -32,6 +32,8 @@ RUN addgroup -S backend && adduser -S backend -G backend
 ENV HOME=/home/backend
 ENV LOBBY_HOME=/home/backend/lobby
 RUN mkdir $LOBBY_HOME
+ENV LOBBY_LOG=/var/log/lobby
+RUN mkdir $LOBBY_LOG
 WORKDIR $LOBBY_HOME
 
 RUN apk update && apk add libpq
@@ -42,5 +44,6 @@ RUN pip install --no-cache /wheels/*
 COPY . $LOBBY_HOME
 
 RUN chown -R backend:backend $LOBBY_HOME
+RUN chown -R backend:backend $LOBBY_LOG
 
 USER backend

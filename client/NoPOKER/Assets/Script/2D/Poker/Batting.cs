@@ -42,10 +42,12 @@ public class Batting : MonoBehaviour
     public void Raise(int raiseChip)
     {
         _canPayChip = _checkMyChip(raiseChip);
+
         if (_canPayChip)
         {
             _uiBatting.SetPlayerBattingResult(PokerGameManager.Instance.NowTurn, raiseChip.ToString());
             PersonSound.Instance.PlayRaiseSound();
+            PokerGameManager.Instance.ResetCallNum();
             _payChip(raiseChip, false);
         }
     }
@@ -57,6 +59,7 @@ public class Batting : MonoBehaviour
         {
             _uiBatting.SetPlayerBattingResult(PokerGameManager.Instance.NowTurn, "콜");
             PersonSound.Instance.PlayCallSound();
+            PokerGameManager.Instance.UpCallNum();
             _payChip(_callBattingChip, true);
         }      
     }

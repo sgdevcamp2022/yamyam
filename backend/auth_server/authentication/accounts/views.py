@@ -1,5 +1,6 @@
 import json
 import jwt
+import logging
 
 from django.contrib.auth.tokens import default_token_generator
 from django.core.exceptions import ImproperlyConfigured, ValidationError
@@ -22,6 +23,8 @@ from .serializers import CreateUserSerializer, RetreiveUserSerializer, ResetPass
 from .hash import check_account_activate_token, make_token
 from .utils import issue_token
 from config.base import SECRET_KEY, ALGORITHM, SITE_URL
+
+logger = logging.getLogger('auth')
 
 
 class CreateAccount(generics.GenericAPIView):
@@ -134,7 +137,8 @@ class ActivateAccount(View):
         try:
             uid = force_str(urlsafe_base64_decode(uidb64))
             user = User.objects.get(pk=uid)
-        except (TypeError, ValueError, OverflowError, User.DoesNotExist):
+        except (TypeError, ValueError, OverflowError, User.DoesNotExist) as e:
+            logger.exception(e)
             user = None
 
         if user is not None and user.is_active is False:
@@ -209,6 +213,7 @@ class LoginAccount(APIView):
             else:
                 cache.delete(username)
                 cache.set(username, refresh_token, 60*60*24*14)
+            logger.info("(%s, %s)is login", user.id, user.nickname)
             return Response(data={
                 "id": user.id,
                 "nickname": user.nickname
@@ -256,7 +261,8 @@ class LogoutAccount(APIView):
             else:
                 cache.delete(username)
                 return Response(status=status.HTTP_200_OK)
-        except (jwt.exceptions.InvalidTokenError):
+        except (jwt.exceptions.InvalidTokenError) as e:
+            logger.exception(e)
             return Response(status=status.HTTP_404_NOT_FOUND)
 
 
@@ -289,7 +295,8 @@ class CheckAccessToken(APIView):
             jwt.decode(
                 request.headers['Access-Token'], SECRET_KEY, ALGORITHM)
             return Response(headers={'new-api-url': request.headers['x-original-uri']}, status=status.HTTP_200_OK)
-        except (jwt.exceptions.InvalidTokenError):
+        except (jwt.exceptions.InvalidTokenError) as e:
+            logger.exception(e)
             return Response(status=status.HTTP_401_UNAUTHORIZED)
 
 
@@ -347,7 +354,8 @@ class CheckRefreshToken(APIView):
                                     'Refresh-Token': refresh_token,
                                     'new-api-url': request.headers['x-original-uri'],
                                 })
-        except (jwt.exceptions.InvalidTokenError):
+        except (jwt.exceptions.InvalidTokenError) as e:
+            logger.exception(e)
             return Response(status=status.HTTP_401_UNAUTHORIZED)
 
 
@@ -373,6 +381,7 @@ class FindUsername(APIView):
             'username': user.username,
         })
         user.email_user('Here is your NoPOKER ID', message)
+        logger.info("user find username by email : %s", user.email)
         return Response(status=status.HTTP_200_OK)
 
 
@@ -414,6 +423,7 @@ class PasswordReset(APIView):
                 'token': default_token_generator.make_token(user),
             })
             user.email_user('NoPOKER Password reset', message)
+            logger.info("user change password by email : %s", user.email)
             return Response(status=status.HTTP_200_OK)
         else:
             return Response(status=status.HTTP_404_NOT_FOUND)
@@ -475,8 +485,9 @@ class PasswordResetConfirm(View):
             OverflowError,
             User.DoesNotExist,
             ValidationError
-        ):
+        ) as e:
             user = None
+            logger.exception(e)
         return user
 
 
@@ -548,6 +559,7 @@ class HandleAccount(generics.GenericAPIView):
             'token': make_token(user.nickname),
         })
         user.email_user('Withdraw Your NoPOKER Account', message)
+        logger.info("user want to withdraw account by email : %s", user.email)
         return Response(status=status.HTTP_200_OK)
 
 
@@ -556,7 +568,8 @@ class WithdrawAccount(View):
         try:
             uid = force_str(urlsafe_base64_decode(uidb64))
             user = User.objects.get(pk=uid)
-        except (TypeError, ValueError, OverflowError, User.DoesNotExist):
+        except (TypeError, ValueError, OverflowError, User.DoesNotExist) as e:
+            logger.exception(e)
             user = None
 
         if user is not None:
