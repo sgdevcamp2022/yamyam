@@ -1,8 +1,11 @@
 import json
+import logging
 
 from asgiref.sync import async_to_sync
 from channels.generic.websocket import JsonWebsocketConsumer
 from django.core.cache import caches
+
+logger = logging.getLogger('lobby')
 
 
 class LobbyConsumer(JsonWebsocketConsumer):
@@ -196,6 +199,8 @@ class LobbyConsumer(JsonWebsocketConsumer):
         self.user_info = "%s_%s" % (self.user_id, self.user_nickname)
         self.accept()
 
+        logger.info("%s connected", self.user_nickname)
+
         async_to_sync(self.channel_layer.group_add)(
             self.notification_group_name, self.channel_name
         )
@@ -248,6 +253,7 @@ class LobbyConsumer(JsonWebsocketConsumer):
             }
         )
         caches['default'].delete(self.user_info)
+        logger.info("%s disconnected", self.user_nickname)
         # need to delete room redis too.
 
     def receive(self, text_data):
@@ -255,9 +261,13 @@ class LobbyConsumer(JsonWebsocketConsumer):
         self.types[data["type"]](self, data)
 
     def lobby_message(self, event):
+        logger.info("%s's lobby message : %s",
+                    self.user_nickname, event["message"])
         self.send_json(event)
 
     def team_message(self, event):
+        logger.info("%s's team message : %s",
+                    self.user_nickname, event["message"])
         self.send_json(event)
 
     def invite_request(self, event):
