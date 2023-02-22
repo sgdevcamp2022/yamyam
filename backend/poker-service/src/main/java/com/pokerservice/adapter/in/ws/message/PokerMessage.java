@@ -1,10 +1,12 @@
 package com.pokerservice.adapter.in.ws.message;
 
-import com.pokerservice.adapter.in.ws.message.content.BetResponseContent;
-import com.pokerservice.adapter.in.ws.message.content.DieContent;
-import com.pokerservice.adapter.in.ws.message.content.FocusContent;
-import com.pokerservice.adapter.in.ws.message.content.GameStartContent;
-import com.pokerservice.adapter.in.ws.message.content.JoinContent;
+import com.pokerservice.adapter.in.ws.message.content.serverContent.BetResponseContent;
+import com.pokerservice.adapter.in.ws.message.content.clientContent.DieResponseContent;
+import com.pokerservice.adapter.in.ws.message.content.serverContent.ExitContent;
+import com.pokerservice.adapter.in.ws.message.content.serverContent.FocusContent;
+import com.pokerservice.adapter.in.ws.message.content.serverContent.GameStartContent;
+import com.pokerservice.adapter.in.ws.message.content.serverContent.JoinContent;
+import com.pokerservice.adapter.in.ws.message.content.serverContent.ResultContent;
 
 public class PokerMessage<T> {
 
@@ -13,16 +15,18 @@ public class PokerMessage<T> {
     public enum MessageType {
         // CLIENT SEND THIS
         READY,
-        DRAW,
-        BET, DIE,
-        LEAVE,
 
         // SERVER SEND THIS
         JOIN,
         GAME_START,
         FOCUS,
-        BATTLE_RESULT,
+        RESULT,
+        GAME_END,
         ERROR,
+        EXIT,
+
+        // USE BOTH
+        BET, DIE
     }
 
     private T content;
@@ -50,8 +54,16 @@ public class PokerMessage<T> {
         return new PokerMessage<>(MessageType.BET, content, 1.0);
     }
 
-    public static PokerMessage<DieContent> dieMessage(DieContent content) {
+    public static PokerMessage<DieResponseContent> dieMessage(DieResponseContent content) {
         return new PokerMessage<>(MessageType.DIE, content, 1.0);
+    }
+
+    public static PokerMessage<ResultContent> resultMessage(ResultContent content) {
+        return new PokerMessage<>(MessageType.RESULT, content, 1.0);
+    }
+
+    public static PokerMessage<ExitContent> exitMessage(ExitContent content) {
+        return new PokerMessage<>(MessageType.EXIT, content, 1.0);
     }
 
     public MessageType getType() {

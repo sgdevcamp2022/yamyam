@@ -3,7 +3,6 @@ package com.pokerservice.adapter.in.ws;
 import com.pokerservice.core.domain.Game;
 import com.pokerservice.core.domain.GameType;
 import com.pokerservice.core.domain.Player;
-import com.pokerservice.core.port.in.GameUseCase;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -23,7 +22,7 @@ public class GameManager {
     private static final Map<String, Player> connectedPlayers = new ConcurrentHashMap<>();
     private static final Map<Long, Game> activateGames = new ConcurrentHashMap<>();
 
-    public void removePlayer(String sessionId) {
+    public static void removePlayer(String sessionId) {
         connectedPlayers.remove(sessionId);
     }
 
@@ -40,8 +39,12 @@ public class GameManager {
         return activateGames.get(gameId);
     }
 
-    public static List<Player> getPlayers(long gameId) {
+    public static List<Player> getPlayersByGameId(long gameId) {
         return activateGames.get(gameId).getPlayers();
+    }
+
+    public static Player findPlayerBySessionId(String userSessionId) {
+        return connectedPlayers.get(userSessionId);
     }
 
     public void exitGame(Player player) {

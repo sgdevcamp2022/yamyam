@@ -2,6 +2,8 @@ package com.pokerservice.adapter.in.ws;
 
 import com.pokerservice.core.domain.Player;
 import com.pokerservice.core.port.in.GameUseCase;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Objects;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,6 +22,7 @@ public class WebSocketEventListener {
     private final SimpMessageSendingOperations messageSendingOperations;
     private static final Logger log = LoggerFactory.getLogger(WebSocketEventListener.class);
     private final GameUseCase gameUseCase;
+    private Map<String, String> websocketSessionMap = new HashMap<>();
 
 
     public WebSocketEventListener(SimpMessageSendingOperations messageSendingOperations,
@@ -31,23 +34,26 @@ public class WebSocketEventListener {
     @EventListener
     public void handleWebSocketConnectListener(SessionConnectedEvent event) {
         StompHeaderAccessor stompHeaderAccessor = StompHeaderAccessor.wrap(event.getMessage());
-        log.info("websocket Connect Success - {}", stompHeaderAccessor.getSessionId());
-        log.info("username - {}", stompHeaderAccessor.getUser().getName());
+        String socketSessionId = stompHeaderAccessor.getSessionId();
+        String socketUserId = stompHeaderAccessor.getUser().getName();
 
+        log.info("websocket Connect Success - sessionId: {}, userId: {}", socketUserId, socketUserId);
+
+        websocketSessionMap.put(socketSessionId, socketUserId);
     }
 
     @EventListener
     public void handleSessionConnectEvent(SessionConnectedEvent event) {
-        StompHeaderAccessor stompHeaderAccessor = StompHeaderAccessor.wrap(event.getMessage());
-        log.info("session Connect Success - {}", stompHeaderAccessor.getSessionId());
-        log.info("username - {}", stompHeaderAccessor.getUser().getName());
     }
 
     @EventListener
     public void handleWebSocketDisconnectListener(SessionDisconnectEvent event) {
         log.info("Poker Server DisConnect Success");
         StompHeaderAccessor headerAccessor = StompHeaderAccessor.wrap(event.getMessage());
-        String sessionId = headerAccessor.getUser().getName();
+        String socketSessionId = headerAccessor.getSessionId();
+        String socketUserId = websocketSessionMap.remove(socketSessionId);
+
+        gameUseCase.exitGame(socketUserId);
 
 //        Player player = gameManager.getPlayerInfo(sessionId);
 //        gameManager.exitGame(player);

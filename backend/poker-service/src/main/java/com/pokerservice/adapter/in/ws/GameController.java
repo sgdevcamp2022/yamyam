@@ -1,14 +1,12 @@
 package com.pokerservice.adapter.in.ws;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JavaType;
-import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.pokerservice.adapter.in.ws.message.PokerMessage;
 import com.pokerservice.adapter.in.ws.message.PokerMessage.MessageType;
-import com.pokerservice.adapter.in.ws.message.content.BetRequestContent;
-import com.pokerservice.adapter.in.ws.message.content.DieContent;
-import com.pokerservice.adapter.in.ws.message.content.ReadyContent;
+import com.pokerservice.adapter.in.ws.message.content.clientContent.BetRequestContent;
+import com.pokerservice.adapter.in.ws.message.content.clientContent.DieResponseContent;
+import com.pokerservice.adapter.in.ws.message.content.clientContent.ReadyContent;
 import com.pokerservice.core.port.in.GameUseCase;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -40,7 +38,7 @@ public class GameController {
 
         switch (packet) {
             case READY -> {
-                ReadyContent content = convertJsonToContent(pokerMessage.getContent(), ReadyContent.class);
+                ReadyContent content = mapTo(pokerMessage.getContent(), ReadyContent.class);
                 gameId = content.gameId();
                 userId = content.userId();
                 boolean allReady = gameUseCase.checkReady(gameId, userId);
@@ -51,30 +49,30 @@ public class GameController {
                 }
             }
             case BET -> {
-                BetRequestContent content = convertJsonToContent(pokerMessage.getContent(), BetRequestContent.class);
+                BetRequestContent content = mapTo(pokerMessage.getContent(), BetRequestContent.class);
                 gameId = content.gameId();
                 userId = content.userId();
                 gameUseCase.betting(gameId, userId, content.betAmount());
                 gameUseCase.sendFocus(gameId);
             }
             case DIE -> {
-                DieContent content = convertJsonToContent(pokerMessage.getContent(), DieContent.class);
+                DieResponseContent content = mapTo(pokerMessage.getContent(), DieResponseContent.class);
                 gameId = content.gameId();
-                userId = content.userId();
+                userId = content.id();
                 gameUseCase.die(gameId, userId);
                 gameUseCase.sendFocus(gameId);
             }
-            case BATTLE_RESULT -> {
+//            case BATTLE_RESULT -> {
 //                gameUseCase.calcGameResult();
-            }
+//            }
         }
     }
 
-    private <S> S convertJsonToContent(Object object, Class<S> s) {
+    private <S> S mapTo(Object from, Class<S> to) {
         S content;
         try {
-            String json = mapper.writeValueAsString(object);
-            content = mapper.readValue(json, s);
+            String json = mapper.writeValueAsString(from);
+            content = mapper.readValue(json, to);
         } catch (JsonProcessingException e) {
             throw new RuntimeException(e);
         }

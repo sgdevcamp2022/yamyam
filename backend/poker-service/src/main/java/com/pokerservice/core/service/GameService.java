@@ -2,12 +2,15 @@ package com.pokerservice.core.service;
 
 import com.pokerservice.adapter.in.ws.GameManager;
 import com.pokerservice.adapter.in.ws.message.PokerMessage;
-import com.pokerservice.adapter.in.ws.message.content.BetResponseContent;
-import com.pokerservice.adapter.in.ws.message.content.DieContent;
-import com.pokerservice.adapter.in.ws.message.content.FocusContent;
-import com.pokerservice.adapter.in.ws.message.content.GameStartContent;
-import com.pokerservice.adapter.in.ws.message.content.JoinContent;
-import com.pokerservice.adapter.in.ws.message.content.PlayerInfo;
+import com.pokerservice.adapter.in.ws.message.content.serverContent.BetResponseContent;
+import com.pokerservice.adapter.in.ws.message.content.clientContent.DieResponseContent;
+import com.pokerservice.adapter.in.ws.message.content.serverContent.ExitContent;
+import com.pokerservice.adapter.in.ws.message.content.serverContent.FocusContent;
+import com.pokerservice.adapter.in.ws.message.content.serverContent.GameStartContent;
+import com.pokerservice.adapter.in.ws.message.content.serverContent.JoinContent;
+import com.pokerservice.adapter.in.ws.message.content.serverContent.PlayerInfo;
+import com.pokerservice.adapter.in.ws.message.content.serverContent.PlayerResultInfo;
+import com.pokerservice.adapter.in.ws.message.content.serverContent.ResultContent;
 import com.pokerservice.core.domain.Game;
 import com.pokerservice.core.domain.GameType;
 import com.pokerservice.core.domain.Player;
@@ -50,7 +53,7 @@ public class GameService implements GameMakeUseCase, GameUseCase {
         if (game.isFull()) {
             game.getPlayers().forEach(p -> {
                 PokerMessage<JoinContent> message = PokerMessage
-                    .joinMessage(new JoinContent(p.getUserId(), p.getNickname(), p.getOrder()));
+                    .joinMessage(new JoinContent(p.getId(), p.getNickname(), p.getOrder()));
                 log.info("send Message to {}, message: {}", player, message);
                 messageSendPort.sendMessage(POKER_ENDPOINT + gameId, message);
             });
@@ -72,9 +75,9 @@ public class GameService implements GameMakeUseCase, GameUseCase {
         game.nextTurn();
 
         PokerMessage<FocusContent> message = PokerMessage.focusMessage(
-            new FocusContent(focusPlayer.getUserId()));
+            new FocusContent(focusPlayer.getId()));
 
-        log.info("send Message to everyone, message: {}", message);
+        log.info("send Focus Message to everyone, message: {}", message);
         messageSendPort.sendMessage(POKER_ENDPOINT + gameId, message);
     }
 
@@ -86,41 +89,69 @@ public class GameService implements GameMakeUseCase, GameUseCase {
 
         List<Player> players = game.getPlayers();
         players.forEach(p -> {
-            playerInfos.add(new PlayerInfo(p.getUserId(), p.getChip(), p.getCard()));
+            playerInfos.add(new PlayerInfo(p.getId(), p.getChip(), p.getCard()));
         });
         GameStartContent content = new GameStartContent(playerInfos);
         PokerMessage<GameStartContent> message = PokerMessage.gameStartMessage(
             content);
 
-        log.info("send Message to everyone, message: {}", message);
+        log.info("send Game_Start Message to everyone, message: {}", message);
         messageSendPort.sendMessage(POKER_ENDPOINT + gameId, message);
     }
 
     @Override
     public void betting(long gameId, long playerId, int betAmount) {
         Game game = GameManager.getActivateGame(gameId);
+
+        if (!game.isPlayerTurn(playerId)) {
+            throw new AssertionError("현재 플레이할 수 있는 턴이 아닙니다. 게임: " + gameId + ", 플레이어 : " + playerId);
+        }
+
         game.betting(playerId, betAmount);
 
         Player player = game.findPlayerById(playerId);
 
         PokerMessage<BetResponseContent> message = PokerMessage.betMessage(
-            new BetResponseContent(gameId, playerId, betAmount,
-                player.getCurrentBetAmount(),
+            new BetResponseContent(playerId, betAmount,
+                player.getChip(),
                 game.getTotalBetAmount()));
 
-        log.info("send Message to everyone, message: {}", player, message);
+        log.info("send Betting Message to everyone, message: {}", message);
         messageSendPort.sendMessage(POKER_ENDPOINT + gameId, message);
     }
 
     @Override
     public void die(long gameId, long playerId) {
         Game game = GameManager.getActivateGame(gameId);
+
+        if (!game.isPlayerTurn(playerId)) {
+            throw new AssertionError("현재 플레이할 수 있는 턴이 아닙니다. 게임: " + gameId + ", 플레이어 : " + playerId);
+        }
+
         game.die(playerId);
 
         if (checkOnlyOneLive(game)) {
+            List<PlayerResultInfo> playerResultInfos = game.getPlayerResultInfos();
+
             messageSendPort.sendMessage(POKER_ENDPOINT + gameId,
-                PokerMessage.dieMessage(new DieContent(gameId, playerId)));
+                PokerMessage.resultMessage(new ResultContent(playerResultInfos)));
+        } else {
+            messageSendPort.sendMessage(POKER_ENDPOINT + gameId,
+                PokerMessage.dieMessage(new DieResponseContent(gameId, playerId)));
         }
+    }
+
+    @Override
+    public void exitGame(String socketUserId) {
+        Player player = GameManager.findPlayerBySessionId(socketUserId);
+        long gameId = player.getGameId();
+
+        Game game = GameManager.getActivateGame(gameId);
+        GameManager.removePlayer(socketUserId);
+        game.exitGame(player);
+
+        messageSendPort.sendMessage(POKER_ENDPOINT + gameId,
+            PokerMessage.exitMessage(new ExitContent(player.getId(), player.getNickname())));
     }
 
     private boolean checkOnlyOneLive(Game game) {
