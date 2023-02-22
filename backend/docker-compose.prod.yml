@@ -28,15 +28,11 @@ services:
       - redis
       - auth
   match:
-    build: ./match-service
-    volumes:
-      - ./match-service/:/usr/src/match/
+    build: .
     ports:
       - 8003:8003
   poker:
-    build: ./poker-service
-    volumes:
-      - ./poker-service/:/usr/src/poker/
+    build: .
     ports:
       - 8004:8004
   db:
