@@ -63,13 +63,36 @@ public class LobbyUserListSocketData {
 public class UserSocketData {
     public int id;
     public string nickname;
-
+    public int order;
+    public int card;
     public UserSocketData(int id, string nickname)
     {
         this.id = id;
         this.nickname = nickname;
     }
+    public UserSocketData(int id, string nickname, int card)
+    {
+        this.id = id;
+        this.nickname = nickname;
+        this.card = card;
+    }
+
 }
+
+public class UserPokertData {
+    public int id;
+    public string nickname;
+    public int order;
+    public int card;
+    public UserPokertData(int id, string nickname, int card)
+    {
+        this.id = id;
+        this.nickname = nickname;
+        this.card = card;
+    }
+
+}
+
 
 public class DefaultUserSocketData {
     public string type;
@@ -113,7 +136,7 @@ public class LobbyConnect : MonoBehaviour {
     StringBuilder _urlBuilder = new StringBuilder();
     LobbyUserListSocketData _userListData;
     public LobbyUserListSocketData UserListData { get => _userListData; }
-    private void Awake()
+    private void Start()
     {
         Init();
     }
@@ -125,6 +148,7 @@ public class LobbyConnect : MonoBehaviour {
         DontDestroyOnLoad(this);
         LobbyServerConnect();
     }
+
     public void LobbyServerConnect()
     {
         _urlBuilder.Append("ws://127.0.0.1:8001/ws/lobby/");
@@ -158,8 +182,6 @@ public class LobbyConnect : MonoBehaviour {
         //MessageDataDecoding(e.Data);
 
         LobbyMessageType _messageType = JsonConvert.DeserializeObject<LobbyMessageType>(e.Data);
-
-        Debug.Log(_messageType.type);
         try
         {
             switch (Enum.Parse(typeof(LobbySocketType), _messageType.type))
@@ -191,14 +213,16 @@ public class LobbyConnect : MonoBehaviour {
                 }
                 break;
                 case LobbySocketType.user_list:
+                    Debug.Log("1");
                    _userListData = JsonConvert.DeserializeObject<LobbyUserListSocketData>(e.Data);
-                    Debug.Log(_userListData);
-                    UserList.Instance.SetUserList(_userListData);
+                    Debug.Log("2");
                     UserList.Instance.IsUserCountChanged = LobbyUserChangeType.Setting;
+                    UserList.Instance.SetUserList(_userListData);
+                    Debug.Log("3");
+                   
                     break;
                 case LobbySocketType.invite_request:
                     InviteRequestSocketData _requestUserData = JsonConvert.DeserializeObject<InviteRequestSocketData>(e.Data);
-                    Debug.Log(_requestUserData);
                     Team.Instance.ReceiveInviteRequest(_requestUserData);
                     Team.Instance.TeamType = LobbySocketType.invite_request;
                     Team.Instance.ChangedRequestState = true;
@@ -223,7 +247,6 @@ public class LobbyConnect : MonoBehaviour {
                     break;
                 case LobbySocketType.invitee_exit:
                     TeamSocketData _newTeamData = JsonConvert.DeserializeObject<TeamSocketData>(e.Data);
-                    Debug.Log("Length : " + _newTeamData.invitees.Length);
                     if(_newTeamData.invitees.Length == 0 )
                     {
                         Team.Instance.TeamType = LobbySocketType.invitee_exit;

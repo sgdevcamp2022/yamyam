@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 
 public class Batting : MonoBehaviour
 {
@@ -12,12 +12,13 @@ public class Batting : MonoBehaviour
     private int _myBattingChip = 150;
     public int MyBattingChip { get => _myBattingChip; }
     private int _callBattingChip = 10;
+    public int CallBattingChip { get => _callBattingChip; }
     public int MinBattingChip { get => _callBattingChip + _unitBattingChip; }
     private int _unitBattingChip = 5;
     public int UnitBattingChip { get => _unitBattingChip; }
     private bool _canPayChip;
+    public GameObject InActiveButtonView;
 
-    
 
     private void Awake()
     {
@@ -45,51 +46,98 @@ public class Batting : MonoBehaviour
 
         if (_canPayChip)
         {
-            _uiBatting.SetPlayerBattingResult(PokerGameManager.Instance.NowTurn, raiseChip.ToString());
+            _uiBatting.SetPlayerBattingResult(PokerGameManager.Instance.UiPos, raiseChip.ToString());
             PersonSound.Instance.PlayRaiseSound();
             PokerGameManager.Instance.ResetCallNum();
-            _payChip(raiseChip, false);
+
+                _payChip(raiseChip, false);
         }
     }
+    public void OtherRaise(int raiseChip)
+    {
+   
+            _uiBatting.SetPlayerBattingResult(PokerGameManager.Instance.UiPos, raiseChip.ToString());
+            PersonSound.Instance.PlayRaiseSound();
+            PokerGameManager.Instance.ResetCallNum();
 
+            _payChip(raiseChip, false);
+
+    }
     public void Call()
     {       
         _canPayChip = _checkMyChip(_callBattingChip);
         if (_canPayChip)
         {
-            _uiBatting.SetPlayerBattingResult(PokerGameManager.Instance.NowTurn, "콜");
+            _uiBatting.SetPlayerBattingResult(PokerGameManager.Instance.NowTurnUserId, "콜");
             PersonSound.Instance.PlayCallSound();
-            PokerGameManager.Instance.UpCallNum();
+
             _payChip(_callBattingChip, true);
         }      
     }
-
+    public void OtherCall()
+    {
+       
+            _uiBatting.SetPlayerBattingResult(PokerGameManager.Instance.NowTurnUserId, "콜");
+            PersonSound.Instance.PlayCallSound();
+         //   PokerGameManager.Instance.UpCallNum();
+            _payChip(_callBattingChip, true);
+    }
     public void Die()
     {
         // 서버통신 : 해당 플레이어가 다이했다는걸 알리기.
         // 턴을 넘기도록함.
-        _uiBatting.SetPlayerBattingResult(PokerGameManager.Instance.NowTurn, "다이");
-        _uiBatting.ActiveDieView(PokerGameManager.Instance.NowTurn);
+        _uiBatting.SetPlayerBattingResult(PokerGameManager.Instance.UiPos, "다이");
+        _uiBatting.ActiveDieView(PokerGameManager.Instance.UiPos);
         PokerGameManager.Instance.UpDieNum();
         PersonSound.Instance.PlayDieSound();
         PokerGameManager.Instance.ChangePlayerState(BattingState.die);
-        PokerGameManager.Instance.FinishTurn();
+    
+    
+        if(PokerGameManager.Instance.NowTurnUserId == UserInfo.Instance.UserID)
+        {
+            PokerGameManager.Instance.FinishTurn();
+
+            PokerGameSocket.Instance.SendDieRequest();
+            InActiveButtonView.SetActive(true);
+        }
     }
+
+
 
     private void _payChip(int batting, bool call)
     {
         _roundBattingChip += batting;
-        _myBattingChip -= batting;
+        
         _callBattingChip = batting;
-        _uiBatting.SettingCanBattingChip();
-        _uiBatting.ChangeBattingChip();
 
-        _uiBatting.ShowBattingChipMoveCenter(batting);
         // (콜을 했을경우)서버통신 : 해당 플레이어가 콜했다는걸 알리기.
         // 서버통신 : 칩을 지불함, 전체 베팅금액 증가 알림
         // 턴을 넘기도록함.
-        PokerGameManager.Instance.FinishTurn();
+
+
+        if (PokerGameManager.Instance.NowTurnUserId == UserInfo.Instance.UserID)
+        {
+            _myBattingChip -= batting;
+            PokerGameManager.Instance.FinishTurn();
+            PokerGameSocket.Instance.SendBettingRequest(batting);
+
+            _uiBatting.SettingCanBattingChip();
+            _uiBatting.ChangeBattingChip();
+
+            _uiBatting.ShowBattingChipMoveCenter(batting);
+           InActiveButtonView.SetActive(true);
+        }
+        else
+        {
+            _uiBatting.SettingCanBattingChip();
+            _uiBatting.ChangeBattingChip();
+
+            _uiBatting.ShowBattingChipMoveCenter(batting);
+            PokerGameManager.Instance.FinishTurn();
+        }
     }
+
+
 
     ////////////////////////////////////////서버를 통해 받을부분..../////////////////////////////////////
     /// <summary>
@@ -100,6 +148,14 @@ public class Batting : MonoBehaviour
         _roundBattingChip += raise;
         _callBattingChip += raise;
         //UI쪽에도 변경사항을 반영해야함..
+    }
+
+    public void SetRoundBatting(int total, int raise)
+    {
+        _roundBattingChip = total;
+        _callBattingChip = raise;
+
+        _uiBatting.ChangeBattingChip();
     }
 
     public void SettingRoundBatting(int roundBatting)

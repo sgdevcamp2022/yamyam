@@ -45,8 +45,6 @@ public class FileIO : MonoBehaviour
 
     public static byte[] GetKeyFile()
     {
-        Debug.Log("STREAM PATH : " + Application.streamingAssetsPath);
-        Debug.Log(_filekeyPath);
         _fileReader = new StreamReader(_filekeyPath);
         _content = _fileReader.ReadLine();
         _fileReader.Close();

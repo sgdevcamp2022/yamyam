@@ -803,6 +803,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _uiBatting: {fileID: 1773321153}
+  InActiveButtonView: {fileID: 756387030}
 --- !u!4 &140183853
 Transform:
   m_ObjectHideFlags: 0
@@ -5377,7 +5378,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!224 &756387031
 RectTransform:
   m_ObjectHideFlags: 0
@@ -6618,7 +6619,11 @@ MonoBehaviour:
   _turnTiem: 10
   _turn: {fileID: 309489763}
   _card: {fileID: 685722200}
+  NowTurnUserId: 0
   _uiPokerPlayer: {fileID: 1585753932}
+  ReceiveSocketFlag: 0
+  _pokerGameState: 0
+  UiPos: 0
 --- !u!82 &947998856
 AudioSource:
   m_ObjectHideFlags: 0
@@ -12478,6 +12483,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _uiBatting: {fileID: 0}
+  InActiveButtonView: {fileID: 0}
 --- !u!1 &1924337735
 GameObject:
   m_ObjectHideFlags: 0

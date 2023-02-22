@@ -85,9 +85,6 @@ public class Login : MonoBehaviour
             _RefreshToken = i;
         }
 
-        Debug.Log("refresh-token = " + _RefreshToken);
-
-
         //_token은 서버로부터 받아온값을 바로 넣어주는걸로.
         _AccessToken = Crypto.AESEncrypt128(_AccessToken, CryptoType.AccessToken);
         _RefreshToken = Crypto.AESEncrypt128(_RefreshToken, CryptoType.RefreshToken);

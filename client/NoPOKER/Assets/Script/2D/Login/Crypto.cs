@@ -1,4 +1,4 @@
-﻿
+
 using UnityEngine;
 using System;
 using System.IO;
@@ -22,7 +22,6 @@ public class Crypto : MonoBehaviour
         rijndael.Mode = CipherMode.CBC;
         rijndael.Padding = PaddingMode.PKCS7;
         rijndael.KeySize = 128;
-        Debug.Log("key : " + s_key);
         MemoryStream _memoryStream = new MemoryStream();
         ICryptoTransform _encryptor = rijndael.CreateEncryptor(Encoding.UTF8.GetBytes(s_key), Encoding.UTF8.GetBytes(s_key));
 

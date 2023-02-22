@@ -16,33 +16,36 @@ public class UserList : MonoBehaviour
     public static UserList Instance { get => s_instance; }
     List<UserSocketData> _users = new List<UserSocketData>();
     [SerializeField] AllUserRecycleViewController _allUserRecycleViewController = new AllUserRecycleViewController();
-    LobbyUserListSocketData _userList = new LobbyUserListSocketData();
+    LobbyUserListSocketData _userList = null;
     UserSocketData _user;
     public LobbyUserChangeType IsUserCountChanged = LobbyUserChangeType.None;
 
 
     private void Awake()
     {
-       StartCoroutine(Init());
+      Init();
     }
 
-    IEnumerator  Init()
+    void  Init()
     {
-        yield return null;
+     
         if (s_instance == null)
             s_instance = this;
 
-        _userList = LobbyConnect.Instance.UserListData;
+        
       
     }
     private void Update()
     {
         if(IsUserCountChanged != LobbyUserChangeType.None)
         {
-            switch(IsUserCountChanged)
+            Debug.Log("IsUserCountChanged != LobbyUserChangeType.None");
+            switch (IsUserCountChanged)
             {
                 case LobbyUserChangeType.Setting:
-                    StartCoroutine(SetDatas());
+                    //Debug.Log("SeTTING");
+                    //StartCoroutine(SetDatas());
+                    _allUserRecycleViewController.SetDatas(_userList.users);
                     break;
                 case LobbyUserChangeType.Add:
                     _allUserRecycleViewController.AddData(new UserSocketData(_user.id, _user.nickname));
@@ -50,7 +53,6 @@ public class UserList : MonoBehaviour
                 case LobbyUserChangeType.Sub:
                     _allUserRecycleViewController.DeleteData(_user);
                     break;
-
             }
             IsUserCountChanged = LobbyUserChangeType.None;
         }
@@ -59,7 +61,9 @@ public class UserList : MonoBehaviour
 
     IEnumerator SetDatas()
     {
+        Debug.Log("USER = NULL?");
         yield return new WaitUntil(() => _userList.users != null);
+        Debug.Log("USER NOT NULL");
         _allUserRecycleViewController.SetDatas(_userList.users);
     }
 

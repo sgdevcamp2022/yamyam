@@ -33,12 +33,12 @@ namespace UI
 
 
         public void SetDatas(UserSocketData[] users)
-        {/*
+        {
             for(int i=0;i<users.Length;i++)
             {
                 TableData.Add(new UICellUserData {Id=users[i].id , Name = users[i].nickname, Invite = true});
             }
-            UpdateData();*/
+            UpdateData();
         }
 
         public void AddData(UserSocketData user)
