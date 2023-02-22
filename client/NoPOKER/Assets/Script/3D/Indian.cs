@@ -13,9 +13,12 @@ public class Indian : MonoBehaviour
 
     public int ammo;
     public int maxAmmo;
+    public int health;
+    public int maxHealth;
 
     float horizonAxis;
     float verticalAxis;
+
     bool walkDown;
     bool jumpDown;
     bool fireDown;
@@ -30,6 +33,7 @@ public class Indian : MonoBehaviour
     bool isSwap;
     bool isReload;
     bool isFireReady;
+    bool isDamage;
 
     Vector3 moveVector;
     Vector3 dodgeVector;
@@ -37,6 +41,7 @@ public class Indian : MonoBehaviour
 
     Rigidbody rigid;
     Animator anime;
+    MeshRenderer[] meshes;
 
     GameObject nearObject;
     Weapon equipWeapon;
@@ -46,7 +51,8 @@ public class Indian : MonoBehaviour
     void Awake()
     {
         rigid = GetComponent<Rigidbody>();
-        anime = GetComponentInChildren<Animator>();   
+        anime = GetComponentInChildren<Animator>();
+        meshes = GetComponentsInChildren<MeshRenderer>();
     }
 
     void Update()
@@ -93,9 +99,9 @@ public class Indian : MonoBehaviour
 
     void Turn()
     {
-        // ≈∞∫∏µÂø° ¿««— »∏¿¸
+        // ÌÇ§Î≥¥ÎìúÏóê ÏùòÌïú ÌöåÏ†Ñ
         transform.LookAt(transform.position + moveVector);
-        // ∏∂øÏΩ∫ø° ¿««— »∏¿¸
+        // ÎßàÏö∞Ïä§Ïóê ÏùòÌïú ÌöåÏ†Ñ
         if (fireDown) 
         {
             Ray ray = followCamera.ScreenPointToRay(Input.mousePosition);
@@ -211,7 +217,7 @@ public class Indian : MonoBehaviour
         }
     }
 
-    private void OnCollisionEnter(Collision collision)
+    void OnCollisionEnter(Collision collision)
     {
         if(collision.gameObject.tag == "Floor")
         {
@@ -220,13 +226,59 @@ public class Indian : MonoBehaviour
         }
     }
 
-    private void OnTriggerStay(Collider other)
+    void OnTriggerEnter(Collider other)
+    {
+        if (other.tag == "Melee")
+        {
+            Weapon weapon = other.GetComponent<Weapon>();
+            health -= weapon.damage;
+            Vector3 reactVector = transform.position - other.transform.position;
+            StartCoroutine(OnDamage());
+        }
+        else if (other.tag == "Bullet")
+        {
+            Bullet bullet = other.GetComponent<Bullet>();
+            health -= bullet.damage;
+            Vector3 reactVector = transform.position - other.transform.position;
+            Destroy(other.gameObject);
+            StartCoroutine(OnDamage());
+        }
+        else if (other.tag == "EnemyBullet")
+        {
+            if (!isDamage)
+            {
+                Bullet enemyBullet = other.GetComponent<Bullet>();
+                health -= enemyBullet.damage;
+                StartCoroutine(OnDamage());
+            }
+        }
+    }
+
+    IEnumerator OnDamage()
+    {
+        isDamage = true;
+
+        foreach(MeshRenderer mesh in meshes)
+        {
+            mesh.material.color = Color.yellow;
+        }
+        yield return new WaitForSeconds(1f);
+        
+        isDamage = false;
+
+        foreach (MeshRenderer mesh in meshes)
+        {
+            mesh.material.color = Color.white;
+        }
+    }
+
+    void OnTriggerStay(Collider other)
     {
         if (other.tag == "Weapon")
             nearObject = other.gameObject; 
     }
 
-    private void OnTriggerExit(Collider other)
+    void OnTriggerExit(Collider other)
     {
         if (other.tag == "Weapon")
             nearObject = null;
