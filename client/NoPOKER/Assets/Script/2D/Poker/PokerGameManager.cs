@@ -102,12 +102,11 @@ public class PokerGameManager : MonoBehaviour
     private int _alivePeople;
     public bool ReceiveSocketFlag = false;
 
-    public ReceivedBattingSocketData receivedBattingInfo = new ReceivedBattingSocketData(); 
-
+    public ReceivedBattingSocketData receivedBattingInfo = new ReceivedBattingSocketData();
     public PokerGameState _pokerGameState;
     public int UiPos;
-
-
+    public int ResultUserUiPos;
+   public  PokerResultPlayerSocketData[] ResultPlayerDatas;
 
     private void Update()
     {
@@ -119,6 +118,7 @@ public class PokerGameManager : MonoBehaviour
                     Debug.Log("NOW TURN : " + NowTurnUserId);
                     if (NowTurnUserId == UserInfo.Instance.UserID)
                     {
+
                         Batting.Instance.InActiveButtonView.SetActive(false);
                      }
                     _turn.StartTurn(NowTurnUserId);
@@ -132,7 +132,7 @@ public class PokerGameManager : MonoBehaviour
                 case PokerGameState.DIE:
                     //turn 돌아가는거 중단.
                     _turn.FinishTurn();
-                    ShowDieResult();
+                    ShowDieResult(ResultUserUiPos);
                     break;
             }
 
@@ -178,8 +178,17 @@ public class PokerGameManager : MonoBehaviour
             s_instance = this;
 
         _peopleNum = PokerGameSocket.Instance.GetPokerGamePeopleNum;
-        Debug.Log("POKERGAMEMANAGER READ PEOPLENUM = " + _peopleNum);
         DontDestroyOnLoad(this);
+    }
+
+
+    public void ShowGameResult()
+    {
+        for(int i=0;i<_peopleNum;i++)
+        {
+            int _findIndex = _playerUiOrders.FindIndex(x => x.id == PokerGameSocket.Instance.GetGamePlayersList[i].id);
+          //  _uiPokerPlayer.SetUsetChip(PokerGameSocket.Instance.result,)
+        }
     }
 
     public void SettingGame()
@@ -202,7 +211,7 @@ public class PokerGameManager : MonoBehaviour
     {
         for(int i=0;i<PokerGameSocket.Instance.GetPokerGamePeopleNum;i++)
         {
-            Debug.Log("NAME : " + PokerGameSocket.Instance.GetGamePlayersList[i].nickname);
+        
             PlayerOrder.Add(new PokerPlayer(
                 PokerGameSocket.Instance.GetGamePlayersList[i].id,
                 PokerGameSocket.Instance.GetGamePlayersList[i].nickname,
@@ -218,7 +227,10 @@ public class PokerGameManager : MonoBehaviour
         _turn.ClearTurnUI();
     }
 
-
+    public void StartTurn()
+    {
+        _isBattingFinish = false;
+    }
     public void FinishPokerGame()
     {
         _pokerFinish = true;
@@ -240,6 +252,7 @@ public class PokerGameManager : MonoBehaviour
 
     public void ResetPokerGame()
     {
+
         //Start();
     }
 
@@ -290,6 +303,11 @@ public class PokerGameManager : MonoBehaviour
             _uiPokerPlayer.SetUserName(2, _playerUiOrders[2].nickname);
             _uiPokerPlayer.SetUserName(2, _playerUiOrders[3].nickname);
         }
+
+        for(int i=0;i< _playerUiOrders.Count;i++)
+        {
+            Debug.Log("_playerUiOrders[" + i + "] : " + _playerUiOrders[i].nickname);
+        }
     }
 
     public void FindMyName()
@@ -321,20 +339,22 @@ public class PokerGameManager : MonoBehaviour
     {
        if(receivedBattingInfo.betAmout == Batting.Instance.CallBattingChip) //콜을 한 경우.
         {
+            Debug.Log("상대방이 call을 했네요");
             Batting.Instance.OtherCall();
             Batting.Instance.SetRoundBatting(receivedBattingInfo.totalAmount, receivedBattingInfo.betAmout);
-            _uiPokerPlayer.SetUsetChip(UiPos, receivedBattingInfo.currentAmount);
+            _uiPokerPlayer.SetUsetChip(ResultUserUiPos, receivedBattingInfo.currentAmount);
         }
        else
         {
+            Debug.Log("상대방이 RAISE을 했네요");
             Batting.Instance.OtherRaise(receivedBattingInfo.betAmout);
             Batting.Instance.SetRoundBatting(receivedBattingInfo.totalAmount, receivedBattingInfo.betAmout);
-            _uiPokerPlayer.SetUsetChip(UiPos, receivedBattingInfo.currentAmount);
+            _uiPokerPlayer.SetUsetChip(ResultUserUiPos, receivedBattingInfo.currentAmount);
 
         }
     }
-    public void ShowDieResult()
+    public void ShowDieResult(int userID)
     {
-        Batting.Instance.Die();
+        Batting.Instance.OtherDie(userID);
     }
 }

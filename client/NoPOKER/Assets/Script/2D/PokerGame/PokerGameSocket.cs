@@ -31,10 +31,21 @@ public class PokerGameStartSocketData {
     public string type;
     public Dictionary<string, PokerStartPlayerSocketData[]> content = new Dictionary<string, PokerStartPlayerSocketData[]>();
 }
+public class PokerGameResultSocketData {
+    public string type;
+    public Dictionary<string, PokerResultPlayerSocketData[]> content = new Dictionary<string, PokerResultPlayerSocketData[]>();
+}
+
 public class PokerStartPlayerSocketData {
     public int id;
     public int currentChip;
     public int card;
+}
+
+public class PokerResultPlayerSocketData {
+    public int id;
+    public bool result;
+    public int currentChip;
 }
 
 
@@ -44,6 +55,7 @@ public class PokerUserSocketData {
     public int order;
     public int currentChip;
     public int card;
+    public bool result;
     public PokerUserSocketData(int id, string nickname,int order)
     {
         this.id = id;
@@ -55,6 +67,12 @@ public class PokerUserSocketData {
     {
         this.currentChip = currentChip;
         this.card = card;
+    }
+
+    public void SetPokerResultData(bool result, int currentChip)
+    {
+        this.currentChip = currentChip;
+        this.result = result;
     }
 }
 
@@ -82,7 +100,7 @@ public class PokerGameSocket : MonoBehaviour
     public int GetPokerGamePeopleNum { get => _pokerGamePeopleNum; }
 
     private bool IsChangeScene = false;
-
+    private bool IsChange3DScene = false;
     private void Start()
     {
         Init();
@@ -100,9 +118,15 @@ public class PokerGameSocket : MonoBehaviour
     {
         if(IsChangeScene)
         {
+            Debug.Log("1");
             StartCoroutine(FocusCoroutine());
-  
+            Debug.Log("2");
             IsChangeScene = false;
+        }
+        if(IsChange3DScene)
+        {
+            GameManager.Instance.ChangeScene(Scenes.ActionGameScene);
+            IsChange3DScene = false;
         }
 
         if(Input.GetKeyDown(KeyCode.D))
@@ -162,6 +186,8 @@ public class PokerGameSocket : MonoBehaviour
     PokerSocketStringData _messageData;
     PokerSocketIntData _messageIntData;
     int receiveStartNum = 0;
+    PokerGameStartSocketData _startMessageData;
+    PokerGameResultSocketData _resultMessageData;
     private void ws_OnMessage(object sender, MessageEventArgs e)
     {
         Debug.Log(e.Data);
@@ -171,7 +197,11 @@ public class PokerGameSocket : MonoBehaviour
         Debug.Log("headers: " + message.Headers);
         Debug.Log("body: " + message.Body);
 
-        switch(message.Command)
+        try
+        { 
+
+
+        switch (message.Command)
         {
             case StompCommand.CONNECTED:
                 receiveStartNum = 0;
@@ -180,41 +210,43 @@ public class PokerGameSocket : MonoBehaviour
                 SendStompSubscribe();
                 break;
             case StompCommand.MESSAGE:
-                PokerSocketType _socketType = JsonConvert.DeserializeObject<PokerSocketType>(message.Body);
+
+                    PokerSocketType _socketType = JsonConvert.DeserializeObject<PokerSocketType>(message.Body);
+                 
                 // _messageData = JsonConvert.DeserializeObject<PokerSocketData>(message.Body);
                 switch (Enum.Parse(typeof(PokerMessageType), _socketType.type)) //TYPE 비교
                 {
                     case PokerMessageType.JOIN:
-                        _messageData = JsonConvert.DeserializeObject<PokerSocketStringData>(message.Body);
+                            PokerSocketStringData  _messageData = JsonConvert.DeserializeObject<PokerSocketStringData>(message.Body);
                         userSocketDataList.Add(new PokerUserSocketData(
                             Int32.Parse(_messageData.content["userId"]),
                             _messageData.content["nickname"],
                             Int32.Parse(_messageData.content["order"]))
                             );
 
-                        if(Match.Instance.GetMatchType.Equals("2P"))
+                        if (Match.Instance.GetMatchType.Equals("2P"))
                         {
                             if (userSocketDataList.Count == 2)
                             {
-                             
+
                                 userSocketDataList = userSocketDataList.OrderBy(x => x.order).ToList();
                                 _pokerGamePeopleNum = 2;
                                 SendReadyRequest(); //준비되었다고 알림보냄
-                                                         
+
                             }
                         }
                         else //4P
                         {
                             if (userSocketDataList.Count == 4)
                             {
-                               
+
                             }
                         }
                         break;
                     case PokerMessageType.GAME_START:
                         try
                         {
-                            PokerGameStartSocketData _startMessageData = JsonConvert.DeserializeObject<PokerGameStartSocketData>(message.Body);
+                             _startMessageData = JsonConvert.DeserializeObject<PokerGameStartSocketData>(message.Body);
                             PokerStartPlayerSocketData[] _startPlayerDatas = _startMessageData.content["playerInfos"];
                             for (int i = 0; i < _pokerGamePeopleNum; i++)
                             {
@@ -227,51 +259,78 @@ public class PokerGameSocket : MonoBehaviour
                         {
                             Debug.Log("ERROR : " + ex);
                         }
-                      
+
                         break;
 
                     case PokerMessageType.FOCUS:
                         try
                         {
-                            _messageData = JsonConvert.DeserializeObject<PokerSocketStringData>(message.Body);
+                                _startMessageData.type = "FOCUS";
+                            _messageIntData = JsonConvert.DeserializeObject<PokerSocketIntData>(message.Body);
                             if (GameManager.Instance.CheckNowScene() == Scenes.PokerGameScene)
                             {
-                                PokerGameManager.Instance.NowTurnUserId = Int32.Parse(_messageData.content["id"]);
+                                PokerGameManager.Instance.NowTurnUserId = _messageIntData.content["id"];
                                 PokerGameManager.Instance._pokerGameState = PokerGameState.FOCUS;
                                 PokerGameManager.Instance.ReceiveSocketFlag = true;
                             }
                         }
-                        catch(Exception ex)
+                        catch (Exception ex)
                         {
                             Debug.Log("ERROR : " + ex);
                         }
                         break;
                     case PokerMessageType.BET:
                         try
-                        {                       
-                            _messageIntData = JsonConvert.DeserializeObject<PokerSocketIntData>(message.Body);
-                            if (Int32.Parse(_messageIntData.content["playerId"].ToString()) != UserInfo.Instance.UserID)
+                            {
+                                
+                                _messageIntData = JsonConvert.DeserializeObject<PokerSocketIntData>(message.Body);
+                            if (_messageIntData.content["playerId"] != UserInfo.Instance.UserID)
                             {
                                 PokerGameManager.Instance.receivedBattingInfo.id = _messageIntData.content["playerId"];
-                            PokerGameManager.Instance.receivedBattingInfo.betAmout = _messageIntData.content["betAmount"];
-                            PokerGameManager.Instance.receivedBattingInfo.currentAmount = _messageIntData.content["currentAmount"];
-                            PokerGameManager.Instance.receivedBattingInfo.totalAmount = _messageIntData.content["totalAmount"];
+                                PokerGameManager.Instance.receivedBattingInfo.betAmout = _messageIntData.content["betAmount"];
+                                PokerGameManager.Instance.receivedBattingInfo.currentAmount = _messageIntData.content["currentAmount"];
+                                PokerGameManager.Instance.receivedBattingInfo.totalAmount = _messageIntData.content["totalAmount"];
 
-                  
-                                PokerGameManager.Instance._pokerGameState = PokerGameState.BET;
+                                PokerGameManager.Instance.ResultUserUiPos =
+                                             PokerGameManager.Instance.GetPlayerUiOrders.FindIndex
+                                             (x => x.id == _messageIntData.content["playerId"]);
+                                    if (_pokerGamePeopleNum == 2)
+                                    {
+                                        if (PokerGameManager.Instance.ResultUserUiPos == 1)
+                                            PokerGameManager.Instance.ResultUserUiPos = 2;
+                                    }
+                                    PokerGameManager.Instance._pokerGameState = PokerGameState.BET;
                                 PokerGameManager.Instance.ReceiveSocketFlag = true;
-                          }
+                            }
                         }
                         catch (Exception ex)
                         {
                             Debug.Log("ERROR : " + ex);
                         }
                         break;
-
-                    case PokerMessageType.RESULT:
+                    case PokerMessageType.DIE:
                         try
                         {
-                            Debug.Log("RECEIVED RESULT");
+                            _messageIntData = JsonConvert.DeserializeObject<PokerSocketIntData>(message.Body);
+                            if (_messageIntData.content["playerId"] != UserInfo.Instance.UserID)//남이 죽은거
+                            {
+
+
+                                PokerGameManager.Instance.ResultUserUiPos =
+                                    PokerGameManager.Instance.GetPlayerUiOrders.FindIndex
+                                    (x => x.id == _messageIntData.content["playerId"]);
+
+                                if (_pokerGamePeopleNum == 2)
+                                {
+                                    if (PokerGameManager.Instance.ResultUserUiPos == 1)
+                                        PokerGameManager.Instance.ResultUserUiPos = 2;
+                                }
+
+                                PokerGameManager.Instance._pokerGameState = PokerGameState.DIE;
+                                PokerGameManager.Instance.ReceiveSocketFlag = true;
+                                Debug.Log("RECEIVED RESULT");
+                            }
+
 
                         }
                         catch (Exception ex)
@@ -279,19 +338,61 @@ public class PokerGameSocket : MonoBehaviour
                             Debug.Log("ERROR : " + ex);
                         }
                         break;
-                }
+                    case PokerMessageType.RESULT:
+                        try
+                        {//RESULT보여주기.
+                                _resultMessageData = JsonConvert.DeserializeObject<PokerGameResultSocketData>(message.Body);
+                                PokerResultPlayerSocketData[] _resultPlayerDatas = _resultMessageData.content["playerInfos"];
+                                for (int i = 0; i < _pokerGamePeopleNum; i++)
+                                {
+                                    int _findIndex = userSocketDataList.FindIndex(x => x.id == _resultPlayerDatas[i].id);
+                                    userSocketDataList[_findIndex].SetPokerResultData(_resultPlayerDatas[i].result, _resultPlayerDatas[i].currentChip);
+                                }
+                                Debug.Log("RECEIVED RESULTRECEIVED RESULTRECEIVED RESULTRECEIVED RESULTRECEIVED RESULT");
+                                PokerGameManager.Instance.ResultPlayerDatas = _resultPlayerDatas;
+                                //
+                        }
+                        catch (Exception ex)
+                        {
+                            Debug.Log("ERROR : " + ex);
+                        }
+                        break;
+                        case PokerMessageType.OPEN:
+                            try
+                            {
+                                Debug.Log("OPEN OPENOPEN OPENOPEN OPENOPEN OPENOPEN OPENOPEN OPEN");
+
+                            }
+                            catch (Exception ex)
+                            {
+                                Debug.Log("ERROR : " + ex);
+                            }
+                            break;
+                    }
 
                 break;
         }
-   
+
+
+
+    }
+
+        catch(Exception ex)
+        {
+            Debug.Log(ex);
+        }
+
     }
 
     IEnumerator FocusCoroutine()
     {
 
         // yield return new WaitUntil(() => GameManager.Instance.CheckNowScene() == Scenes.PokerGameScene);
-        yield return new WaitUntil(() => _messageData.type.Equals("FOCUS"));
+        Debug.Log("3");
+        yield return new WaitUntil(() => _startMessageData.type.Equals("FOCUS"));
+        Debug.Log("4");
         GameManager.Instance.ChangeScene(Scenes.PokerGameScene);
+        Debug.Log("5");
         StartCoroutine( FirstFocus());
     }
 
@@ -300,8 +401,8 @@ public class PokerGameSocket : MonoBehaviour
         Debug.Log("FirstFocus");
         yield return new WaitUntil(() => GameManager.Instance.CheckNowScene() == Scenes.PokerGameScene);
         Debug.Log("화면전환됨!");
-        PokerGameManager.Instance.NowTurnUserId = Int32.Parse(_messageData.content["id"]);
-        Debug.Log("NOW TURN : " + Int32.Parse(_messageData.content["id"]));
+        PokerGameManager.Instance.NowTurnUserId = _messageIntData.content["id"];
+        Debug.Log("NOW TURN : " + _messageIntData.content["id"]);
 
         PokerGameManager.Instance._pokerGameState = PokerGameState.FOCUS;
         PokerGameManager.Instance.ReceiveSocketFlag = true;

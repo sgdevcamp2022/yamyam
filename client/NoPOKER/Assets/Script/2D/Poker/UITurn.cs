@@ -33,6 +33,7 @@ public class UITurn : MonoBehaviour
         StartCoroutine(_battingTurn);
         yield return new WaitUntil(()=> PokerGameManager.Instance.IsBattingFinish);
         _playersTurnUI[_nowUiPos].gameObject.SetActive(false);
+        PokerGameManager.Instance.StartTurn();
 
         FinishTurn();
     }
@@ -56,6 +57,7 @@ public class UITurn : MonoBehaviour
         if (PokerGameManager.Instance.PokerFinish)
         {
             _stopTimer = true;
+            FinishTurn();
             return;
         }           
         _currentTime = Time.time - _startTime;
@@ -65,8 +67,9 @@ public class UITurn : MonoBehaviour
         }
         else
         {
-            _stopTimer = true;
+            
             FinishTurn();
+            if(PokerGameManager.Instance.NowTurnUserId == UserInfo.Instance.UserID)
             Batting.Instance.Die();         
         }
     }
@@ -116,6 +119,8 @@ public class UITurn : MonoBehaviour
 
     public void FinishTurn()
     {
+        _stopTimer = true;
+
         StopCoroutine(_battingTurn);
         StopCoroutine(_turnWait);
        

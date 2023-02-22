@@ -132,7 +132,7 @@ public class TeamMemberExitSocketData {
 public class LobbyConnect : MonoBehaviour {
     private static LobbyConnect s_instance = null;
     public static LobbyConnect Instance { get => s_instance; }
-    WebSocket _lobbySocket;
+   public WebSocket _lobbySocket;
     StringBuilder _urlBuilder = new StringBuilder();
     LobbyUserListSocketData _userListData;
     public LobbyUserListSocketData UserListData { get => _userListData; }
