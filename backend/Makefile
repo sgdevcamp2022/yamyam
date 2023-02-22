@@ -17,6 +17,7 @@ local-build:        ## Generate LOCAL level Backend Infra at ONCE!
 	@make local
 
 prod-build:         ## Generate production level Backend Infra at ONCE!
+	@make down
 	@make prod
 	@make migrate
 	@make cs

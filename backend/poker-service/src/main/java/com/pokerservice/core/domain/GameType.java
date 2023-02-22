@@ -5,13 +5,13 @@ public enum GameType {
     P2(2),
     P4(4);
 
-    private final int playerCount;
+    private int playerSize;
 
-    GameType(int playerCount) {
-        this.playerCount = playerCount;
+    GameType(int playerSize) {
+        this.playerSize = playerSize;
     }
 
-    public int getPlayerCount() {
-        return playerCount;
+    public int getPlayerSize() {
+        return playerSize;
     }
 }
