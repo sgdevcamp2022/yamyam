@@ -19,7 +19,7 @@ public class UIBatting : MonoBehaviour
 
     [SerializeField] GameObject[] _playersPosition = new GameObject[4];
     [SerializeField] RectTransform[] _battingChips = new RectTransform[3];
-    
+    [SerializeField] GameObject _inactiveBattingButtonView;
     private int _canBatting;
     private Vector3 _targetPos;
 
@@ -54,7 +54,7 @@ public class UIBatting : MonoBehaviour
 
     public void BattingUp()
     {
-        _canBatting += Batting.Instance.UnitBattingChip;
+        _canBatting += 1;
 
         if ( _canBatting <= Batting.Instance.MyBattingChip)
         {
@@ -62,22 +62,31 @@ public class UIBatting : MonoBehaviour
         }
         else
         {
-            _canBatting -= Batting.Instance.UnitBattingChip;
+            _canBatting -=1;
         }       
     }
 
     public void BattingDown()
     {
-        _canBatting -= Batting.Instance.UnitBattingChip;
+        _canBatting -= 1;
 
         if ( _canBatting < Batting.Instance.MinBattingChip)
         {
-            _canBatting += Batting.Instance.UnitBattingChip;
+            _canBatting += 1;
         }
         else
         {
             _battingChipNum.text = _canBatting.ToString();
         }
+    }
+
+    public void DonAccessBattingButton()
+    {
+        _inactiveBattingButtonView.SetActive(true);
+    }
+    public void AccessBattingButton()
+    {
+        _inactiveBattingButtonView.SetActive(false);
     }
 
     public void ChangeBattingChip()

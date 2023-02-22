@@ -14,7 +14,8 @@ public enum PokerGameState {
     FOCUS,
     RRESULT,
     BET,
-    DIE
+    DIE,
+    OPEN
 }
 
 public class PokerPlayer
@@ -100,13 +101,13 @@ public class PokerGameManager : MonoBehaviour
     private int _callNum = 0;
 
     public bool ReceiveSocketFlag = false;
-
+    
     public ReceivedBattingSocketData receivedBattingInfo = new ReceivedBattingSocketData();
     public PokerGameState _pokerGameState;
     public int UiPos;
     public int ResultUserUiPos;
    public  PokerResultPlayerSocketData[] ResultPlayerDatas;
-
+    [SerializeField] GameObject _inactiveBattingButtonView;
     private void Update()
     {
         if(ReceiveSocketFlag)
@@ -117,8 +118,15 @@ public class PokerGameManager : MonoBehaviour
                     Debug.Log("NOW TURN : " + NowTurnUserId);
                     if (NowTurnUserId == UserInfo.Instance.UserID)
                     {
-
                         Batting.Instance.InActiveButtonView.SetActive(false);
+                        if(_playerUiOrders[0].currentChip < Batting.Instance.CallBattingChip)
+                        {
+                            Batting.Instance.CallorDieState(true);
+                        }
+                        else
+                        {
+                            Batting.Instance.CallorDieState(false);
+                        }
                      }
                     _turn.StartTurn(NowTurnUserId);
                     break;
@@ -132,6 +140,10 @@ public class PokerGameManager : MonoBehaviour
                     //turn 돌아가는거 중단.
                     _turn.FinishTurn();
                     ShowDieResult(ResultUserUiPos);
+                    break;
+                case PokerGameState.OPEN:
+                    FinishPokerGame();
+                    ShowGameResult();
                     break;
             }
 
@@ -176,7 +188,7 @@ public class PokerGameManager : MonoBehaviour
 
             if(_playerUiOrders[_findIndex].result == true)
             {
-                //승리라면 어떤 효과주기
+                SendWinnerMessage(_playerUiOrders[_findIndex].id);
             }
         }
     }
@@ -225,18 +237,12 @@ public class PokerGameManager : MonoBehaviour
         _pokerFinish = true;
         _turn.StopAllTurn();
         _card.OpenMyCard();
-        PokerGameSocket.Instance.DisconnectSever();
     }
 
-    public void AllDie()
-    {
-        _card.OpenMyCard();
-        SendWinnerMessage();
-    }
-
-    public void SendWinnerMessage()
+    public void SendWinnerMessage(int winnerID)
     {
         Batting.Instance.Win();
+        _turn.ShowWinnerUI(winnerID);
     }
 
     public void ResetPokerGame()
@@ -274,6 +280,9 @@ public class PokerGameManager : MonoBehaviour
             }
             
         }
+
+        for (int i = 0; i < _playerUiOrders.Count; i++)
+            Debug.Log("_playerUiOrders :" + _playerUiOrders[i].nickname);
         if (_peopleNum == 2)
         {
             _uiPokerPlayer.SetUserName(0, _playerUiOrders[0].nickname);

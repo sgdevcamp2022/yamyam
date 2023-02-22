@@ -9,13 +9,11 @@ public class Batting : MonoBehaviour
 
     private int _roundBattingChip = 20;
     public int RoundBattingChip { get => _roundBattingChip; }
-    private int _myBattingChip = 100;
+    private int _myBattingChip = 90;
     public int MyBattingChip { get => _myBattingChip; }
     private int _callBattingChip = 10;
     public int CallBattingChip { get => _callBattingChip; }
-    public int MinBattingChip { get => _callBattingChip + _unitBattingChip; }
-    private int _unitBattingChip = 5;
-    public int UnitBattingChip { get => _unitBattingChip; }
+    public int MinBattingChip { get => _callBattingChip +1; }
     private bool _canPayChip;
     public GameObject InActiveButtonView;
 
@@ -184,6 +182,7 @@ public class Batting : MonoBehaviour
                 ResetBattingChip();
                 //베팅칩 그 사람한테 가는거 UI적으로 보여주기
                 _uiBatting.ShowBattingChipMovePlayer(i);
+
                 Debug.Log("winner찾음~!");
             }
         }
@@ -195,5 +194,16 @@ public class Batting : MonoBehaviour
         _callBattingChip = 10;
     }
 
+    public void CallorDieState(bool state)
+    {
+        if(state)
+        {
+            _uiBatting.DonAccessBattingButton();
+        }        
+        else
+        {
+            _uiBatting.AccessBattingButton();
+        }
+    }
 
 }
