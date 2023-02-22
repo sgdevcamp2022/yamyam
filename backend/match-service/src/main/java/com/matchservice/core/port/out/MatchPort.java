@@ -1,7 +1,7 @@
 package com.matchservice.core.port.out;
 
-import com.matchservice.core.domain.Match;
-import com.matchservice.core.domain.MatchType;
+import com.matchservice.core.domain.match.Match;
+import com.matchservice.core.domain.match.Match.GameType;
 import java.util.List;
 
 public interface MatchPort {
@@ -10,7 +10,10 @@ public interface MatchPort {
 
     Match findById(long id);
 
-    List<Match> showMatches(MatchType matchType);
+    List<Match> showMatches(GameType gameType);
+
+    List<Match> showAll();
 
     Match remove(long id);
+
 }

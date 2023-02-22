@@ -1,42 +1,39 @@
 package com.matchservice.core.domain;
 
-import java.time.LocalDateTime;
 import java.util.Objects;
+import org.springframework.messaging.simp.SimpMessageSendingOperations;
 
 public class Player {
 
     private long id;
     private String session;
-    private LocalDateTime penaltyTime;
+    private SimpMessageSendingOperations operate;
 
-    public Player(long id, String session) {
-        this.id = id;
+    public Player(String session, SimpMessageSendingOperations operate) {
         this.session = session;
-        this.penaltyTime = LocalDateTime.now().minusMinutes(1);
+        this.operate = operate;
     }
 
-    public long getId() {
-        return id;
+    public Player(long id, String session, SimpMessageSendingOperations operate) {
+        this.id = id;
+        this.session = session;
+        this.operate = operate;
     }
 
     public void setId(long id) {
         this.id = id;
     }
 
+    public long getId() {
+        return id;
+    }
+
     public String getSession() {
         return session;
     }
 
-    public void setSession(String session) {
-        this.session = session;
-    }
-
-    public boolean isPenaltyUser() {
-        return LocalDateTime.now().isBefore(penaltyTime);
-    }
-
-    public void givePenalty() {
-        penaltyTime = LocalDateTime.now().plusMinutes(5);
+    public SimpMessageSendingOperations getOperate() {
+        return operate;
     }
 
     @Override
@@ -48,11 +45,19 @@ public class Player {
             return false;
         }
         Player player = (Player) o;
-        return id == player.id;
+        return id == player.id && Objects.equals(session, player.session);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id);
+        return Objects.hash(id, session);
+    }
+
+    @Override
+    public String toString() {
+        return "Player{" +
+            "id=" + id +
+            ", session='" + session + '\'' +
+            '}';
     }
 }

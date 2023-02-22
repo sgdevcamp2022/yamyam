@@ -1,13 +1,12 @@
 package com.matchservice.core.port.out;
 
-import com.matchservice.core.domain.Match;
-import com.matchservice.core.domain.MatchType;
+import com.matchservice.core.domain.match.Match.GameType;
 import com.matchservice.core.domain.Player;
 
 public interface MatchQueuePort {
-    void save(Player player, MatchType matchType);
+    void save(Player player, GameType gameType);
 
-    Player remove(MatchType matchType);
+    Player remove(GameType gameType);
 
-    long size(MatchType matchType);
+    long size(GameType gameType);
 }

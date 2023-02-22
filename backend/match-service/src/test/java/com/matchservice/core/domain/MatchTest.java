@@ -1,26 +1,39 @@
 package com.matchservice.core.domain;
 
-import static org.assertj.core.api.Assertions.*;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
+import com.matchservice.core.domain.match.Match;
+import com.matchservice.core.domain.match.Match.GameType;
 import java.util.List;
-import java.util.stream.Stream;
 import org.junit.jupiter.api.Test;
+import org.springframework.messaging.Message;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
+import org.springframework.messaging.support.AbstractMessageChannel;
 
 class MatchTest {
+    private static class TestMessageTemplate extends SimpMessagingTemplate {
 
+        public TestMessageTemplate() {
+            super(new AbstractMessageChannel() {
+                @Override
+                protected boolean sendInternal(Message<?> message, long timeout) {
+                    return false;
+                }
+            });
+        }
+    }
     @Test
     void compare_moreWaitPlayer_WillFirst(){
         // given
-        Match match1 = new Match(MatchType.P4);
-        Match match2 = new Match(MatchType.P4);
-        Match match3 = new Match(MatchType.P4);
-        Match match4 = new Match(MatchType.P4);
+        Match match1 = new Match(GameType.P4);
+        Match match2 = new Match(GameType.P4);
+        Match match3 = new Match(GameType.P4);
+        Match match4 = new Match(GameType.P4);
 
-        Player testPlayer1 = new Player(1, "test");
-        Player testPlayer2 = new Player(2, "test");
-        Player testPlayer3 = new Player(3, "test");
-        Player testPlayer4 = new Player(4, "test");
+        Player testPlayer1 = new Player(1, "test", new TestMessageTemplate());
+        Player testPlayer2 = new Player(2, "test", new TestMessageTemplate());
+        Player testPlayer3 = new Player(3, "test", new TestMessageTemplate());
+        Player testPlayer4 = new Player(4, "test", new TestMessageTemplate());
 
         match1.addPlayer(testPlayer1);
         match1.addPlayer(testPlayer2);

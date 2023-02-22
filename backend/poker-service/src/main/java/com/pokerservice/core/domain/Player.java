@@ -1,32 +1,60 @@
 package com.pokerservice.core.domain;
 
 import java.util.Objects;
+import org.springframework.messaging.simp.SimpMessageSendingOperations;
 
 public class Player {
 
-    private final long userId;
+    private final long id;
     private final String session;
     private final String nickname;
     private int currentBetAmount;
     private int chip;
     private int card;
-    private int seatNo;
+    private int order;
+    private long gameId;
     private PlayerStatus status;
+    private SimpMessageSendingOperations operate;
 
-    private Player(long userId, String session, String nickname) {
-        this.userId = userId;
+    private Player(long id, String session, String nickname, long gameId) {
+        this.id = id;
         this.session = session;
         this.nickname = nickname;
         this.chip = 100;
         this.status = PlayerStatus.PLAYING;
+        this.gameId = gameId;
     }
 
-    public static Player create(long userId, String session, String nickname) {
-        return new Player(userId, session , nickname);
+    public static Player create(long userId, String session, String nickname, long gameId) {
+        return new Player(userId, session, nickname, gameId);
     }
 
-    public long getUserId() {
-        return userId;
+    public void die() {
+        status = PlayerStatus.DIE;
+    }
+
+    public void betting(int betAmount) {
+        this.currentBetAmount += betAmount;
+        this.chip -= betAmount;
+    }
+
+    public int allIn() {
+        int allInChip = chip;
+        this.chip = 0;
+        this.currentBetAmount += allInChip;
+        return allInChip;
+    }
+
+    public void setOperate(SimpMessageSendingOperations operate) {
+        this.operate = operate;
+    }
+
+    public SimpMessageSendingOperations getOperate() {
+        return operate;
+    }
+
+    public long getId() {
+        return id;
     }
 
     public String getSession() {
@@ -41,32 +69,32 @@ public class Player {
         return currentBetAmount;
     }
 
-    public void betting(int betAmount) {
-        this.currentBetAmount = betAmount;
-    }
-
     public int getChip() {
         return chip;
     }
 
-    public void updateChip(int chipAmount) {
-        this.chip += chip;
+    public void addChip(int chipAmount) {
+        this.chip += chipAmount;
+    }
+
+    public void minusChip(int chipAmount) {
+        this.chip -= chipAmount;
     }
 
     public int getCard() {
         return card;
     }
 
-    public void drawCard(int card) {
+    public void setCardInfo(int card) {
         this.card = card;
     }
 
-    public int getSeatNo() {
-        return seatNo;
+    public int getOrder() {
+        return order;
     }
 
-    public void setSeatNo(int seatNo) {
-        this.seatNo = seatNo;
+    public void setOrder(int order) {
+        this.order = order;
     }
 
     public PlayerStatus getStatus() {
@@ -75,6 +103,10 @@ public class Player {
 
     public void changeStatus(PlayerStatus status) {
         this.status = status;
+    }
+
+    public long getGameId() {
+        return gameId;
     }
 
     @Override
@@ -86,26 +118,26 @@ public class Player {
             return false;
         }
         Player player = (Player) o;
-        return userId == player.userId && Objects.equals(session, player.session)
-            && Objects.equals(nickname, player.nickname);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(userId, session, nickname);
+        return id == player.id;
     }
 
     @Override
     public String toString() {
         return "Player{" +
-            "userId=" + userId +
+            "userId=" + id +
             ", session='" + session + '\'' +
             ", nickname='" + nickname + '\'' +
             ", currentBetAmount=" + currentBetAmount +
             ", chip=" + chip +
             ", card=" + card +
-            ", seatNo=" + seatNo +
+            ", order=" + order +
             ", status=" + status +
+            ", operate=" + operate +
             '}';
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id);
     }
 }

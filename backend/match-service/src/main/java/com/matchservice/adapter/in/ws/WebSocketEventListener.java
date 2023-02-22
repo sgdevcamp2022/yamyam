@@ -1,9 +1,12 @@
 package com.matchservice.adapter.in.ws;
 
 import com.matchservice.core.domain.Lobby;
+import com.matchservice.core.domain.Player;
+import com.matchservice.core.domain.message.MatchMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.event.EventListener;
+import org.springframework.messaging.Message;
 import org.springframework.messaging.simp.SimpMessageSendingOperations;
 import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
 import org.springframework.stereotype.Component;
@@ -25,26 +28,23 @@ public class WebSocketEventListener {
 
     @EventListener
     public void handleWebSocketConnectListener(SessionConnectedEvent event) {
-        log.info("Received a new web socket connection");
-        StompHeaderAccessor headerAccessor = StompHeaderAccessor.wrap(event.getMessage());
+        StompHeaderAccessor stompHeaderAccessor = StompHeaderAccessor.wrap(event.getMessage());
+        String sessionId = stompHeaderAccessor.getUser().getName();
+        Player player = new Player(sessionId, messageSendingOperations);
+        log.info("sessionId : {} - add user to lobby", sessionId);
+        lobby.addPlayer(sessionId, player);
     }
 
     @EventListener
     public void handleSessionConnectEvent(SessionConnectedEvent event) {
-        StompHeaderAccessor stompHeaderAccessor = StompHeaderAccessor.wrap(event.getMessage());
-        String sessionId = stompHeaderAccessor.getUser().getName();
-        lobby.addSender(sessionId, messageSendingOperations);
     }
 
     @EventListener
     public void handleWebSocketDisconnectListener(SessionDisconnectEvent event) {
         StompHeaderAccessor headerAccessor = StompHeaderAccessor.wrap(event.getMessage());
-        String username = (String) headerAccessor.getSessionAttributes().get("username");
-        String session = headerAccessor.getUser().getName();
+        String sessionId = headerAccessor.getUser().getName();
 
-        if (username != null) {
-            log.info("User Disconnected : " + username);
-            lobby.removeSender(session);
-        }
+        log.info("sessionId: {} - disconnect from lobby", sessionId);
+        lobby.removePlayer(sessionId);
     }
 }
