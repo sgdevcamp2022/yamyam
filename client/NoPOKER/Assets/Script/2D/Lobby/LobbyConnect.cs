@@ -84,6 +84,8 @@ public class UserPokertData {
     public string nickname;
     public int order;
     public int card;
+    public int currentChip;
+    public bool result;
     public UserPokertData(int id, string nickname, int card)
     {
         this.id = id;
@@ -132,7 +134,7 @@ public class TeamMemberExitSocketData {
 public class LobbyConnect : MonoBehaviour {
     private static LobbyConnect s_instance = null;
     public static LobbyConnect Instance { get => s_instance; }
-    WebSocket _lobbySocket;
+   public WebSocket _lobbySocket;
     StringBuilder _urlBuilder = new StringBuilder();
     LobbyUserListSocketData _userListData;
     public LobbyUserListSocketData UserListData { get => _userListData; }
