@@ -7,4 +7,4 @@ RUN gradle clean build
 ARG JAR_FILE_PATH=build/libs/*-SNAPSHOT.jar
 COPY ${JAR_FILE_PATH} match.jar
 
-ENTRYPOINT ["java", "-jar", "match.jar", "--url.poker-service=http://localhost:8004"]
+ENTRYPOINT ["java", "-jar", "match.jar"]
