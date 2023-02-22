@@ -48,7 +48,6 @@ public class Batting : MonoBehaviour
         {
             _uiBatting.SetPlayerBattingResult(PokerGameManager.Instance.UiPos, raiseChip.ToString());
             PersonSound.Instance.PlayRaiseSound();
-            PokerGameManager.Instance.ResetCallNum();
 
                 _payChip(raiseChip, false);
         }
@@ -58,7 +57,6 @@ public class Batting : MonoBehaviour
    
             _uiBatting.SetPlayerBattingResult(PokerGameManager.Instance.ResultUserUiPos, raiseChip.ToString());
             PersonSound.Instance.PlayRaiseSound();
-            PokerGameManager.Instance.ResetCallNum();
 
             _payChip(raiseChip, false);
 
@@ -88,7 +86,6 @@ public class Batting : MonoBehaviour
         // 턴을 넘기도록함.
         _uiBatting.SetPlayerBattingResult(0, "다이");
         _uiBatting.ActiveDieView(0);
-        PokerGameManager.Instance.UpDieNum();
         PersonSound.Instance.PlayDieSound();
         PokerGameManager.Instance.ChangePlayerState(BattingState.die);
     
@@ -105,7 +102,6 @@ public class Batting : MonoBehaviour
         // 턴을 넘기도록함.
         _uiBatting.SetPlayerBattingResult(PokerGameManager.Instance.ResultUserUiPos, "다이");
         _uiBatting.ActiveDieView(PokerGameManager.Instance.UiPos);
-        PokerGameManager.Instance.UpDieNum();
         PersonSound.Instance.PlayDieSound();
         PokerGameManager.Instance.ChangePlayerState(BattingState.die);
 

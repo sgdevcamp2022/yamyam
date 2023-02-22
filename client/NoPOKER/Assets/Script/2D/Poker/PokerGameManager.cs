@@ -89,7 +89,6 @@ public class PokerGameManager : MonoBehaviour
 
     public float TurnTime { get => _turnTiem; }
     public int NowTurnUserId;
-    private int _gameProcessNum = 0;
     private int _distributeNum = 0;
     public int DistributeNum { get => _distributeNum; }
     private int _dieNum = 0;
@@ -99,7 +98,7 @@ public class PokerGameManager : MonoBehaviour
     private int _myOrder;
     private int _startPoint;
     private int _callNum = 0;
-    private int _alivePeople;
+
     public bool ReceiveSocketFlag = false;
 
     public ReceivedBattingSocketData receivedBattingInfo = new ReceivedBattingSocketData();
@@ -140,22 +139,7 @@ public class PokerGameManager : MonoBehaviour
         }
     }
 
-    public void UpCallNum()
-    {
-        _callNum++;
-    }
-    
-    public void ResetCallNum()
-    {
-        _callNum = 0;
-    }
-
-    public void UpDieNum()
-    {
-        _dieNum++;
-        _alivePeople--;
-    }
-
+ 
     public void UpDistributeNum()
     {
         _distributeNum++;
@@ -166,19 +150,18 @@ public class PokerGameManager : MonoBehaviour
         Init();
    
     }
-    private void Start()
+    
+    public void StartPokerGame()
     {
-        SettingGame();
+        _peopleNum = PokerGameSocket.Instance.GetPokerGamePeopleNum;
+        SettingGame(); 
     }
-
 
     public void Init()
     {
         if (s_instance == null)
             s_instance = this;
-
-        _peopleNum = PokerGameSocket.Instance.GetPokerGamePeopleNum;
-        DontDestroyOnLoad(this);
+      //  DontDestroyOnLoad(this);
     }
 
 
@@ -187,17 +170,23 @@ public class PokerGameManager : MonoBehaviour
         for(int i=0;i<_peopleNum;i++)
         {
             int _findIndex = _playerUiOrders.FindIndex(x => x.id == PokerGameSocket.Instance.GetGamePlayersList[i].id);
-          //  _uiPokerPlayer.SetUsetChip(PokerGameSocket.Instance.result,)
+            _playerUiOrders[_findIndex].currentChip = PokerGameSocket.Instance.GetGamePlayersList[i].currentChip;
+            _playerUiOrders[_findIndex].result = PokerGameSocket.Instance.GetGamePlayersList[i].result;
+            _uiPokerPlayer.SetUsetChip(_findIndex, _playerUiOrders[_findIndex].currentChip);
+
+            if(_playerUiOrders[_findIndex].result == true)
+            {
+                //승리라면 어떤 효과주기
+            }
         }
     }
 
     public void SettingGame()
     {
-        _alivePeople = _peopleNum;
         GetPlayerOrder();
         SetPlayerPosition();                   
 
-        Batting.Instance.SettingRoundBatting(0);
+        Batting.Instance.SettingRoundBatting(_peopleNum * 10);
         _card.DistributeCard();
     }
 

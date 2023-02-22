@@ -84,6 +84,8 @@ public class UserPokertData {
     public string nickname;
     public int order;
     public int card;
+    public int currentChip;
+    public bool result;
     public UserPokertData(int id, string nickname, int card)
     {
         this.id = id;

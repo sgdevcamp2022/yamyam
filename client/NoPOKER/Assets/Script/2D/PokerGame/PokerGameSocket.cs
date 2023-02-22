@@ -99,7 +99,7 @@ public class PokerGameSocket : MonoBehaviour
     int _pokerGamePeopleNum;
     public int GetPokerGamePeopleNum { get => _pokerGamePeopleNum; }
 
-    private bool IsChangeScene = false;
+    private bool IsStart = false;
     private bool IsChange3DScene = false;
     private void Start()
     {
@@ -116,12 +116,10 @@ public class PokerGameSocket : MonoBehaviour
 
     private void Update()
     {
-        if(IsChangeScene)
+        if(IsStart)
         {
-            Debug.Log("1");
             StartCoroutine(FocusCoroutine());
-            Debug.Log("2");
-            IsChangeScene = false;
+            IsStart = false;
         }
         if(IsChange3DScene)
         {
@@ -246,14 +244,17 @@ public class PokerGameSocket : MonoBehaviour
                     case PokerMessageType.GAME_START:
                         try
                         {
+                                userSocketDataList = new List<PokerUserSocketData>();
                              _startMessageData = JsonConvert.DeserializeObject<PokerGameStartSocketData>(message.Body);
                             PokerStartPlayerSocketData[] _startPlayerDatas = _startMessageData.content["playerInfos"];
+                                _pokerGamePeopleNum= _startPlayerDatas.Count();
                             for (int i = 0; i < _pokerGamePeopleNum; i++)
                             {
                                 int _findIndex = userSocketDataList.FindIndex(x => x.id == _startPlayerDatas[i].id);
                                 userSocketDataList[_findIndex].SetPokerStartData(_startPlayerDatas[i].currentChip, _startPlayerDatas[i].card);
                             }
-                            IsChangeScene = true;
+                 
+                            IsStart = true;
                         }
                         catch (Exception ex)
                         {
@@ -388,22 +389,22 @@ public class PokerGameSocket : MonoBehaviour
     {
 
         // yield return new WaitUntil(() => GameManager.Instance.CheckNowScene() == Scenes.PokerGameScene);
-        Debug.Log("3");
-        yield return new WaitUntil(() => _startMessageData.type.Equals("FOCUS"));
-        Debug.Log("4");
-        GameManager.Instance.ChangeScene(Scenes.PokerGameScene);
-        Debug.Log("5");
+        yield return new WaitUntil(() => _startMessageData.type.Equals("FOCUS"));      
         StartCoroutine( FirstFocus());
+        if (GameManager.Instance.CheckNowScene() == Scenes.PokerGameScene)
+            PokerGameManager.Instance.StartPokerGame();
+        else if (GameManager.Instance.CheckNowScene() == Scenes.LobbyScene)
+            GameManager.Instance.ChangeScene(Scenes.PokerGameScene);
     }
 
     public IEnumerator FirstFocus()
     {
         Debug.Log("FirstFocus");
+
         yield return new WaitUntil(() => GameManager.Instance.CheckNowScene() == Scenes.PokerGameScene);
-        Debug.Log("화면전환됨!");
         PokerGameManager.Instance.NowTurnUserId = _messageIntData.content["id"];
         Debug.Log("NOW TURN : " + _messageIntData.content["id"]);
-
+        PokerGameManager.Instance.StartPokerGame();
         PokerGameManager.Instance._pokerGameState = PokerGameState.FOCUS;
         PokerGameManager.Instance.ReceiveSocketFlag = true;
 
