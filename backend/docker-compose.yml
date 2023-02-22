@@ -24,6 +24,22 @@ services:
       - ./.env.lobby.dev
     depends_on:
       - redis
+  match:
+    build: ./match-service
+    command: java -jar match-service-0.0.1-SNAPSHOT.jar
+    volumes:
+      - ./match-service/:/usr/src/match/
+    ports:
+      - 8003:8003
+    container_name: match-server
+  poker:
+    build: ./poker-service
+    command: java -jar poker-service-0.0.1-SNAPSHOT.jar
+    volumes:
+      - ./poker-service/:/usr/src/poker/
+    ports:
+      - 8004:8004
+    container_name: poker-server
   db:
     image: postgres:14.6-alpine
     volumes:
