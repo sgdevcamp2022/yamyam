@@ -2,7 +2,10 @@ package com.pokerservice.core.domain;
 
 public enum PlayerStatus {
     PLAYING(1),
-    DIE(2),
+    RAISE(2),
+    CALL(3),
+    DIE(4),
+    ALLIN(5),
     LOOSE(8),
     EXIT(9);
 

@@ -27,7 +27,8 @@ public class UICard : MonoBehaviour
      //   _playerCardUI[1].sprite =
      if(PokerGameManager.Instance.PeopleNum == 2)
         {
-            _playerCardUI[2].sprite = _cardImage[_cards[1]];
+            Debug.Log("_cards[1] : " +_cards[1]);
+            _playerCardUI[2].sprite = _cardImage[_cards[1]-1];
         }
      else //2명 이상일 경우
         {

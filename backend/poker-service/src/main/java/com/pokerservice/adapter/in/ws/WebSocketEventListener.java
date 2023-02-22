@@ -48,10 +48,12 @@ public class WebSocketEventListener {
 
     @EventListener
     public void handleWebSocketDisconnectListener(SessionDisconnectEvent event) {
-        log.info("Poker Server DisConnect Success");
         StompHeaderAccessor headerAccessor = StompHeaderAccessor.wrap(event.getMessage());
+        log.info("=== Poker Server DisConnect Success ===");
         String socketSessionId = headerAccessor.getSessionId();
         String socketUserId = websocketSessionMap.remove(socketSessionId);
+        log.info("socketSessionId: {}", socketSessionId);
+        log.info("socketUserId: {}", socketUserId);
 
         gameUseCase.exitGame(socketUserId);
 

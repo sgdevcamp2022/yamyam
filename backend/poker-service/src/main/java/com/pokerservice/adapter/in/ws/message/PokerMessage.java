@@ -20,13 +20,13 @@ public class PokerMessage<T> {
         JOIN,
         GAME_START,
         FOCUS,
-        RESULT,
+        RESULT, OPEN,
         GAME_END,
         ERROR,
         EXIT,
 
         // USE BOTH
-        BET, DIE
+        RAISE, CALL, ALLIN, DIE
     }
 
     private T content;
@@ -50,8 +50,16 @@ public class PokerMessage<T> {
         return new PokerMessage<>(MessageType.FOCUS, content, 1.0);
     }
 
-    public static PokerMessage<BetResponseContent> betMessage(BetResponseContent content) {
-        return new PokerMessage<>(MessageType.BET, content, 1.0);
+    public static PokerMessage<BetResponseContent> raiseMessage(BetResponseContent content) {
+        return new PokerMessage<>(MessageType.RAISE, content, 1.0);
+    }
+
+    public static PokerMessage<BetResponseContent> callMessage(BetResponseContent content) {
+        return new PokerMessage<>(MessageType.CALL, content, 1.0);
+    }
+
+    public static PokerMessage<BetResponseContent> allInMessage(BetResponseContent content) {
+        return new PokerMessage<>(MessageType.ALLIN, content, 1.0);
     }
 
     public static PokerMessage<DieResponseContent> dieMessage(DieResponseContent content) {
@@ -60,6 +68,10 @@ public class PokerMessage<T> {
 
     public static PokerMessage<ResultContent> resultMessage(ResultContent content) {
         return new PokerMessage<>(MessageType.RESULT, content, 1.0);
+    }
+
+    public static PokerMessage<Void> openMessage() {
+        return new PokerMessage<>(MessageType.OPEN, null, 1.0);
     }
 
     public static PokerMessage<ExitContent> exitMessage(ExitContent content) {
