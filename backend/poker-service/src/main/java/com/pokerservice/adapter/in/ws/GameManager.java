@@ -39,6 +39,10 @@ public class GameManager {
         return activateGames.get(gameId);
     }
 
+    public static void addPlayerSessionInfo(Player player) {
+        connectedPlayers.put(player.getSession(), player);
+    }
+
     public static List<Player> getPlayersByGameId(long gameId) {
         return activateGames.get(gameId).getPlayers();
     }

@@ -9,6 +9,7 @@ public class Player {
     private final String session;
     private final String nickname;
     private int currentBetAmount;
+    private int totalBetAmount;
     private int chip;
     private int card;
     private int order;
@@ -34,15 +35,37 @@ public class Player {
     }
 
     public void betting(int betAmount) {
-        this.currentBetAmount += betAmount;
+        if (chip < betAmount) {
+            throw new IllegalArgumentException("소지 칩 수보다 많이 배팅할 수 없습니다.");
+        }
+        this.currentBetAmount = betAmount;
+        this.totalBetAmount += betAmount;
         this.chip -= betAmount;
     }
 
-    public int allIn() {
-        int allInChip = chip;
+    public void allIn() {
+        this.currentBetAmount = chip;
+        this.totalBetAmount += chip;
         this.chip = 0;
-        this.currentBetAmount += allInChip;
-        return allInChip;
+
+        this.status = PlayerStatus.ALLIN;
+    }
+
+    public boolean canRaise() {
+        return status == PlayerStatus.PLAYING ||
+            status == PlayerStatus.RAISE;
+    }
+
+    public boolean canCall() {
+        return status == PlayerStatus.PLAYING ||
+            status == PlayerStatus.RAISE ||
+            status == PlayerStatus.CALL;
+    }
+
+    public boolean canAllIn() {
+        return status == PlayerStatus.PLAYING ||
+            status == PlayerStatus.RAISE ||
+            status == PlayerStatus.CALL;
     }
 
     public void setOperate(SimpMessageSendingOperations operate) {

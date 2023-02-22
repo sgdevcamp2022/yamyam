@@ -44,16 +44,14 @@ public class GameController {
                 boolean allReady = gameUseCase.checkReady(gameId, userId);
 
                 if (allReady) {
-                    gameUseCase.drawCard(gameId);
+                    gameUseCase.settingGame(gameId);
                     gameUseCase.sendFocus(gameId);
                 }
             }
-            case BET -> {
+            case RAISE, CALL, ALLIN -> {
                 BetRequestContent content = mapTo(pokerMessage.getContent(), BetRequestContent.class);
-                gameId = content.gameId();
-                userId = content.userId();
-                gameUseCase.betting(gameId, userId, content.betAmount());
-                gameUseCase.sendFocus(gameId);
+                gameUseCase.betting(pokerMessage.getType(), content);
+
             }
             case DIE -> {
                 DieResponseContent content = mapTo(pokerMessage.getContent(), DieResponseContent.class);

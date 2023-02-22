@@ -2,6 +2,8 @@ package com.pokerservice.core.service;
 
 import com.pokerservice.adapter.in.ws.GameManager;
 import com.pokerservice.adapter.in.ws.message.PokerMessage;
+import com.pokerservice.adapter.in.ws.message.PokerMessage.MessageType;
+import com.pokerservice.adapter.in.ws.message.content.clientContent.BetRequestContent;
 import com.pokerservice.adapter.in.ws.message.content.serverContent.BetResponseContent;
 import com.pokerservice.adapter.in.ws.message.content.clientContent.DieResponseContent;
 import com.pokerservice.adapter.in.ws.message.content.serverContent.ExitContent;
@@ -54,10 +56,13 @@ public class GameService implements GameMakeUseCase, GameUseCase {
             game.getPlayers().forEach(p -> {
                 PokerMessage<JoinContent> message = PokerMessage
                     .joinMessage(new JoinContent(p.getId(), p.getNickname(), p.getOrder()));
-                log.info("send Message to {}, message: {}", player, message);
+
+                log.info("send Join Message to everyOne, message: {}", message);
                 messageSendPort.sendMessage(POKER_ENDPOINT + gameId, message);
             });
         }
+
+        GameManager.addPlayerSessionInfo(player);
     }
 
     @Override
@@ -72,7 +77,6 @@ public class GameService implements GameMakeUseCase, GameUseCase {
     public void sendFocus(long gameId) {
         Game game = GameManager.getActivateGame(gameId);
         Player focusPlayer = game.focus();
-        game.nextTurn();
 
         PokerMessage<FocusContent> message = PokerMessage.focusMessage(
             new FocusContent(focusPlayer.getId()));
@@ -82,16 +86,19 @@ public class GameService implements GameMakeUseCase, GameUseCase {
     }
 
     @Override
-    public void drawCard(long gameId) {
+    public void settingGame(long gameId) {
         Game game = GameManager.getActivateGame(gameId);
         List<PlayerInfo> playerInfos = new ArrayList<>();
+        game.settingGame();
         game.drawCard();
 
         List<Player> players = game.getPlayers();
         players.forEach(p -> {
             playerInfos.add(new PlayerInfo(p.getId(), p.getChip(), p.getCard()));
         });
-        GameStartContent content = new GameStartContent(playerInfos);
+
+        GameStartContent content = new GameStartContent(game.getTotalBetAmount(), playerInfos);
+
         PokerMessage<GameStartContent> message = PokerMessage.gameStartMessage(
             content);
 
@@ -100,24 +107,69 @@ public class GameService implements GameMakeUseCase, GameUseCase {
     }
 
     @Override
-    public void betting(long gameId, long playerId, int betAmount) {
-        Game game = GameManager.getActivateGame(gameId);
+    public void betting(MessageType messageType, BetRequestContent content) {
+        Game game = GameManager.getActivateGame(content.gameId());
 
+        long gameId = content.gameId();
+        long playerId = content.userId();
         if (!game.isPlayerTurn(playerId)) {
-            throw new AssertionError("현재 플레이할 수 있는 턴이 아닙니다. 게임: " + gameId + ", 플레이어 : " + playerId);
+            throw new AssertionError(
+                "현재 플레이할 수 있는 턴이 아닙니다. 게임: " + gameId + ", 플레이어 : " + playerId);
         }
 
-        game.betting(playerId, betAmount);
+        PokerMessage<BetResponseContent> message = null;
 
-        Player player = game.findPlayerById(playerId);
+        switch (messageType) {
+            case RAISE -> {
+                game.raise(playerId, content.betAmount());
+                Player player = game.findPlayerById(playerId);
 
-        PokerMessage<BetResponseContent> message = PokerMessage.betMessage(
-            new BetResponseContent(playerId, betAmount,
-                player.getChip(),
-                game.getTotalBetAmount()));
+                message = PokerMessage.raiseMessage(
+                    new BetResponseContent(playerId, content.betAmount(),
+                        player.getChip(),
+                        game.getTotalBetAmount()));
+
+                log.info("send Betting Message to everyone, message: {}", message);
+                messageSendPort.sendMessage(POKER_ENDPOINT + gameId, message);
+            }
+            case CALL -> {
+                game.call(playerId);
+                message = PokerMessage.callMessage(
+                    new BetResponseContent(playerId, content.betAmount(),
+                        game.getMinBetAmount(),
+                        game.getTotalBetAmount()));
+            }
+            case ALLIN -> {
+                game.allIn(playerId);
+                Player player = game.findPlayerById(playerId);
+
+                message = PokerMessage.allInMessage(
+                    new BetResponseContent(playerId, content.betAmount(),
+                        player.getCurrentBetAmount(),
+                        game.getTotalBetAmount()));
+            }
+        }
 
         log.info("send Betting Message to everyone, message: {}", message);
         messageSendPort.sendMessage(POKER_ENDPOINT + gameId, message);
+
+        if (isChanceToOpen(game)) {
+            if (game.isOpenTime()) {
+                PokerMessage<ResultContent> openMessage = PokerMessage
+                    .resultMessage(new ResultContent(game.getPlayerResultInfos()));
+                messageSendPort.sendMessage(POKER_ENDPOINT + gameId, openMessage);
+            }
+        }
+         else {
+            game.nextTurn();
+            sendFocus(gameId);
+        }
+    }
+
+    private static boolean isChanceToOpen(Game game) {
+        return game.getCurrentTurn() == game.getGameType().getPlayerSize() - 1
+            && game.getLastRaiseIndex() == -1 ||
+            game.getCurrentTurn() == game.getLastRaiseIndex();
     }
 
     @Override
@@ -125,7 +177,8 @@ public class GameService implements GameMakeUseCase, GameUseCase {
         Game game = GameManager.getActivateGame(gameId);
 
         if (!game.isPlayerTurn(playerId)) {
-            throw new AssertionError("현재 플레이할 수 있는 턴이 아닙니다. 게임: " + gameId + ", 플레이어 : " + playerId);
+            throw new AssertionError(
+                "현재 플레이할 수 있는 턴이 아닙니다. 게임: " + gameId + ", 플레이어 : " + playerId);
         }
 
         game.die(playerId);
@@ -139,6 +192,13 @@ public class GameService implements GameMakeUseCase, GameUseCase {
             messageSendPort.sendMessage(POKER_ENDPOINT + gameId,
                 PokerMessage.dieMessage(new DieResponseContent(gameId, playerId)));
         }
+        game.nextTurn();
+        sendFocus(gameId);
+    }
+
+    @Override
+    public void summary(long gameId, List<PlayerResultInfo> playerResultInfos) {
+
     }
 
     @Override
