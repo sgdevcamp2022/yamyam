@@ -15,6 +15,7 @@ public class GameManager : MonoBehaviour
     {
         get => s_instance;
     }
+    Scenes _scenes = Scenes.LoginScene;
 
     private void Awake()
     {
@@ -33,10 +34,11 @@ public class GameManager : MonoBehaviour
     public void ChangeScene(Scenes sceneNum)
     {
         SceneManager.LoadScene((int)sceneNum);
+        _scenes = sceneNum;
     }
 
     public Scenes CheckNowScene()
     {
-        return (Scenes)SceneManager.GetActiveScene().buildIndex;
+        return _scenes;
     }
 }
