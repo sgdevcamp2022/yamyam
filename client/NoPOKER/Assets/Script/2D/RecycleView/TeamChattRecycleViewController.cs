@@ -4,7 +4,7 @@ using UnityEngine.UI;
 
 namespace UI
 {
-    public class TeamChattRecycleViewController : UIRecycleViewController<UICellData>
+    public class TeamChattRecycleViewController : UIRecycleViewController<UIChattData>
     {
         [SerializeField] RectTransform _scroll;
         [SerializeField] ScrollRect _scrollRect;
@@ -16,10 +16,10 @@ namespace UI
 
         public void LoadTeamChattingData()
         {
-            TableData = new List<UICellData>()
+            TableData = new List<UIChattData>()
             {
-                new UICellData { Name="Team" , Chat = "여기는 팀채팅입니다. 팀이요 팀!"},
-                new UICellData { Name="겜잘알" , Chat = "팀끼리는 어떤말을 하는건가여?"},
+                new UIChattData { Name="Team" , Chat = "여기는 팀채팅입니다. 팀이요 팀!"},
+                new UIChattData { Name="겜잘알" , Chat = "팀끼리는 어떤말을 하는건가여?"},
             };
 
             InitializeTableView();
@@ -28,7 +28,7 @@ namespace UI
         }
 
 
-        public void AddData(UICellData data)
+        public void AddData(UIChattData data)
         {
             TableData.Add(data);
         }

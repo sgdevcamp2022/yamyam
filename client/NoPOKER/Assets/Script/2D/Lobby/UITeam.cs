@@ -1,4 +1,4 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using TMPro;
@@ -10,27 +10,29 @@ public class UITeam : MonoBehaviour
     int _memberNum = 1;
     List<string> _names = new List<string>();
 
-    public void ActiveTeamMember()
-    {
-        for(int i=0;i<_names.Count;i++)
-        {
-            _teamMemberList[i].SetActive(true);
-            _teamMemberName[i].SetText(_names[i]);
-        }
 
-        for (int i = _names.Count; i < 4; i++)
-        {
-            _teamMemberList[i].SetActive(false);
-        }
-
-    }
-    public void InActiveTeamMember()
+    public void CleanTeamMember()
     {
-        for (int i = _names.Count; i < 4; i++)
+        for (int i =1; i < 4; i++)
         {
             _teamMemberList[i].SetActive(false);
         }
     }
+
+    public void UpdateTeamMember()
+    {
+        CleanTeamMember();
+        //0은 팀장자리
+        _teamMemberName[0].SetText(Team.Instance.LeaderData.nickname);
+        _teamMemberList[0].SetActive(true);
+        for (int i=1;i<=Team.Instance.TeamMemberData.Length;i++) //1부터 시작하도록. 
+        {
+            Debug.Log(Team.Instance.TeamMemberData[i - 1].nickname);
+            _teamMemberName[i].SetText(Team.Instance.TeamMemberData[i-1].nickname);
+            _teamMemberList[i].SetActive(true);       
+        }
+    }
+
 
     public void AddTeamMember(string name)
     {
@@ -38,17 +40,14 @@ public class UITeam : MonoBehaviour
         _memberNum++;
     }
 
-    public void SetTeamMember(List<string> names)
-    {
-        _names = names;
-        ActiveTeamMember();
-    }
+ 
+
+  
 
     public void SubTeamMember(string name)
     {
         _names.RemoveAt(_memberNum);
         _memberNum--;
-        InActiveTeamMember();
     }
 
     public void ExitTeam()
@@ -56,7 +55,10 @@ public class UITeam : MonoBehaviour
         //Team클래스에 서버통신: 팀나가기
         LobbyWindowController.Instance.InActiveTeamWindow();
         LobbyWindowController.Instance.ActiveAllChatWindow();
+        Team.Instance.ExitTeam();
     }
+
+
 
     public void SettingTeam(string[] members)
     {

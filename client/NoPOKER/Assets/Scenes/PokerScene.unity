@@ -38,7 +38,7 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 0}
-  m_IndirectSpecularColor: {r: 0.18028378, g: 0.22571412, b: 0.30692285, a: 1}
+  m_IndirectSpecularColor: {r: 0.18028328, g: 0.22571322, b: 0.30692163, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -701,7 +701,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &96414023
 RectTransform:
   m_ObjectHideFlags: 0
@@ -803,6 +803,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _uiBatting: {fileID: 1773321153}
+  InActiveButtonView: {fileID: 756387030}
 --- !u!4 &140183853
 Transform:
   m_ObjectHideFlags: 0
@@ -1470,7 +1471,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &201752456
 RectTransform:
   m_ObjectHideFlags: 0
@@ -5377,7 +5378,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!224 &756387031
 RectTransform:
   m_ObjectHideFlags: 0
@@ -6618,6 +6619,11 @@ MonoBehaviour:
   _turnTiem: 10
   _turn: {fileID: 309489763}
   _card: {fileID: 685722200}
+  NowTurnUserId: 0
+  _uiPokerPlayer: {fileID: 1585753932}
+  ReceiveSocketFlag: 0
+  _pokerGameState: 0
+  UiPos: 0
 --- !u!82 &947998856
 AudioSource:
   m_ObjectHideFlags: 0
@@ -10219,10 +10225,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0cd44c1031e13a943bb63640046fad76, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_UiScaleMode: 0
+  m_UiScaleMode: 1
   m_ReferencePixelsPerUnit: 100
   m_ScaleFactor: 1
-  m_ReferenceResolution: {x: 800, y: 600}
+  m_ReferenceResolution: {x: 1920, y: 600}
   m_ScreenMatchMode: 0
   m_MatchWidthOrHeight: 0
   m_PhysicalUnit: 3
@@ -11047,6 +11053,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1585753931}
+  - component: {fileID: 1585753932}
   m_Layer: 5
   m_Name: Players
   m_TagString: Untagged
@@ -11078,6 +11085,28 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 100, y: 100}
   m_Pivot: {x: 0.5, y: 0.5}
+--- !u!114 &1585753932
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1585753930}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ea5b7257fa940894385098065705f41b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _uiUserNames:
+  - {fileID: 573922509}
+  - {fileID: 216846478}
+  - {fileID: 989331334}
+  - {fileID: 1386532975}
+  _uiUserChip:
+  - {fileID: 2038644277}
+  - {fileID: 1454473057}
+  - {fileID: 619495825}
+  - {fileID: 2051604907}
 --- !u!1 &1651318750
 GameObject:
   m_ObjectHideFlags: 0
@@ -12454,6 +12483,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _uiBatting: {fileID: 0}
+  InActiveButtonView: {fileID: 0}
 --- !u!1 &1924337735
 GameObject:
   m_ObjectHideFlags: 0

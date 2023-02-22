@@ -28,14 +28,29 @@ public class MatchSendData
 
 public class Match : MonoBehaviour
 {
+    private static Match s_instance = null;
+    public static Match Instance { get => s_instance; }
+
     [SerializeField] private List<GameObject> _loadingObject = new List<GameObject>();
     private IEnumerator _loadingCoroutine;
     private IEnumerator _loadingUICoroutine;
 
     public WebSocket _socket = null;
     private StringBuilder _matchType = new StringBuilder();
+    public StringBuilder GetMatchType { get => _matchType; }
     private string username = "";
     private StompMessageParser messageParser = new StompMessageParser();
+
+    private void Start()
+    {
+        Init();
+    }
+
+    private void Init()
+    {
+        if (s_instance == null)
+            s_instance = this;
+    }
 
     public void SetMatch2()
     {
@@ -53,7 +68,7 @@ public class Match : MonoBehaviour
     void ws_OnMessage(object sender, MessageEventArgs e)
     {
         StompMessage message = messageParser.Deserialize(e.Data);
-
+        Debug.Log(e.Data);
         Debug.Log("command: " + message.Command);
         Debug.Log("headers: " + message.Headers);
         Debug.Log("body: " + message.Body);
@@ -64,6 +79,7 @@ public class Match : MonoBehaviour
             headers.Add("destination", "/topic/match/" + message.Headers.GetValueOrDefault("user-name"));
             headers.Add("id", "sub0");
             StompMessage subscribeMessage = new StompMessage(StompCommand.SUBSCRIBE, "", headers);
+
             _socket.Send(messageParser.Serialize(subscribeMessage));
         }
         else if(message.Command == StompCommand.MESSAGE)
@@ -78,6 +94,8 @@ public class Match : MonoBehaviour
                     break;
                 case MatchMessagetype.MATCH_DONE:
                     //게임서버 열기.
+
+                    PokerGameSocket.Instance.GameRoomID = Int32.Parse(_matchData.content["gameId"]);
                     PokerGameSocket.Instance.PokerGameSocketConnect();
                     //게임ID
                     //매칭서버 닫기.

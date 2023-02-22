@@ -13,13 +13,13 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
     @Override
     public void configureMessageBroker(MessageBrokerRegistry config) {
         config.enableSimpleBroker("/topic");
-        config.setApplicationDestinationPrefixes("/match");
+        config.setApplicationDestinationPrefixes("/pub");
     }
     @Override
     public void registerStompEndpoints(StompEndpointRegistry stompEndpointRegistry) {
         stompEndpointRegistry
-                .addEndpoint("/match-ws") // Set websocket endpoint to connect to
-                .setHandshakeHandler(new CustomHandshakeHandler()) // Set custom handshake handler
-                .withSockJS();
+            .addEndpoint("/match-ws") // Set websocket endpoint to connect to
+            .setHandshakeHandler(new CustomHandshakeHandler()); // Set custom handshake handler
+//            .withSockJS();
     }
 }

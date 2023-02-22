@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using TMPro;
 using UnityEngine.UI;
 using System.Collections;
@@ -19,7 +19,7 @@ public class UIBatting : MonoBehaviour
 
     [SerializeField] GameObject[] _playersPosition = new GameObject[4];
     [SerializeField] RectTransform[] _battingChips = new RectTransform[3];
-
+    
     private int _canBatting;
     private Vector3 _targetPos;
 
@@ -101,20 +101,30 @@ public class UIBatting : MonoBehaviour
         _myBattingChip.text = Batting.Instance.MyBattingChip.ToString();
     }
 
+ 
+
     public void ActiveDieView(int who)
     {       
         _dieView[who].SetActive(true);
-        PokerGameManager.Instance.PlayerOrder[who].SetState(PokerState.die);
+        PokerGameManager.Instance.PlayerOrder[who].SetState(BattingState.die);
     }
 
     public void SetPlayerBattingResult(int who, string text)
     {
+        if(PokerGameManager.Instance.PeopleNum == 2)
+        {
+            if(who == 1)
+            {
+                _playerBattingResultObject[2].SetActive(true);
+                _playerBattingResultText[2].text = text;
+            }
+        }
         _playerBattingResultObject[who].SetActive(true);
         _playerBattingResultText[who].text = text;
     }
     public void ShowBattingChipMoveCenter(int battingMoney)
     {
-        _battingChips[0].position = _playersPosition[PokerGameManager.Instance.NowTurn].transform.position;
+        _battingChips[0].position = _playersPosition[PokerGameManager.Instance.UiPos].transform.position;
         _battingChips[0].gameObject.SetActive(true);
         StartCoroutine(BattingChipMoveCenter(battingMoney));
     }

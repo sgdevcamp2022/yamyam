@@ -1,23 +1,28 @@
-﻿using UnityEngine;
+using UnityEngine;
 using TMPro;
 using System.Text;
 namespace UI
 {
-    public class UICellData
+    public class UIChattData
     {
         public string Name;
         public string Chat;
+
+        public void ClearChatData()
+        {
+            Chat = "";
+        }
     }
 
-    public class UIRecycleViewCellChatting : UIRecycleViewCell<UICellData>
+    public class UIRecycleViewCellChatting : UIRecycleViewCell<UIChattData>
     {
         [SerializeField] private TMP_Text _txtContent;
 
        StringBuilder _stringBuilder = new StringBuilder();
-        UICellData _data;
+        UIChattData _data;
         string _frontColor = "<color=#CAB75B>";
         string _backColor = "</color>";
-        public override void UpdateContent(UICellData itemData)
+        public override void UpdateContent(UIChattData itemData)
         {
             _data = itemData;
             _stringBuilder.Clear();

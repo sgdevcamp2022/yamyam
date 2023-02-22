@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using TMPro;
 using System.Net.Http;
 using System.Threading.Tasks;
@@ -62,9 +62,9 @@ public class SignUp : MonoBehaviour
             return;
         }
 
-        ResetPwWebRequest();
+        SignUpRequest();
     }
-    async Task ResetPwWebRequest()
+    async Task SignUpRequest()
     {
         SignUpData data = new SignUpData();
         data.username = _id.text;
@@ -101,6 +101,7 @@ public class SignUp : MonoBehaviour
                     WindowController.Instance.SendAlertMessage(LoginAlertMessage.DuplicateEmail);
                     return;
                 }
+
                 break;
         }
     }

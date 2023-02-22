@@ -74,6 +74,7 @@ public class UserPage : MonoBehaviour
         }
         else //인증실패!
         {
+            FileIO.ResetKey();
             LobbyWindowController.Instance.ActiveAlertWindow(LobbyAlertMessage.FailAuth);
         }
 

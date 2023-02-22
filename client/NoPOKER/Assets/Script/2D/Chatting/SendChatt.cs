@@ -1,4 +1,4 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UI;
@@ -7,14 +7,20 @@ public class SendChatt : MonoBehaviour
 {
     [SerializeField] TMP_InputField _chattingField;
     [SerializeField] TMP_Text _sendChattContent;
+    UIChattData _sendChattData = new UIChattData();
 
     private void Start()
     {
         _chattingField.onSubmit.AddListener(delegate { SendChattContent(); });
+        _sendChattData.Name = UserInfo.Instance.NickName;
     }
     public void SendChattContent()
-    {
-        Chatting.Instance.SendChatting(new UICellData {Name= UserInfo.Instance.NickName,Chat= _sendChattContent.text});
+    { 
+        _sendChattData.ClearChatData();
+        _sendChattData.Chat = _sendChattContent.text;
+         Chatting.Instance.SendChatting(_sendChattData);
+        Debug.Log("chat : " + _sendChattData.Chat);
+
         _chattingField.text = "";
     }
 }

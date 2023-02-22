@@ -1,10 +1,11 @@
-﻿using UnityEngine;
+using UnityEngine;
 using TMPro;
 using System.Text;
 namespace UI
 {
     public class UICellUserData
     {
+        public int Id;
         public string Name;
         public bool Invite;
     }
@@ -24,8 +25,8 @@ namespace UI
 
         public void OnClickedButton()
         {
-            Debug.Log("name : " + _data.Name);
-            Team.Instance.Invite(_data.Name);
+            if(UserInfo.Instance.IsLeader)
+            Team.Instance.SendInviteRequest(new UserSocketData(_data.Id, _data.Name));
         }
     }
 }

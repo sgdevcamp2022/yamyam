@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+using System;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -13,16 +14,15 @@ namespace UI
         float _preContentHeight;
         float _currentContentPos;
         private float _changedHeight;
+        public bool IsChangedUserList = false;       
+
         public void LoadAllChattingData()
         {
+            //SetDatas(UserList.Instance..users);
+
             TableData = new List<UICellUserData>()
             {
-                new UICellUserData { Name="뇸뇸쓰" ,Invite = true},
-                new UICellUserData { Name="겜잘알" , Invite = true},
-                new UICellUserData { Name="스마일게이트" ,Invite = true },
-                new UICellUserData { Name="이사님" , Invite = true},
-                new UICellUserData { Name="용용" ,Invite = true },
-               new UICellUserData { Name="NoPOKER" , Invite = true},
+              
 
             };
 
@@ -31,9 +31,38 @@ namespace UI
             _scroll.SetInsetAndSizeFromParentEdge(RectTransform.Edge.Left, 0, 0);
         }
 
-        public void AddData(UICellUserData data)
+
+        public void SetDatas(UserSocketData[] users)
         {
-            TableData.Add(data);
+            for(int i=0;i<users.Length;i++)
+            {
+                TableData.Add(new UICellUserData {Id=users[i].id , Name = users[i].nickname, Invite = true});
+            }
+            UpdateData();
+        }
+
+        public void AddData(UserSocketData user)
+        {
+            Debug.Log("AddData userNickName = " +user.nickname);
+            if (user.id != UserInfo.Instance.UserID)
+            {
+                TableData.Add(new UICellUserData { Id = user.id, Name = user.nickname, Invite = true });
+            }
+            UpdateData();
+        }
+
+        public void DeleteData(UserSocketData user)
+        {
+            Debug.Log("Now TableData Count = " + TableData.Count);
+            for(int i=0;i< TableData.Count;i++)
+            {
+                if (TableData[i].Id == user.id)
+                    TableData.RemoveAt(i);
+                   // TableData.Remove(new UICellUserData { Id = user.id, Name = user.nickname, Invite = true });
+            }
+          
+
+            UpdateAfterLeaveData();
         }
 
         public void UpdateData() //새로운 유저가 로비에 추가되었을 때
@@ -47,10 +76,22 @@ namespace UI
             OnScrollPoschanged(new Vector2(0f, -0.01f));
         }
 
+        public void UpdateAfterLeaveData()
+        {
+            _currentContentPos = CachedScrollRect.content.anchoredPosition.y;
+            _changedHeight = CachedScrollRect.content.sizeDelta.y - _preContentHeight;
+            _preContentHeight = CachedScrollRect.content.sizeDelta.y;
+            _currentContentPos -= _changedHeight;
+            CachedScrollRect.content.anchoredPosition = new Vector2(0f, _currentContentPos);
+            InitializeTableView();
+            OnScrollPoschanged(new Vector2(0f, 0.01f));
+        }
+
         protected override void Start()
         {
             base.Start();
             LoadAllChattingData();
+
         }
     }
 }

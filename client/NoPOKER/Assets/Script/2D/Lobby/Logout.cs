@@ -44,6 +44,7 @@ public class Logout : MonoBehaviour
         else 
         {
             LobbyWindowController.Instance.ActiveAlertWindow(LobbyAlertMessage.FailAuth);
+            FileIO.ResetKey();
         }
     }
 
