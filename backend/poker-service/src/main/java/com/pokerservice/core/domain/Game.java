@@ -1,8 +1,10 @@
 package com.pokerservice.core.domain;
 
+import com.pokerservice.adapter.in.ws.message.content.serverContent.PlayerResultInfo;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.Random;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,6 +27,7 @@ public class Game {
     private final GameType gameType;
     private final LocalDateTime createdAt;
     private LocalDateTime updatedAt;
+    private Player winner;
 
     public Game(long id, GameType gameType) {
         this.id = id;
@@ -53,7 +56,9 @@ public class Game {
         // checking dead user
         players.stream()
             .filter(player -> player.getChip() + player.getCurrentBetAmount() == 0)
-            .forEach(p -> p.changeStatus(PlayerStatus.DIE));
+            .forEach(p -> p.changeStatus(PlayerStatus.LOOSE));
+
+
 
         currentTurn = 0;
         minBetAmount = 10;
@@ -80,16 +85,16 @@ public class Game {
         if (minBetAmount > betAmount) {
             throw new IllegalArgumentException("최소 배팅금액보다 적게 배팅할 수 없습니다.");
         }
+
         Player player = findPlayerById(playerId);
 
         if (player.getChip() <= minBetAmount) {
-            betAmount = player.getChip();
-            totalBetAmount += player.getChip();
-            player.minusChip(player.getChip());
+            betAmount = player.allIn();
+            totalBetAmount += betAmount;
         } else if (player.getChip() < betAmount) {
             throw new IllegalArgumentException("소지한 금액보다 더 많은 금액을 배팅할 수 없습니다.");
         } else {
-            player.minusChip(betAmount);
+            player.betting(betAmount);
             totalBetAmount += betAmount;
         }
     }
@@ -101,7 +106,7 @@ public class Game {
 
     public Player findPlayerById(long playerId) {
         Player player = players.stream()
-            .filter(p -> p.getUserId() == playerId)
+            .filter(p -> p.getId() == playerId)
             .findFirst()
             .orElseThrow(() -> new IllegalArgumentException("no player"));
         return player;
@@ -149,7 +154,7 @@ public class Game {
 
     public void calcBattle(long winnerId) {
         Player winner = players.stream()
-            .filter(p -> p.getUserId() == winnerId)
+            .filter(p -> p.getId() == winnerId)
             .findFirst()
             .orElseThrow(() -> new IllegalArgumentException("no player"));
 
@@ -158,6 +163,52 @@ public class Game {
 
     public boolean isFull() {
         return gameType.getPlayerSize() == players.size();
+    }
+
+    public void ready(long id) {
+        players.forEach(p -> {
+            if (p.getId() == id) {
+                readyCount++;
+            }
+        });
+    }
+
+    public boolean isAllReady() {
+        return gameType.getPlayerSize() == readyCount;
+    }
+
+    public int getReadyCount() {
+        return readyCount;
+    }
+
+    private void calcWinner() {
+        Player winner = players.stream()
+            .filter(p -> p.getStatus() == PlayerStatus.PLAYING)
+            .findFirst()
+            .get();
+        this.winner = winner;
+        winner.addChip(totalBetAmount);
+    }
+
+    public List<PlayerResultInfo> getPlayerResultInfos() {
+        if (winner == null) {
+            calcWinner();
+        }
+
+        return players.stream()
+            .map(p -> {
+                int result = 0;
+                if (p.equals(winner)) {
+                    result = 1;
+                }
+                return new PlayerResultInfo(p.getId(), result, p.getChip());
+            })
+            .toList();
+    }
+
+    public boolean isPlayerTurn(long playerId) {
+        Player player = findPlayerById(playerId);
+        return player.getOrder() == currentTurn;
     }
 
     public Logger getLog() {
@@ -198,21 +249,5 @@ public class Game {
 
     public GameType getGameType() {
         return gameType;
-    }
-
-    public void ready(long id) {
-        players.forEach(p -> {
-            if (p.getUserId() == id) {
-                readyCount++;
-            }
-        });
-    }
-
-    public boolean isAllReady() {
-        return gameType.getPlayerSize() == readyCount;
-    }
-
-    public int getReadyCount() {
-        return readyCount;
     }
 }

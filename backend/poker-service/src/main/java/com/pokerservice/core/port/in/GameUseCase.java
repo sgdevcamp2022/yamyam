@@ -15,4 +15,6 @@ public interface GameUseCase {
     void drawCard(long gameId);
 
     void die(long gameId, long playerId);
+
+    void exitGame(String socketUserId);
 }

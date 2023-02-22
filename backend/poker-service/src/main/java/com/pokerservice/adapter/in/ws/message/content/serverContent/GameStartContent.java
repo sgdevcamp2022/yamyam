@@ -1,4 +1,4 @@
-package com.pokerservice.adapter.in.ws.message.content;
+package com.pokerservice.adapter.in.ws.message.content.serverContent;
 
 import java.util.List;
 

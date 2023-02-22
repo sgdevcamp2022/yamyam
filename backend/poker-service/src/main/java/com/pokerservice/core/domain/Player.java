@@ -5,7 +5,7 @@ import org.springframework.messaging.simp.SimpMessageSendingOperations;
 
 public class Player {
 
-    private final long userId;
+    private final long id;
     private final String session;
     private final String nickname;
     private int currentBetAmount;
@@ -16,8 +16,8 @@ public class Player {
     private PlayerStatus status;
     private SimpMessageSendingOperations operate;
 
-    private Player(long userId, String session, String nickname, long gameId) {
-        this.userId = userId;
+    private Player(long id, String session, String nickname, long gameId) {
+        this.id = id;
         this.session = session;
         this.nickname = nickname;
         this.chip = 100;
@@ -33,6 +33,18 @@ public class Player {
         status = PlayerStatus.DIE;
     }
 
+    public void betting(int betAmount) {
+        this.currentBetAmount += betAmount;
+        this.chip -= betAmount;
+    }
+
+    public int allIn() {
+        int allInChip = chip;
+        this.chip = 0;
+        this.currentBetAmount += allInChip;
+        return allInChip;
+    }
+
     public void setOperate(SimpMessageSendingOperations operate) {
         this.operate = operate;
     }
@@ -41,8 +53,8 @@ public class Player {
         return operate;
     }
 
-    public long getUserId() {
-        return userId;
+    public long getId() {
+        return id;
     }
 
     public String getSession() {
@@ -55,10 +67,6 @@ public class Player {
 
     public int getCurrentBetAmount() {
         return currentBetAmount;
-    }
-
-    public void betting(int betAmount) {
-        this.currentBetAmount += betAmount;
     }
 
     public int getChip() {
@@ -110,13 +118,13 @@ public class Player {
             return false;
         }
         Player player = (Player) o;
-        return userId == player.userId;
+        return id == player.id;
     }
 
     @Override
     public String toString() {
         return "Player{" +
-            "userId=" + userId +
+            "userId=" + id +
             ", session='" + session + '\'' +
             ", nickname='" + nickname + '\'' +
             ", currentBetAmount=" + currentBetAmount +
@@ -130,6 +138,6 @@ public class Player {
 
     @Override
     public int hashCode() {
-        return Objects.hash(userId);
+        return Objects.hash(id);
     }
 }

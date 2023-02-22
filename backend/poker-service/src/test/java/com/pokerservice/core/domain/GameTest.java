@@ -165,7 +165,7 @@ class GameTest {
                 .hasMessage("소지한 금액보다 더 많은 금액을 배팅할 수 없습니다.");
         }
 
-        @DisplayName("소지 칩 개수가 배팅 칩 개수보다 작으면 올인을 한다.")
+        @DisplayName("'소지 칩 개수'가 '최소 배팅 칩 개수'보다 작으면 올인을 한다.")
         @Test
         void currentChip_under_minBetAmount_allIn() {
             // given
@@ -174,11 +174,13 @@ class GameTest {
 
             // when
             game.join(player1);
-            game.betting(player1.getUserId(), 95);
-            game.betting(player1.getUserId(), 10);
+            game.betting(player1.getId(), 95);
+            game.betting(player1.getId(), 10);
 
             Assertions.assertThat(game.getTotalBetAmount()).isSameAs(100);
             Assertions.assertThat(player1.getChip()).isSameAs(0);
+            Assertions.assertThat(player1.getCurrentBetAmount()).isSameAs(100);
+
         }
     }
 
