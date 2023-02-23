@@ -1,0 +1,4 @@
+server:
+  port: 8003
+url:
+  poker-service: http://localhost:8004

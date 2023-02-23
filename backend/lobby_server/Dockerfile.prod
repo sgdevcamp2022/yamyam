@@ -1,0 +1,49 @@
+###########
+# BUILDER #
+###########
+
+FROM python:3.11.1-alpine as builder
+
+WORKDIR /usr/src/lobby
+
+ENV PYTHONDONTWRITEBYTECODE 1
+ENV PYTHONUNBUFFERED 1
+
+RUN apk update && apk add postgresql-dev gcc python3-dev musl-dev libffi-dev
+
+RUN pip install --upgrade pip
+RUN pip install flake8==3.9.2
+COPY . .
+RUN flake8 --ignore=,E226,E722,E501,F401 .
+
+COPY /requirements/requirements.txt .
+RUN pip wheel --no-cache-dir --no-deps --wheel-dir /usr/src/lobby/wheels -r requirements.txt
+
+#########
+# FINAL #
+#########
+
+FROM python:3.11.1-alpine
+
+RUN mkdir -p /home/backend
+
+RUN addgroup -S backend && adduser -S backend -G backend
+
+ENV HOME=/home/backend
+ENV LOBBY_HOME=/home/backend/lobby
+RUN mkdir $LOBBY_HOME
+ENV LOBBY_LOG=/var/log/lobby
+RUN mkdir $LOBBY_LOG
+WORKDIR $LOBBY_HOME
+
+RUN apk update && apk add libpq
+COPY --from=builder /usr/src/lobby/wheels /wheels
+COPY --from=builder /usr/src/lobby/requirements.txt .
+RUN pip install --no-cache /wheels/*
+
+COPY . $LOBBY_HOME
+
+RUN chown -R backend:backend $LOBBY_HOME
+RUN chown -R backend:backend $LOBBY_LOG
+
+USER backend

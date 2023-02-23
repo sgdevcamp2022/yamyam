@@ -1,0 +1,78 @@
+plugins {
+	id 'java'
+	id 'org.springframework.boot' version '3.0.2'
+	id 'io.spring.dependency-management' version '1.1.0'
+	id 'org.asciidoctor.jvm.convert' version '3.3.2'
+	id 'jacoco'
+}
+
+group = 'com'
+version = '0.0.1-SNAPSHOT'
+sourceCompatibility = '17'
+
+configurations {
+	compileOnly {
+		extendsFrom annotationProcessor
+	}
+
+	asciidoctorExt
+}
+
+repositories {
+	mavenCentral()
+}
+
+ext {
+	restdocVersion = "2.0.6.RELEASE"
+	snippetsDir = file('build/generated-snippets')
+}
+
+dependencies {
+	implementation 'org.springframework.boot:spring-boot-starter-web'
+	implementation 'org.springframework.boot:spring-boot-starter-websocket'
+	testImplementation 'org.springframework.boot:spring-boot-starter-test'
+	implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.0.2'
+
+	// REST DOC
+	asciidoctorExt "org.springframework.restdocs:spring-restdocs-asciidoctor:${restdocVersion}"
+	testImplementation "org.springframework.restdocs:spring-restdocs-mockmvc:${restdocVersion}"
+
+	implementation group: 'org.webjars', name: 'webjars-locator', version: '0.46'
+	implementation group: 'org.webjars', name: 'bootstrap', version: '5.2.3'
+	implementation group: 'org.webjars', name: 'jquery', version: '3.6.3'
+	implementation group: 'org.webjars', name: 'stomp-websocket', version: '2.3.4'
+	implementation group: 'org.webjars', name: 'sockjs-client', version: '1.5.1'
+
+
+}
+
+tasks.named('test') {
+	useJUnitPlatform()
+}
+
+test {
+	outputs.dir snippetsDir
+}
+
+asciidoctor {
+	inputs.dir snippetsDir
+	configurations 'asciidoctorExt'
+	dependsOn test
+}
+
+task copyDocument(type: Copy) {
+	dependsOn bootJar
+	from file("build/docs/asciidoc")
+	into file("src/main/resources/static/docs")
+}
+
+bootJar {
+	dependsOn asciidoctor
+	from("${asciidoctor.outputDir}/html5") {
+		into 'static/docs'
+	}
+}
+
+build {
+	dependsOn copyDocument
+}

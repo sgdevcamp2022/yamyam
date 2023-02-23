@@ -1,0 +1,56 @@
+###########
+# BUILDER #
+###########
+
+FROM python:3.11.1-alpine as builder
+
+WORKDIR /usr/src/auth
+
+ENV PYTHONDONTWRITEBYTECODE 1
+ENV PYTHONUNBUFFERED 1
+
+RUN apk update && apk add postgresql-dev gcc python3-dev musl-dev libffi-dev
+
+RUN pip install --upgrade pip
+RUN pip install flake8==3.9.2
+COPY . .
+RUN flake8 --ignore=,E226,E501,F401 .
+
+COPY /requirements/requirements.txt .
+RUN pip wheel --no-cache-dir --no-deps --wheel-dir /usr/src/auth/wheels -r requirements.txt
+
+#########
+# FINAL #
+#########
+
+FROM python:3.11.1-alpine
+
+RUN mkdir -p /home/backend
+
+RUN addgroup -S backend && adduser -S backend -G backend
+
+ENV HOME=/home/backend
+ENV AUTH_HOME=/home/backend/auth
+RUN mkdir $AUTH_HOME
+RUN mkdir $AUTH_HOME/staticfiles
+ENV AUTH_LOG=/var/log/lobby
+RUN mkdir $AUTH_LOG
+WORKDIR $AUTH_HOME
+
+RUN apk update && apk add libpq
+COPY --from=builder /usr/src/auth/wheels /wheels
+COPY --from=builder /usr/src/auth/requirements.txt .
+RUN pip install --no-cache /wheels/*
+
+COPY ./entrypoint.prod.sh .
+RUN sed -i 's/\r$//g' $AUTH_HOME/entrypoint.prod.sh
+RUN chmod +x $AUTH_HOME/entrypoint.prod.sh
+
+COPY . $AUTH_HOME
+
+RUN chown -R backend:backend $AUTH_HOME
+RUN chown -R backend:backend $AUTH_LOG
+
+USER backend
+
+ENTRYPOINT [ "/home/backend/auth/entrypoint.prod.sh" ]
