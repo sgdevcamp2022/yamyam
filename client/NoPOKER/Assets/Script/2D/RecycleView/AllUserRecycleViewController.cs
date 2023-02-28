@@ -67,13 +67,13 @@ namespace UI
 
         public void UpdateData() //새로운 유저가 로비에 추가되었을 때
         {
-            _currentContentPos = CachedScrollRect.content.anchoredPosition.y;
-            _changedHeight = CachedScrollRect.content.sizeDelta.y - _preContentHeight;
-            _preContentHeight = CachedScrollRect.content.sizeDelta.y;
-            _currentContentPos += _changedHeight;
-            CachedScrollRect.content.anchoredPosition = new Vector2(0f, _currentContentPos);
+           // _currentContentPos = CachedScrollRect.content.anchoredPosition.y;
+           // _changedHeight = CachedScrollRect.content.sizeDelta.y - _preContentHeight;
+           // _preContentHeight = CachedScrollRect.content.sizeDelta.y;
+          //  _currentContentPos += _changedHeight;
+          //  CachedScrollRect.content.anchoredPosition = new Vector2(0f, _currentContentPos);
             InitializeTableView();
-            OnScrollPoschanged(new Vector2(0f, -0.01f));
+         //   OnScrollPoschanged(new Vector2(0f, -0.01f));
         }
 
         public void UpdateAfterLeaveData()
