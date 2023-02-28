@@ -92,6 +92,7 @@ public class Chatting : MonoBehaviour
 
     public void ActiveTeamChatting()
     {
+        _teamChattingRecycleViewController.UpdateMyData();
         _teamChattingUI.SetActive(true);
     }
 

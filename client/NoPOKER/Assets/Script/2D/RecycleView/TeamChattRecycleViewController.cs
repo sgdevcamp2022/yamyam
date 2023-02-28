@@ -16,9 +16,6 @@ namespace UI
 
         public void LoadTeamChattingData()
         {
-            TableData = new List<UIChattData>()
-            {
-            };
 
             InitializeTableView();
             _preContentHeight = CachedScrollRect.content.sizeDelta.y;
@@ -49,14 +46,17 @@ namespace UI
             OnScrollPoschanged(new Vector2(0f, -0.01f));
         }
 
-        protected override void Start()
+        private void Awake()
         {
             base.Start();
             LoadTeamChattingData();
         }
+
+
         private void OnEnable()
         {
             Chatting.Instance.SetChattingMode(ChattMode.Team);
+            UpdateMyData();
         }
 
         protected override float GetCellHeightAtIndex(int index)

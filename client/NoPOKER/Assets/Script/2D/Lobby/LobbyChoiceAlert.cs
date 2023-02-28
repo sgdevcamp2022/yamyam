@@ -40,6 +40,11 @@ public class LobbyChoiceAlert : MonoBehaviour
                 LobbyConnect.Instance.SendInviteAccept(Team.Instance._inviteRequestData);
                // Team.Instance.AcceptedInvite(); 
                 break;
+            case LobbyChoiceAlertMessage.GameExit:
+                UnityEditor.EditorApplication.isPlaying = false;
+                Application.Quit();
+                break;
+
         }
         LobbyWindowController.Instance.InActiveChoiceAlertWindow();
     }
