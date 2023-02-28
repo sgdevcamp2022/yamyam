@@ -41,4 +41,29 @@ public class GameManager : MonoBehaviour
     {
         return _scenes;
     }
+
+    public void SendGameStartMessage()
+    {
+        if (UserInfo.Instance.IsLeader)
+        {
+            LobbyConnect.Instance.SendGameStartMessage(Team.Instance.GetTeamData);
+        }
+    }
+
+    public void SendGameExitMessage()
+    {
+        if (UserInfo.Instance.IsLeader)
+        {
+            LobbyConnect.Instance.SendGameStartMessage(Team.Instance.GetTeamData);
+        }
+    }
+
+    public void SendExitMessage()
+    {
+        GameExitRequestSocketData _exitRequestData = new GameExitRequestSocketData();
+        _exitRequestData.player.id = UserInfo.Instance.UserID;
+        _exitRequestData.player.nickname = UserInfo.Instance.NickName;
+
+        LobbyConnect.Instance.SendGameExitMessage(_exitRequestData);       
+    }
 }

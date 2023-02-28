@@ -24,7 +24,11 @@ public enum LobbySocketType
     game_exit,
     team_list,
     user_leave,
-    team_message
+    team_message,
+    inviter_playing,
+    team_excess,
+    invitee_playing,
+    team_redundancy,
 }
 
 
@@ -62,6 +66,8 @@ public class LobbyUserListSocketData
     public string type;
     public UserSocketData[] users;
 }
+
+
 
 public class UserSocketData
 {
@@ -140,6 +146,13 @@ public class DefaultUserSocketData
 public class LobbyMessageType
 {
     public string type;
+}
+
+public class GameExitRequestSocketData
+{
+    public string type = "game_exit";
+    public UserSocketData player;
+
 }
 
 public class InviteRequestSocketData
@@ -303,9 +316,19 @@ public class LobbyConnect : MonoBehaviour
                         Team.Instance.TeamType = LobbySocketType.team_list;
                         Team.Instance.ChangedRequestState = true;
                     }
-
                     break;
-
+                case LobbySocketType.invitee_playing:
+                    LobbyWindowController.Instance.ActiveAlertWindow(LobbyAlertMessage.Invitee_Playing);
+                    break;
+                case LobbySocketType.inviter_playing:
+                    LobbyWindowController.Instance.ActiveAlertWindow(LobbyAlertMessage.Inviter_Playing);
+                    break;
+                case LobbySocketType.team_excess:
+                    LobbyWindowController.Instance.ActiveAlertWindow(LobbyAlertMessage.Team_Excess);
+                    break;
+                case LobbySocketType.team_redundancy:
+                    LobbyWindowController.Instance.ActiveAlertWindow(LobbyAlertMessage.Team_Redundancy);
+                    break;
 
             }
         }
@@ -355,6 +378,17 @@ public class LobbyConnect : MonoBehaviour
     {
         sendMessage.type = "team_message";
         sendMessage.leader_id = Team.Instance.LeaderData.id;
+        _lobbySocket.Send(JsonConvert.SerializeObject(sendMessage));
+    }
+
+    public void SendGameStartMessage(TeamSocketData sendMessage)
+    {
+        sendMessage.type = "game_start";
+        _lobbySocket.Send(JsonConvert.SerializeObject(sendMessage));
+    }
+
+    public void SendGameExitMessage(GameExitRequestSocketData sendMessage)
+    {
         _lobbySocket.Send(JsonConvert.SerializeObject(sendMessage));
     }
 }

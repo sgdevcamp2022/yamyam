@@ -38,7 +38,7 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 0}
-  m_IndirectSpecularColor: {r: 0.18028328, g: 0.22571322, b: 0.30692163, a: 1}
+  m_IndirectSpecularColor: {r: 0.18028378, g: 0.22571412, b: 0.30692285, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -1944,8 +1944,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 0, y: -100}
-  m_SizeDelta: {x: 800, y: 400}
+  m_AnchoredPosition: {x: 0, y: 67}
+  m_SizeDelta: {x: 800, y: 350}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &243944757
 MonoBehaviour:
@@ -2275,7 +2275,7 @@ RectTransform:
   - {fileID: 35219598}
   - {fileID: 1867093104}
   m_Father: {fileID: 2077087277}
-  m_RootOrder: 6
+  m_RootOrder: 7
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
@@ -4262,12 +4262,12 @@ RectTransform:
   - {fileID: 611815323}
   - {fileID: 1172475236}
   - {fileID: 1524057386}
-  m_Father: {fileID: 2118272976}
-  m_RootOrder: 4
+  m_Father: {fileID: 2077087277}
+  m_RootOrder: 6
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
-  m_AnchoredPosition: {x: -491, y: -490}
+  m_AnchoredPosition: {x: 419, y: 0}
   m_SizeDelta: {x: 100, y: 100}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &515008055
@@ -5822,7 +5822,7 @@ RectTransform:
   - {fileID: 1854867978}
   - {fileID: 381964085}
   m_Father: {fileID: 2118272976}
-  m_RootOrder: 5
+  m_RootOrder: 4
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
@@ -8705,7 +8705,7 @@ RectTransform:
   m_Children:
   - {fileID: 145255850}
   m_Father: {fileID: 2077087277}
-  m_RootOrder: 8
+  m_RootOrder: 9
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
@@ -14001,6 +14001,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   GameRoomID: 0
+  TotalBetAmount: 0
 --- !u!4 &1872517888
 Transform:
   m_ObjectHideFlags: 0
@@ -14930,7 +14931,7 @@ RectTransform:
   - {fileID: 756263487}
   - {fileID: 2053068762}
   m_Father: {fileID: 2077087277}
-  m_RootOrder: 7
+  m_RootOrder: 8
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
@@ -15880,6 +15881,7 @@ RectTransform:
   - {fileID: 321518834}
   - {fileID: 562232924}
   - {fileID: 1205188811}
+  - {fileID: 515008054}
   - {fileID: 298026980}
   - {fileID: 2031520566}
   - {fileID: 1214561941}
@@ -16928,7 +16930,6 @@ RectTransform:
   - {fileID: 1626247863}
   - {fileID: 1554447304}
   - {fileID: 1265994652}
-  - {fileID: 515008054}
   - {fileID: 723667162}
   m_Father: {fileID: 2077087277}
   m_RootOrder: 0
