@@ -9,8 +9,9 @@ using System.Text;
 using Newtonsoft.Json;
 using StompHelper;
 using Unity.VisualScripting;
+using System.Collections.Concurrent;
 
-public enum LobbySocketType 
+public enum LobbySocketType
 {
     None,
     user_list,
@@ -27,14 +28,15 @@ public enum LobbySocketType
 }
 
 
-public class DefaultMessageSocketData {
+public class DefaultMessageSocketData
+{
 
     public string type;
     public int leader_id;
     public int id;
     public string nickname;
     public string message;
-    
+
     public void LobbyMessageSetting(string message)
     {
         type = "lobby_message";
@@ -55,21 +57,27 @@ public class DefaultMessageSocketData {
     }
 }
 
-public class LobbyUserListSocketData {
+public class LobbyUserListSocketData
+{
     public string type;
     public UserSocketData[] users;
 }
 
-public class UserSocketData {
+public class UserSocketData
+{
     public int id;
     public string nickname;
     public int order;
     public int card;
+
+    public UserSocketData() { }
+
     public UserSocketData(int id, string nickname)
     {
         this.id = id;
         this.nickname = nickname;
     }
+
     public UserSocketData(int id, string nickname, int card)
     {
         this.id = id;
@@ -79,14 +87,13 @@ public class UserSocketData {
 
 }
 
-public class UserPokertData {
+public class UserDefaultData
+{
     public int id;
     public string nickname;
     public int order;
     public int card;
-    public int currentChip;
-    public bool result;
-    public UserPokertData(int id, string nickname, int card)
+    public UserDefaultData(int id, string nickname, int card)
     {
         this.id = id;
         this.nickname = nickname;
@@ -94,47 +101,80 @@ public class UserPokertData {
     }
 
 }
+public class UserPokerData
+{
+    public int id;
+    public string nickname;
+    public int order;
+    public int card;
+    public int currentChip;
+    public bool result;
+    public UserPokerData(int id, string nickname, int card)
+    {
+        this.id = id;
+        this.nickname = nickname;
+        this.card = card;
+    }
+    public UserPokerData(int id, int currentChip, bool result)
+    {
+        this.id = id;
+        this.currentChip = currentChip;
+        this.result = result;
+    }
 
+    public void SetNewData(int currentChip)
+    {
+        this.currentChip = currentChip;
+    }
 
-public class DefaultUserSocketData {
-    public string type;
-   public UserSocketData user;
 }
 
 
-public class LobbyMessageType {
+public class DefaultUserSocketData
+{
+    public string type;
+    public UserSocketData user;
+}
+
+
+public class LobbyMessageType
+{
     public string type;
 }
 
-public class InviteRequestSocketData {
+public class InviteRequestSocketData
+{
     public string type = "invite_request";
     public UserSocketData inviter;
     public UserSocketData invitee;
 
-    public void SetInviteRequestSocketData(UserSocketData inviter , UserSocketData invitee)
+    public void SetInviteRequestSocketData(UserSocketData inviter, UserSocketData invitee)
     {
         this.inviter = inviter;
         this.invitee = invitee;
     }
 }
 
-public class TeamSocketData {
+public class TeamSocketData
+{
     public string type;
     public UserSocketData leader;
     public UserSocketData[] invitees;
 }
 
-public class TeamMemberExitSocketData {
+public class TeamMemberExitSocketData
+{
     public string type;
     public UserSocketData requester;
     public UserSocketData leader;
     public UserSocketData[] invitees;
 }
 
-public class LobbyConnect : MonoBehaviour {
+public class LobbyConnect : MonoBehaviour
+{
     private static LobbyConnect s_instance = null;
     public static LobbyConnect Instance { get => s_instance; }
-   public WebSocket _lobbySocket;
+    public WebSocket _lobbySocket;
     StringBuilder _urlBuilder = new StringBuilder();
     LobbyUserListSocketData _userListData;
     public LobbyUserListSocketData UserListData { get => _userListData; }
@@ -162,7 +202,6 @@ public class LobbyConnect : MonoBehaviour {
         _lobbySocket.OnMessage += ws_OnMessage;
         _lobbySocket.OnClose += ws_OnClose;
         _lobbySocket.Connect();
-
     }
 
     private void ws_OnClose(object sender, CloseEventArgs e)
@@ -201,27 +240,31 @@ public class LobbyConnect : MonoBehaviour {
                     Chatting.Instance.IsReceiveMessage = true;
                     break;
                 case LobbySocketType.user_join:
-                //유저리스트 업데이트. 한명들어온거 반영
-                try
-                {
+                    //유저리스트 업데이트. 한명들어온거 반영
+                    try
+                    {
+
                         DefaultUserSocketData _userData = JsonConvert.DeserializeObject<DefaultUserSocketData>(e.Data);
-                    Debug.Log(_userData);
-                    UserList.Instance.JoinUser(_userData);
-                    UserList.Instance.IsUserCountChanged = LobbyUserChangeType.Add;
+                        if (_userData.user.id != UserInfo.Instance.UserID)
+                        {
+                            UserList.Instance.JoinUser(_userData);
+                            Debug.Log("user_list: LobbyUserChangeType is Add");
+                            UserList.Instance.IsUserCountChanged = LobbyUserChangeType.Add;
+                        }
+
+
                     }
-                catch (Exception ex)
-                {
-                    Debug.Log("ERROR : " + ex);
-                }
-                break;
+                    catch (Exception ex)
+                    {
+                        Debug.Log("ERROR : " + ex);
+                    }
+                    break;
                 case LobbySocketType.user_list:
-                    Debug.Log("1");
-                   _userListData = JsonConvert.DeserializeObject<LobbyUserListSocketData>(e.Data);
-                    Debug.Log("2");
+                    _userListData = JsonConvert.DeserializeObject<LobbyUserListSocketData>(e.Data);
+
+                    Debug.Log("user_list: LobbyUserChangeType is Setting");
                     UserList.Instance.IsUserCountChanged = LobbyUserChangeType.Setting;
                     UserList.Instance.SetUserList(_userListData);
-                    Debug.Log("3");
-                   
                     break;
                 case LobbySocketType.invite_request:
                     InviteRequestSocketData _requestUserData = JsonConvert.DeserializeObject<InviteRequestSocketData>(e.Data);
@@ -237,7 +280,7 @@ public class LobbyConnect : MonoBehaviour {
                     Team.Instance.ChangedRequestState = true;
                     break;
                 case LobbySocketType.user_leave:
-                    DefaultUserSocketData _leavUserData = JsonConvert.DeserializeObject<DefaultUserSocketData>(e.Data);                    
+                    DefaultUserSocketData _leavUserData = JsonConvert.DeserializeObject<DefaultUserSocketData>(e.Data);
                     UserList.Instance.LeaveUser(_leavUserData);
                     UserList.Instance.IsUserCountChanged = LobbyUserChangeType.Sub;
                     break;
@@ -249,7 +292,7 @@ public class LobbyConnect : MonoBehaviour {
                     break;
                 case LobbySocketType.invitee_exit:
                     TeamSocketData _newTeamData = JsonConvert.DeserializeObject<TeamSocketData>(e.Data);
-                    if(_newTeamData.invitees.Length == 0 )
+                    if (_newTeamData.invitees.Length == 0)
                     {
                         Team.Instance.TeamType = LobbySocketType.invitee_exit;
                         Team.Instance.ChangedRequestState = true;
@@ -260,15 +303,15 @@ public class LobbyConnect : MonoBehaviour {
                         Team.Instance.TeamType = LobbySocketType.team_list;
                         Team.Instance.ChangedRequestState = true;
                     }
-          
+
                     break;
 
 
             }
         }
-        catch(Exception ex)
+        catch (Exception ex)
         {
-            Debug.Log("ERROR : " +ex);
+            Debug.Log("ERROR : " + ex);
         }
 
     }

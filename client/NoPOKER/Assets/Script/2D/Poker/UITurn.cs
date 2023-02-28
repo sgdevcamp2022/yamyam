@@ -5,35 +5,51 @@ using UnityEngine.UI;
 
 public class UITurn : MonoBehaviour
 {
+
+
     [SerializeField] private Image[] _playersTurnUI;
-    [SerializeField] private GameObject[] _playersTurnObject;
-    [SerializeField] private GameObject[] _playersWinObject;
+
+    [SerializeField] private GameObject[] _2PlayersWinObject;
+    [SerializeField] private GameObject[] _4PlayersWinObject;
+
+    [SerializeField] private GameObject[] _2PlayersTurnObject;
+    [SerializeField] private Image[] _2PlayersTurnUI;
+    [SerializeField] private GameObject[] _4PlayersTurnObject;
+    [SerializeField] private Image[] _4PlayersTurnUI;
+
     private IEnumerator _battingTurn;
     private IEnumerator _turnWait;
-    private int _nowTurnUser = 0;
+
     private float _turnTime;
     private float _currentTime;
     private float _startTime;
-    private bool _isFirst = true;
+    private bool _isWaitDistribute = true;
     bool _stopTimer = false;
     private int _nowUiPos;
-    public void StartTurn(int userId) 
+    public void StartTurn() 
     {
-        _nowTurnUser = userId;
         Init();
 
         StartCoroutine(_turnWait);
     }
 
     IEnumerator TurnWait()
-    {   if (_isFirst)
+    {   if (_isWaitDistribute)
         {
             yield return new WaitUntil(() => PokerGameManager.Instance.DistributeNum== PokerGameManager.Instance.PeopleNum);
-            _isFirst = false;
+            _isWaitDistribute = false;
         }      
         StartCoroutine(_battingTurn);
         yield return new WaitUntil(()=> PokerGameManager.Instance.IsBattingFinish);
-        _playersTurnUI[_nowUiPos].gameObject.SetActive(false);
+        if(PokerGameSocket.Instance.GetPokerGamePeopleNum == 2)
+        {
+            _2PlayersTurnUI[_nowUiPos].gameObject.SetActive(false);
+        }
+        else
+        {
+            _4PlayersTurnUI[_nowUiPos].gameObject.SetActive(false);
+        }
+
         PokerGameManager.Instance.StartTurn();
 
         FinishTurn();
@@ -55,7 +71,7 @@ public class UITurn : MonoBehaviour
 
     void  CheckTime()
     {
-        if (PokerGameManager.Instance.PokerFinish)
+        if (PokerGameManager.Instance._pokerGameState != PokerGameState.FOCUS)
         {
             _stopTimer = true;
             FinishTurn();
@@ -67,8 +83,7 @@ public class UITurn : MonoBehaviour
             SetFillAmout(_turnTime - _currentTime);
         }
         else
-        {
-            
+        {           
             FinishTurn();
             if(PokerGameManager.Instance.NowTurnUserId == UserInfo.Instance.UserID)
             Batting.Instance.Die();         
@@ -77,29 +92,38 @@ public class UITurn : MonoBehaviour
 
     void SetFillAmout(float value)
     {
-        _playersTurnUI[_nowUiPos].fillAmount = value / _turnTime;
+        if (PokerGameSocket.Instance.GetPokerGamePeopleNum == 2)
+        {
+            _2PlayersTurnUI[_nowUiPos].fillAmount = value / _turnTime;
+        }
+        else
+        {
+            _4PlayersTurnUI[_nowUiPos].fillAmount = value / _turnTime;
+        }
+
     }
+
+
 
     void Init()
     {
-         _nowUiPos = PokerGameManager.Instance.GetPlayerUiOrders.FindIndex(x => x.id == _nowTurnUser);
+         _nowUiPos = PokerGameManager.Instance.GetPlayerUiOrders.FindIndex(x => x.id == PokerGameManager.Instance.NowTurnUserId);
         PokerGameManager.Instance.UiPos = _nowUiPos;
-        Debug.Log("_NOWUIPOS = " + _nowUiPos);
-        //반복문돌면서 현재 유저가 어디있는지 찾아야함.
+        Debug.Log("NOW UI POS : " + _nowUiPos);
         if(PokerGameManager.Instance.PeopleNum == 2)
-        { //02020202
-            if(_nowUiPos ==1)
-            {
-                _nowUiPos = 2;
-            }
+        { 
+            _2PlayersTurnUI[_nowUiPos].fillAmount = 1f;
+            _2PlayersTurnUI[_nowUiPos].gameObject.SetActive(true);
         }
-        _playersTurnUI[_nowUiPos].gameObject.SetActive(true);
-        _playersTurnUI[_nowUiPos].fillAmount = 1f;
-        
+        else
+        {
+            _4PlayersTurnUI[_nowUiPos].fillAmount = 1f;
+            _4PlayersTurnUI[_nowUiPos].gameObject.SetActive(true);
+        }
+
+     
         _turnWait = TurnWait();
         _battingTurn = Turn();
-
-        SettingPeople();
     }     
     
     public void ShowWinnerUI(int who)
@@ -110,39 +134,71 @@ public class UITurn : MonoBehaviour
 
     IEnumerator WinnerUI(int winner)
     {
-        for(int i=0;i<3;i++)
+        if (PokerGameSocket.Instance.GetPokerGamePeopleNum == 2)
         {
-            _playersWinObject[winner].SetActive(true);
-            yield return new WaitForSeconds(0.2f);
-            _playersWinObject[winner].SetActive(false);
-            yield return new WaitForSeconds(0.2f);
+            for (int i = 0; i < 3; i++)
+            {
+                _2PlayersWinObject[winner].SetActive(true);
+                yield return new WaitForSeconds(0.2f);
+                _2PlayersWinObject[winner].SetActive(false);
+                yield return new WaitForSeconds(0.2f);
+            }
+        }
+     
+        else
+        {
+            for (int i = 0; i < 3; i++)
+            {
+                _2PlayersWinObject[winner].SetActive(true);
+                yield return new WaitForSeconds(0.2f);
+                _2PlayersWinObject[winner].SetActive(false);
+                yield return new WaitForSeconds(0.2f);
+            }
         }
     }
 
     public void HideWinnerUI()
     {
-        for(int i=0;i<4;i++)
-        _playersWinObject[i].SetActive(true);
+        if (PokerGameSocket.Instance.GetPokerGamePeopleNum == 2)
+        {
+            for (int i = 0; i < 2; i++)
+                _2PlayersWinObject[i].SetActive(false);
+        }
+        else
+        {
+            for (int i = 0; i < 4; i++)
+                _4PlayersWinObject[i].SetActive(false);
+        }
+
     }
 
-    void SettingPeople()
+    public void SettingPeople()
     {
+        InitPeople();
         switch (PokerGameManager.Instance.PeopleNum)
-        {
+        {     
             case 2:
-                _playersTurnObject[1].SetActive(false);
-                _playersTurnObject[3].SetActive(false);
+                for (int i=0;i< _2PlayersTurnObject.Length;i++)
+                    _2PlayersTurnObject[i].SetActive(true);
                 break;
 
             case 3:
-                _playersTurnObject[1].SetActive(true);
-                _playersTurnObject[3].SetActive(false);
+                for (int i = 0; i < 3; i++)
+                    _4PlayersTurnObject[i].SetActive(true);
                 break;
             case 4:
-                _playersTurnObject[1].SetActive(true);
-                _playersTurnObject[3].SetActive(true);
+                for (int i = 0; i < 4; i++)
+                    _4PlayersTurnObject[i].SetActive(true);
                 break;
         }     
+    }
+
+    void InitPeople()
+    {
+        for (int i = 0; i < 4; i++)
+            _4PlayersTurnObject[i].SetActive(false);
+        for (int i = 0; i < 2; i++)
+            _2PlayersTurnObject[i].SetActive(false);
     }
 
     public void FinishTurn()
@@ -151,8 +207,19 @@ public class UITurn : MonoBehaviour
 
         StopCoroutine(_battingTurn);
         StopCoroutine(_turnWait);
-       
-       _playersTurnUI[_nowUiPos].gameObject.SetActive(false);
+        if(PokerGameManager.Instance.NowTurnUserId == UserInfo.Instance.UserID)
+        {
+            _2PlayersTurnUI[0].gameObject.SetActive(false);
+        }
+       else if(PokerGameSocket.Instance.GetPokerGamePeopleNum == 2)
+        {
+            _2PlayersTurnUI[1].gameObject.SetActive(false);
+        }
+       else
+        {
+            _4PlayersTurnUI[PokerGameManager.Instance.ResultUserUiPos].gameObject.SetActive(false);
+        }
+ 
      
     }    
 
@@ -161,11 +228,25 @@ public class UITurn : MonoBehaviour
         StopCoroutine(_battingTurn);
         StopCoroutine(_turnWait);
 
-        _playersTurnUI[_nowUiPos].gameObject.SetActive(false);
+        if (PokerGameSocket.Instance.GetPokerGamePeopleNum == 2)
+        {
+            _2PlayersTurnUI[_nowUiPos].gameObject.SetActive(false);
+        }
+        else
+        {
+            _4PlayersTurnUI[_nowUiPos].gameObject.SetActive(false);
+        }
     }
 
     public void ClearTurnUI()
     {
-        _playersTurnUI[_nowUiPos].gameObject.SetActive(false);
+        if (PokerGameSocket.Instance.GetPokerGamePeopleNum == 2)
+        {
+            _2PlayersTurnUI[_nowUiPos].gameObject.SetActive(false);
+        }
+        else
+        {
+            _4PlayersTurnUI[_nowUiPos].gameObject.SetActive(false);
+        }
     }
 }

@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -18,8 +18,6 @@ namespace UI
         {
             TableData = new List<UIChattData>()
             {
-                new UIChattData { Name="Team" , Chat = "여기는 팀채팅입니다. 팀이요 팀!"},
-                new UIChattData { Name="겜잘알" , Chat = "팀끼리는 어떤말을 하는건가여?"},
             };
 
             InitializeTableView();

@@ -13,13 +13,19 @@ public class UIBatting : MonoBehaviour
     [SerializeField] TMP_Text _battingChipNum;
     [SerializeField] TMP_Text _myBattingChip;
 
-    [SerializeField] GameObject[] _dieView = new GameObject[4];
-    [SerializeField] GameObject[] _playerBattingResultObject = new GameObject[4];
-    [SerializeField] TMP_Text[] _playerBattingResultText = new TMP_Text[4];
+    [SerializeField] GameObject[] _2DieView = new GameObject[2];
+    [SerializeField] GameObject[] _4DieView = new GameObject[4];
+
+    [SerializeField] GameObject[] _2PlayerBattingResultObject = new GameObject[2];
+    [SerializeField] TMP_Text[] _2PlayerBattingResultText = new TMP_Text[2];
+    [SerializeField] GameObject[] _4PlayerBattingResultObject = new GameObject[4];
+    [SerializeField] TMP_Text[] _4PlayerBattingResultText = new TMP_Text[4];
 
     [SerializeField] GameObject[] _playersPosition = new GameObject[4];
     [SerializeField] RectTransform[] _battingChips = new RectTransform[3];
     [SerializeField] GameObject _inactiveBattingButtonView;
+    [SerializeField] TMP_Text _allInorCallText;
+    [SerializeField] GameObject _inactiveCallButtonView;
     private int _canBatting;
     private Vector3 _targetPos;
 
@@ -28,6 +34,10 @@ public class UIBatting : MonoBehaviour
         _init();
     }
 
+    public void InitSetting()
+    {
+        _init();
+    }
     private void _init()
     {
         _canBatting = Batting.Instance.MinBattingChip;
@@ -35,7 +45,9 @@ public class UIBatting : MonoBehaviour
         _myBattingChip.text = Batting.Instance.MyBattingChip.ToString();
         _battingChipNum.text = _canBatting.ToString();
         for(int i=0;i<4;i++)
-        _dieView[i].SetActive(false);
+        _4DieView[i].SetActive(false);
+        for (int i = 0; i < 2; i++)
+            _2DieView[i].SetActive(false);
 
         _settingButton();
     }
@@ -82,15 +94,28 @@ public class UIBatting : MonoBehaviour
 
     public void DonAccessBattingButton()
     {
+        _allInorCallText.text = "올인";
         _inactiveBattingButtonView.SetActive(true);
     }
     public void AccessBattingButton()
     {
+        _allInorCallText.text = "콜";
         _inactiveBattingButtonView.SetActive(false);
+    }
+    public void DonAccessCallButton()
+    {
+
+        _inactiveCallButtonView.SetActive(true);
+    }
+    public void AccessCallButton()
+    {
+
+        _inactiveCallButtonView.SetActive(false);
     }
 
     public void ChangeBattingChip()
     {
+        SettingCanBattingChip();
         ChangeRoundBattingChip();
         ChangeMyBattingChip();
         ChangeRaiseBattingChip();
@@ -113,23 +138,31 @@ public class UIBatting : MonoBehaviour
  
 
     public void ActiveDieView(int who)
-    {       
-        _dieView[who].SetActive(true);
-        PokerGameManager.Instance.PlayerOrder[who].SetState(BattingState.die);
+    {
+        if (PokerGameManager.Instance.PeopleNum == 2)
+        {
+            _2DieView[who].SetActive(true);
+        }
+        else
+        {
+            _4DieView[who].SetActive(true);
+        }
+     
     }
 
     public void SetPlayerBattingResult(int who, string text)
     {
         if(PokerGameManager.Instance.PeopleNum == 2)
         {
-            if(who == 1)
-            {
-                _playerBattingResultObject[2].SetActive(true);
-                _playerBattingResultText[2].text = text;
-            }
+            _2PlayerBattingResultObject[who].SetActive(true);
+            _2PlayerBattingResultText[who].text = text;
         }
-        _playerBattingResultObject[who].SetActive(true);
-        _playerBattingResultText[who].text = text;
+        else
+        {
+            _4PlayerBattingResultObject[who].SetActive(true);
+            _4PlayerBattingResultText[who].text = text;
+        }
+
     }
     public void ShowBattingChipMoveCenter(int battingMoney)
     {
