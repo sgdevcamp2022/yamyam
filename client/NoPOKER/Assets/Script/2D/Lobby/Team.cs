@@ -12,7 +12,7 @@ public class Team : MonoBehaviour
     public InviteRequestSocketData _inviteRequestData = new InviteRequestSocketData();
     public bool ChangedRequestState = false;
     public LobbySocketType TeamType = LobbySocketType.None;
-    private TeamSocketData _teamData = new TeamSocketData();
+    public TeamSocketData _teamData = new TeamSocketData();
     public TeamSocketData GetTeamData { get => _teamData; }
     UserSocketData _leader;
     public UserSocketData LeaderData { get => _leader; }

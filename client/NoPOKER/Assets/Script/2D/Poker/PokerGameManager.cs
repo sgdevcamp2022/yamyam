@@ -15,50 +15,12 @@ public enum PokerGameState {
     RRESULT,
     BET,
     DIE,
-    OPEN
-}
-
-public class PokerPlayer
-{
-    public int _id;
-    public string _name;
-    int _chip;
-    public int _card;
-    BattingState _state = BattingState.batting;
-
-    public PokerPlayer(int id, string name, int chip)
-    {
-        _id = id;
-        _name = name;
-        _chip = chip;
-    }
-
-    public PokerPlayer(int id, string name, int chip, int card)
-    {
-        _id = id;
-        _name = name;
-        _chip = chip;
-        _card = card;
-    }
-
-    public void SetState(BattingState state)
-    {
-        _state = state;
-    }
-    public BattingState GetState()
-    {
-        return _state;
-    }
-
-    public void AddChip(int chip)
-    {
-        _chip += chip;
-    }
-    public void SubChip(int chip)
-    {
-        _chip -= chip;
-    }
-
+    OPEN,
+    LOBBY,
+    CALL,
+    RAISE,
+    ALLIN,
+    NONE
 }
 
 
@@ -74,6 +36,10 @@ public class ReceivedBattingSocketData {
 
 public class PokerGameManager : MonoBehaviour
 {
+
+    private List<PokerUserSocketData> _PlayerInfos = new List<PokerUserSocketData>();
+
+
     private static PokerGameManager s_instance = null;
     public static PokerGameManager Instance { get => s_instance; }
 
@@ -84,9 +50,9 @@ public class PokerGameManager : MonoBehaviour
     public int PeopleNum { get => _peopleNum; }
     private bool _isBattingFinish = false;
     public bool IsBattingFinish { get => _isBattingFinish; }
-    public List<PokerPlayer> PlayerOrder = new List<PokerPlayer>();
-    private List<UserPokertData> _playerUiOrders = new List<UserPokertData>();
-    public List<UserPokertData> GetPlayerUiOrders { get => _playerUiOrders; }
+
+    private List<UserPokerData> _playerUiOrders = new List<UserPokerData>();
+    public List<UserPokerData> GetPlayerUiOrders { get => _playerUiOrders; }
 
     public float TurnTime { get => _turnTiem; }
     public int NowTurnUserId;
@@ -106,8 +72,12 @@ public class PokerGameManager : MonoBehaviour
     public PokerGameState _pokerGameState;
     public int UiPos;
     public int ResultUserUiPos;
+    public bool IsFirstTurn = false;
    public  PokerResultPlayerSocketData[] ResultPlayerDatas;
     [SerializeField] GameObject _inactiveBattingButtonView;
+    private bool _isSetting = true;
+
+
     private void Update()
     {
         if(ReceiveSocketFlag)
@@ -115,9 +85,13 @@ public class PokerGameManager : MonoBehaviour
             switch(_pokerGameState)
             {
                 case PokerGameState.FOCUS:
+
+                    
                     Debug.Log("NOW TURN : " + NowTurnUserId);
+                    SetUserInfo();
                     if (NowTurnUserId == UserInfo.Instance.UserID)
                     {
+                        //Batting.Instance.SetRoundBatting(PokerGameSocket.Instance.TotalBetAmount, 0);
                         Batting.Instance.InActiveButtonView.SetActive(false);
                         if(_playerUiOrders[0].currentChip < Batting.Instance.CallBattingChip)
                         {
@@ -127,27 +101,76 @@ public class PokerGameManager : MonoBehaviour
                         {
                             Batting.Instance.CallorDieState(false);
                         }
+
+                        if(IsFirstTurn)
+                        {
+                            Batting.Instance.CanCallState(false);
+                        }
+                        else
+                        {
+                            Batting.Instance.CanCallState(true);
+                        }
+                        IsFirstTurn = false;
                      }
-                    _turn.StartTurn(NowTurnUserId);
+                    else
+                    {
+                        IsFirstTurn = false;
+                        Batting.Instance.InActiveButtonView.SetActive(true);
+                    }
+                    _turn.StartTurn();
+
+
+
                     break;
+
                 case PokerGameState.BET:
                     //turn 돌아가는거 중단.
-                    //BET정보 화면에 반영
                     _turn.FinishTurn();
+                    //BET정보 화면에 반영
+
                     ShowBattingResult();
                     break;
+
+                    case PokerGameState.CALL:
+                    UpdateUserInfo();
+                    _turn.FinishTurn();
+                    Batting.Instance.SetCallBattingChip(receivedBattingInfo.betAmout);
+                    ShowCallResult();
+                    break;
+
+                case PokerGameState.RAISE:
+                    UpdateUserInfo();
+                    _turn.FinishTurn();
+                    Batting.Instance.SetCallBattingChip(receivedBattingInfo.betAmout);
+                    ShowRaiseResult();
+                    break;
+                case PokerGameState.ALLIN:
+                    UpdateUserInfo();
+                    _turn.FinishTurn();
+
+                    break;
+
+
                 case PokerGameState.DIE:
                     //turn 돌아가는거 중단.
                     _turn.FinishTurn();
                     ShowDieResult(ResultUserUiPos);
                     break;
+
                 case PokerGameState.OPEN:
                     FinishPokerGame();
                     ShowGameResult();
                     break;
+
+                case PokerGameState.LOBBY:
+                    PokerGameSocket.Instance.DisconnectSever();
+                    GameManager.Instance.ChangeScene(Scenes.LobbyScene);
+                    break;
+
             }
 
             ReceiveSocketFlag = false;
+            _pokerGameState = PokerGameState.NONE;
         }
     }
 
@@ -166,14 +189,14 @@ public class PokerGameManager : MonoBehaviour
     public void StartPokerGame()
     {
         _peopleNum = PokerGameSocket.Instance.GetPokerGamePeopleNum;
-        SettingGame(); 
+        SettingGame();
     }
 
     public void Init()
     {
         if (s_instance == null)
             s_instance = this;
-      //  DontDestroyOnLoad(this);
+
     }
 
 
@@ -182,45 +205,84 @@ public class PokerGameManager : MonoBehaviour
         for(int i=0;i<_peopleNum;i++)
         {
             int _findIndex = _playerUiOrders.FindIndex(x => x.id == PokerGameSocket.Instance.GetGamePlayersList[i].id);
+        
+
             _playerUiOrders[_findIndex].currentChip = PokerGameSocket.Instance.GetGamePlayersList[i].currentChip;
             _playerUiOrders[_findIndex].result = PokerGameSocket.Instance.GetGamePlayersList[i].result;
             _uiPokerPlayer.SetUsetChip(_findIndex, _playerUiOrders[_findIndex].currentChip);
 
-            if(_playerUiOrders[_findIndex].result == true)
+            if (_findIndex == 0)
+            {
+                Batting.Instance.SetMyBattingChip(_playerUiOrders[_findIndex].currentChip);
+            }
+
+            if (_playerUiOrders[_findIndex].result == true)
             {
                 SendWinnerMessage(_playerUiOrders[_findIndex].id);
             }
         }
     }
 
+
+    public void SetUserInfo()
+    {
+        for (int i = 0; i < _peopleNum; i++)
+        {
+            int _findIndex = _playerUiOrders.FindIndex(x => x.id == PokerGameSocket.Instance.GetGamePlayersList[i].id);
+            _playerUiOrders[_findIndex].currentChip = PokerGameSocket.Instance.GetGamePlayersList[i].currentChip;
+            _playerUiOrders[_findIndex].result = PokerGameSocket.Instance.GetGamePlayersList[i].result;
+            _uiPokerPlayer.SetUsetChip(_findIndex, _playerUiOrders[_findIndex].currentChip);
+        }
+    }
+
+    public void UpdateUserInfo()
+    {
+        Debug.Log("Update UserInfo문 안");
+            _playerUiOrders[ResultUserUiPos].currentChip = receivedBattingInfo.currentAmount;
+        Debug.Log("_peopleNum : " + _peopleNum);
+        Debug.Log("ResultUserUiPos : " + ResultUserUiPos);
+        Debug.Log("_playerUiOrders[ResultUserUiPos].currentChip  : " + _playerUiOrders[ResultUserUiPos].currentChip);
+
+        Debug.Log("receivedBattingInfo.id " + receivedBattingInfo.id);
+        Debug.Log("receivedBattingInfo.betAmout " + receivedBattingInfo.betAmout);
+        Debug.Log("receivedBattingInfo.currentAmount " + receivedBattingInfo.currentAmount);
+        Debug.Log("receivedBattingInfo.totalAmount " + receivedBattingInfo.totalAmount);
+
+
+        if (_peopleNum ==2)
+        {
+
+            Debug.Log("2명");
+            _uiPokerPlayer.SetUsetChip(2, _playerUiOrders[ResultUserUiPos].currentChip);
+        }
+        else
+        {
+            _uiPokerPlayer.SetUsetChip(ResultUserUiPos, _playerUiOrders[ResultUserUiPos].currentChip);
+        }
+      
+        
+    }
+
+    public UserPokerData GetUserInfo()
+    {
+        return _playerUiOrders[ResultUserUiPos];
+    }
+
+
     public void SettingGame()
     {
-        GetPlayerOrder();
+        IsFirstTurn = true;
         SetPlayerPosition();                   
 
         Batting.Instance.SettingRoundBatting(_peopleNum * 10);
         _card.DistributeCard();
+        _turn.SettingPeople();
+
+        _pokerGameState = PokerGameState.FOCUS;
+        ReceiveSocketFlag = true;
+
     }
 
-    /*[0] 은 무조건 자기자신. [1] 은 자기 바로 다음차례. [2]는 그다다음 [3]은 그다다다음
-    public void SettingPlayerOrder()
-    {
-
-    }*/
-
-    public void GetPlayerOrder() //�÷��̾� �� ������
-    {
-        for(int i=0;i<PokerGameSocket.Instance.GetPokerGamePeopleNum;i++)
-        {
-        
-            PlayerOrder.Add(new PokerPlayer(
-                PokerGameSocket.Instance.GetGamePlayersList[i].id,
-                PokerGameSocket.Instance.GetGamePlayersList[i].nickname,
-                PokerGameSocket.Instance.GetGamePlayersList[i].currentChip,
-                PokerGameSocket.Instance.GetGamePlayersList[i].card)
-                );
-        }
-    }
 
     public void FinishTurn()
     {
@@ -241,19 +303,14 @@ public class PokerGameManager : MonoBehaviour
 
     public void SendWinnerMessage(int winnerID)
     {
-        Batting.Instance.Win();
-        _turn.ShowWinnerUI(winnerID);
-    }
-
-    public void ResetPokerGame()
-    {
-
-        //Start();
+        int _findIndex = _playerUiOrders.FindIndex(x => x.id == winnerID);
+        Batting.Instance.Win(_findIndex);
+        _turn.ShowWinnerUI(_findIndex);
     }
 
     public void SetPlayerPosition()
     {
-       
+        _playerUiOrders.Clear();
         FindMyName();
 
         
@@ -261,7 +318,10 @@ public class PokerGameManager : MonoBehaviour
         {
             for (int i = _myOrder + 1; i < _peopleNum; i++)
             {
-                _playerUiOrders.Add( new UserPokertData(PlayerOrder[i]._id, PlayerOrder[i]._name , PlayerOrder[i]._card));
+                _playerUiOrders.Add( new UserPokerData(
+                    PokerGameSocket.Instance.GetGamePlayersList[i].id,
+                    PokerGameSocket.Instance.GetGamePlayersList[i].nickname ,
+                    PokerGameSocket.Instance.GetGamePlayersList[i].card));
 
             }
         }
@@ -270,13 +330,21 @@ public class PokerGameManager : MonoBehaviour
             if(i==0)
             {
                 if(_myOrder != 0)
-                    _playerUiOrders.Add(new UserPokertData(PlayerOrder[i]._id, PlayerOrder[i]._name , PlayerOrder[i]._card));
+                {
+                    _playerUiOrders.Add(new UserPokerData(
+                    PokerGameSocket.Instance.GetGamePlayersList[i].id,
+                    PokerGameSocket.Instance.GetGamePlayersList[i].nickname,
+                    PokerGameSocket.Instance.GetGamePlayersList[i].card));
+                }
 
                 _startPoint = _playerUiOrders.Count;
             }
             else
             {
-                _playerUiOrders.Add(new UserPokertData(PlayerOrder[i]._id, PlayerOrder[i]._name, PlayerOrder[i]._card));
+                _playerUiOrders.Add(new UserPokerData(
+                PokerGameSocket.Instance.GetGamePlayersList[i].id,
+                PokerGameSocket.Instance.GetGamePlayersList[i].nickname,
+                PokerGameSocket.Instance.GetGamePlayersList[i].card));
             }
             
         }
@@ -312,11 +380,14 @@ public class PokerGameManager : MonoBehaviour
     {
         for(int i=0;i<_peopleNum;i++)
         {
-            if(PlayerOrder[i]._id == UserInfo.Instance.UserID)
+            if(PokerGameSocket.Instance.GetGamePlayersList[i].id == UserInfo.Instance.UserID)
             {
-                Debug.Log("my name is " + PlayerOrder[i]._name);
+                Debug.Log("my name is " + PokerGameSocket.Instance.GetGamePlayersList[i].nickname);
                 _myOrder = i;
-                _playerUiOrders.Add(new UserPokertData(PlayerOrder[i]._id, PlayerOrder[i]._name, PlayerOrder[i]._card));
+                _playerUiOrders.Add(new UserPokerData(
+                PokerGameSocket.Instance.GetGamePlayersList[i].id,
+                PokerGameSocket.Instance.GetGamePlayersList[i].nickname,
+                PokerGameSocket.Instance.GetGamePlayersList[i].card));
                 return;
             }
         }
@@ -328,9 +399,26 @@ public class PokerGameManager : MonoBehaviour
         Debug.Log("3D게임으로 전환됩니다.");
     }
 
-    public void ChangePlayerState(BattingState state)
+    public void ShowCallResult()
     {
-        PlayerOrder[NowTurnUserId].SetState(state);
+        Debug.Log("상대방이 call을 했네요");
+        Batting.Instance.OtherCall();
+        Batting.Instance.SetRoundBatting(receivedBattingInfo.totalAmount, receivedBattingInfo.betAmout);
+        _uiPokerPlayer.SetUsetChip(ResultUserUiPos, receivedBattingInfo.currentAmount);
+    }
+    public void ShowRaiseResult()
+    {
+        Debug.Log("상대방이 Raise을 했네요");
+        Batting.Instance.OtherRaise(receivedBattingInfo.betAmout);
+        Batting.Instance.SetRoundBatting(receivedBattingInfo.totalAmount, receivedBattingInfo.betAmout);
+        _uiPokerPlayer.SetUsetChip(ResultUserUiPos, receivedBattingInfo.currentAmount);
+    }
+    public void ShowAllinResult()
+    {
+        Debug.Log("상대방이 All-IN을 했네요");
+        Batting.Instance.OtherRaise(receivedBattingInfo.betAmout);
+        Batting.Instance.SetRoundBatting(receivedBattingInfo.totalAmount, receivedBattingInfo.betAmout);
+        _uiPokerPlayer.SetUsetChip(ResultUserUiPos, receivedBattingInfo.currentAmount);
     }
 
     public void ShowBattingResult()

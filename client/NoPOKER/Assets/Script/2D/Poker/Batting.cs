@@ -7,16 +7,21 @@ public class Batting : MonoBehaviour
     static private Batting s_instance = null;
     static public Batting Instance { get => s_instance; }
 
-    private int _roundBattingChip = 20;
-    public int RoundBattingChip { get => _roundBattingChip; }
+    private long _roundBattingChip = 20;
+    public long RoundBattingChip { get => _roundBattingChip; }
     private int _myBattingChip = 90;
     public int MyBattingChip { get => _myBattingChip; }
-    private int _callBattingChip = 10;
+    private int _callBattingChip = 0;
     public int CallBattingChip { get => _callBattingChip; }
     public int MinBattingChip { get => _callBattingChip +1; }
     private bool _canPayChip;
     public GameObject InActiveButtonView;
 
+
+    public void SetMyBattingChip(int chip)
+    {
+        _myBattingChip = chip;
+    }
 
     private void Awake()
     {
@@ -27,6 +32,10 @@ public class Batting : MonoBehaviour
     {
         if (s_instance == null)
             s_instance = this;
+    }
+    public void SetCallBattingChip(int callChip)
+    {
+        _callBattingChip = callChip;
     }
 
     private bool _checkMyChip(int batting) 
@@ -51,13 +60,14 @@ public class Batting : MonoBehaviour
         }
     }
     public void OtherRaise(int raiseChip)
-    {
-   
+    {  
             _uiBatting.SetPlayerBattingResult(PokerGameManager.Instance.ResultUserUiPos, raiseChip.ToString());
             PersonSound.Instance.PlayRaiseSound();
-
-            _payChip(raiseChip, false);
-
+    }
+    public void OtherAllin()
+    {
+        _uiBatting.SetPlayerBattingResult(PokerGameManager.Instance.ResultUserUiPos, "올인");
+        PersonSound.Instance.PlayCallSound();
     }
     public void Call()
     {       
@@ -75,8 +85,7 @@ public class Batting : MonoBehaviour
        
             _uiBatting.SetPlayerBattingResult(PokerGameManager.Instance.ResultUserUiPos, "콜");
             PersonSound.Instance.PlayCallSound();
-         //   PokerGameManager.Instance.UpCallNum();
-            _payChip(_callBattingChip, true);
+           // _payChip(_callBattingChip, true);
     }
     public void Die()
     {
@@ -85,8 +94,7 @@ public class Batting : MonoBehaviour
         _uiBatting.SetPlayerBattingResult(0, "다이");
         _uiBatting.ActiveDieView(0);
         PersonSound.Instance.PlayDieSound();
-        PokerGameManager.Instance.ChangePlayerState(BattingState.die);
-    
+ 
             PokerGameManager.Instance.FinishTurn();
 
             PokerGameSocket.Instance.SendDieRequest();
@@ -101,11 +109,11 @@ public class Batting : MonoBehaviour
         _uiBatting.SetPlayerBattingResult(PokerGameManager.Instance.ResultUserUiPos, "다이");
         _uiBatting.ActiveDieView(PokerGameManager.Instance.UiPos);
         PersonSound.Instance.PlayDieSound();
-        PokerGameManager.Instance.ChangePlayerState(BattingState.die);
 
     }
 
 
+    
 
     private void _payChip(int batting, bool call)
     {
@@ -118,8 +126,7 @@ public class Batting : MonoBehaviour
         // 턴을 넘기도록함.
 
           Debug.Log("Who is Now UserID : " + PokerGameManager.Instance.NowTurnUserId);
-        if (PokerGameManager.Instance.NowTurnUserId == UserInfo.Instance.UserID)
-        {
+
           
             _myBattingChip -= batting;
             PokerGameManager.Instance.FinishTurn();
@@ -129,33 +136,31 @@ public class Batting : MonoBehaviour
 
             _uiBatting.ShowBattingChipMoveCenter(batting);
            InActiveButtonView.SetActive(true);
-            PokerGameSocket.Instance.SendBettingRequest(batting);
 
-        }
-        else
-        {
-            _uiBatting.SettingCanBattingChip();
-            _uiBatting.ChangeBattingChip();
+            if(call)
+            {
+                if(_myBattingChip < CallBattingChip)
+                {
+                    PokerGameSocket.Instance.SendAllInRequest(_myBattingChip);
+                }
+                else
+                {
+                    PokerGameSocket.Instance.SendCallRequest(batting);
+                }
+             
+            }
+            else
+            {
+                PokerGameSocket.Instance.SendRaiseRequest(batting);
+            }
+               
 
-            _uiBatting.ShowBattingChipMoveCenter(batting);
-            PokerGameManager.Instance.FinishTurn();
-        }
+    
     }
 
 
 
-    ////////////////////////////////////////서버를 통해 받을부분..../////////////////////////////////////
-    /// <summary>
-    /// 서버 수신을 통해 라운드 베팅 금액이 올라갔을 경우.
-    /// </summary>
-    public void RaiseRoundBatting(int raise) 
-    {
-        _roundBattingChip += raise;
-        _callBattingChip += raise;
-        //UI쪽에도 변경사항을 반영해야함..
-    }
-
-    public void SetRoundBatting(int total, int raise)
+    public void SetRoundBatting(long total, int raise)
     {
         _roundBattingChip = total;
         _callBattingChip = raise;
@@ -167,32 +172,27 @@ public class Batting : MonoBehaviour
     {
         _roundBattingChip = roundBatting;
     }
-    public void ResultAllPlayerBatting(int roundBatting)
+
+    public void Win(int who) //모두 다이를 했을 경우 마지막 한 사람에게 돈을 몰아줌.
     {
-        _roundBattingChip = roundBatting;
-    }
-    public void Win() //모두 다이를 했을 경우 마지막 한 사람에게 돈을 몰아줌.
-    {
-        for (int i = 0; i < PokerGameManager.Instance.PeopleNum; i++)
-        {
-            if (PokerGameManager.Instance.PlayerOrder[i].GetState() != BattingState.die)
-            {
-                PokerGameManager.Instance.PlayerOrder[i].AddChip(_roundBattingChip);
+      
                 //Reset 베팅 칩
                 ResetBattingChip();
                 //베팅칩 그 사람한테 가는거 UI적으로 보여주기
-                _uiBatting.ShowBattingChipMovePlayer(i);
+                _uiBatting.ShowBattingChipMovePlayer(who);
 
                 Debug.Log("winner찾음~!");
-            }
-        }
+            
+        
         //다시 포커게임 시작.
     }
     public void ResetBattingChip()
     {
         _roundBattingChip = 0;
-        _callBattingChip = 10;
+        _callBattingChip = 0;
     }
+
+ 
 
     public void CallorDieState(bool state)
     {
@@ -205,5 +205,15 @@ public class Batting : MonoBehaviour
             _uiBatting.AccessBattingButton();
         }
     }
-
+    public void CanCallState(bool state)
+    {
+        if (state)
+        {
+            _uiBatting.AccessCallButton();
+        }
+        else
+        {
+            _uiBatting.DonAccessCallButton();
+        }
+    }
 }

@@ -10,6 +10,7 @@ using System.Linq;
 using Newtonsoft.Json;
 using StompHelper;
 using Unity.VisualScripting;
+using Newtonsoft.Json.Linq;
 
 public enum PokerMessageType {
     JOIN,
@@ -27,10 +28,24 @@ public class PokerSocketIntData {
     public Dictionary<string,int> content = new Dictionary<string, int>();
 }
 
-public class PokerGameStartSocketData {
+public class PokerGameStartSocketData
+{
     public string type;
-    public Dictionary<string, PokerStartPlayerSocketData[]> content = new Dictionary<string, PokerStartPlayerSocketData[]>();
+    public Hashtable content = new Hashtable();
 }
+
+public class PokerGameEndData
+{
+    public string type;
+    public Dictionary<string, PokerStartPlayerSocketData> content = new Dictionary<string, PokerStartPlayerSocketData>();
+}
+
+public class PokerGameStartContentData
+{
+    public int totalBetAmount;
+    public PokerStartPlayerSocketData[] playerInfos;
+}
+
 public class PokerGameResultSocketData {
     public string type;
     public Dictionary<string, PokerResultPlayerSocketData[]> content = new Dictionary<string, PokerResultPlayerSocketData[]>();
@@ -40,6 +55,13 @@ public class PokerStartPlayerSocketData {
     public int id;
     public int currentChip;
     public int card;
+
+    public PokerStartPlayerSocketData(int id, int currentChip, int card)
+    {
+        this.id = id;
+        this.currentChip = currentChip;
+        this.card = card;
+    }
 }
 
 public class PokerResultPlayerSocketData {
@@ -98,9 +120,13 @@ public class PokerGameSocket : MonoBehaviour
     public List<PokerUserSocketData> GetGamePlayersList { get => userSocketDataList; }
     int _pokerGamePeopleNum;
     public int GetPokerGamePeopleNum { get => _pokerGamePeopleNum; }
-
+    public long TotalBetAmount;
     private bool IsStart = false;
     private bool IsChange3DScene = false;
+    private bool IsFirstTurn = false;
+    private int _nowTurnUserId;
+    private bool IsFocus = false;
+    public int GetNowTurnUserID { get => _nowTurnUserId; }
     private void Start()
     {
         Init();
@@ -118,7 +144,7 @@ public class PokerGameSocket : MonoBehaviour
     {
         if(IsStart)
         {
-            StartCoroutine(FocusCoroutine());
+            StartCoroutine(StartCoroutine());
             IsStart = false;
         }
         if(IsChange3DScene)
@@ -126,11 +152,10 @@ public class PokerGameSocket : MonoBehaviour
             GameManager.Instance.ChangeScene(Scenes.ActionGameScene);
             IsChange3DScene = false;
         }
-
-        if(Input.GetKeyDown(KeyCode.D))
+if(IsFocus)
         {
-           
-            DisconnectSever();
+            StartCoroutine(WaitSetting());
+            IsFocus = false;
         }
     }
 
@@ -156,13 +181,13 @@ public class PokerGameSocket : MonoBehaviour
     private void SendUnSubScribe()
     {
 
-        string _subscribeMessage = "UNSUBSCRIBE\n" +
+        string _unsubscribeMessage = "UNSUBSCRIBE\n" +
             "id:sub0\n" +
             "destination:/topic/match\n" +
             "\n" +
             "\u0000";
 
-        _socket.Send(_subscribeMessage);
+        _socket.Send(_unsubscribeMessage);
     }
     private void ws_OnClose(object sender, CloseEventArgs e)
     {
@@ -185,8 +210,9 @@ public class PokerGameSocket : MonoBehaviour
     PokerSocketStringData _messageData;
     PokerSocketIntData _messageIntData;
     int receiveStartNum = 0;
-    PokerGameStartSocketData _startMessageData;
+    PokerGameStartSocketData _startMessageData = new PokerGameStartSocketData();
     PokerGameResultSocketData _resultMessageData;
+    PokerGameEndData _endMessageData = new PokerGameEndData();
     private void ws_OnMessage(object sender, MessageEventArgs e)
     {
         Debug.Log(e.Data);
@@ -227,60 +253,66 @@ public class PokerGameSocket : MonoBehaviour
                                 _pokerGamePeopleNum = userSocketDataList.Count;
                                 SendReadyRequest(); //준비되었다고 알림보냄
 
-                      
-                      
-                        
                         break;
-                    case "GAME_START":
-                        try
-                        {
-
-                             _startMessageData = JsonConvert.DeserializeObject<PokerGameStartSocketData>(message.Body);
-                            PokerStartPlayerSocketData[] _startPlayerDatas = _startMessageData.content["playerInfos"];
-                                for (int i = 0; i < _startPlayerDatas.Length; i++)
+                    case "GAME_START":                                           
+                                 _startMessageData = JsonConvert.DeserializeObject<PokerGameStartSocketData>(message.Body);
+                                JArray _startPlayerDataJArray = (JArray)_startMessageData.content["playerInfos"];
+                                foreach (JObject jobject in _startPlayerDataJArray)
                                 {
-                                    Debug.Log(_startPlayerDatas[i]);
+                                    int _findIndex = userSocketDataList.FindIndex(x => x.id == (int)jobject["id"]);
+                                    if ((int)jobject["currentChip"] == 0) //초기자금이 0인경우
+                                    {
+                                        if ((int)jobject["id"] == UserInfo.Instance.UserID) //그게 나라면
+                                        {
+                                            PokerWindowController.Instance.ActiveLooseWindow();
+                                            DisconnectSever();
+                                        }
+                                        else
+                                        {
+                                            userSocketDataList.RemoveAt(_findIndex);
+                                        }
+                                    }
+                                    else
+                                    {
+                                      userSocketDataList[_findIndex].SetPokerStartData((int)jobject["currentChip"], (int)jobject["card"]);      
+                                    }
+                                                             
                                 }
-                                _pokerGamePeopleNum = _startPlayerDatas.Count();
-                            for (int i = 0; i < _pokerGamePeopleNum; i++)
-                            {
-                                int _findIndex = userSocketDataList.FindIndex(x => x.id == _startPlayerDatas[i].id);                
-                                userSocketDataList[_findIndex].SetPokerStartData(_startPlayerDatas[i].currentChip, _startPlayerDatas[i].card);
-                            }
-                 
-                            IsStart = true;
-                        }
-                        catch (Exception ex)
-                        {
-                            Debug.Log("ERROR : " + ex);
-                        }
+                           
+                            _pokerGamePeopleNum = userSocketDataList.Count;
+            
+                 //화면에 유저들 렌더링하기.
+                            IsStart = true; 
+                            
+                
 
                         break;
 
                     case "FOCUS":
-                        try
-                        {
-                                Debug.Log("1");
+                       
+
                                 _startMessageData.type = "FOCUS";
                             _messageIntData = JsonConvert.DeserializeObject<PokerSocketIntData>(message.Body);
-                                Debug.Log("2");
-                                if (GameManager.Instance.CheckNowScene() == Scenes.PokerGameScene)
+                            if (GameManager.Instance.CheckNowScene() == Scenes.PokerGameScene)
                             {
-                                PokerGameManager.Instance.NowTurnUserId = _messageIntData.content["id"];
-                                PokerGameManager.Instance._pokerGameState = PokerGameState.FOCUS;
-                                PokerGameManager.Instance.ReceiveSocketFlag = true;
-                            }
-                        }
-                        catch (Exception ex)
-                        {
-                            Debug.Log("ERROR : " + ex);
-                        }
+                                    Debug.Log("안들어왔나?");
+                                IsFocus = true;
+                            }      
+
                         break;
-                    case "BET":
-                        try
-                            {
-                                
+
+                        case "CALL":
+                        case "RAISE":
+                        case "ALLIN":                           
+                        case "BET":   
                                 _messageIntData = JsonConvert.DeserializeObject<PokerSocketIntData>(message.Body);
+
+                            string type = _socketType.type;
+
+                            PokerGameManager.Instance.ResultUserUiPos =
+                                         PokerGameManager.Instance.GetPlayerUiOrders.FindIndex
+                                         (x => x.id == _messageIntData.content["playerId"]);
+
                             if (_messageIntData.content["playerId"] != UserInfo.Instance.UserID)
                             {
                                 PokerGameManager.Instance.receivedBattingInfo.id = _messageIntData.content["playerId"];
@@ -288,23 +320,30 @@ public class PokerGameSocket : MonoBehaviour
                                 PokerGameManager.Instance.receivedBattingInfo.currentAmount = _messageIntData.content["currentAmount"];
                                 PokerGameManager.Instance.receivedBattingInfo.totalAmount = _messageIntData.content["totalAmount"];
 
-                                PokerGameManager.Instance.ResultUserUiPos =
-                                             PokerGameManager.Instance.GetPlayerUiOrders.FindIndex
-                                             (x => x.id == _messageIntData.content["playerId"]);
-                                    if (_pokerGamePeopleNum == 2)
-                                    {
-                                        if (PokerGameManager.Instance.ResultUserUiPos == 1)
-                                            PokerGameManager.Instance.ResultUserUiPos = 2;
-                                    }
-                                    PokerGameManager.Instance._pokerGameState = PokerGameState.BET;
-                                PokerGameManager.Instance.ReceiveSocketFlag = true;
-                            }
-                        }
-                        catch (Exception ex)
-                        {
-                            Debug.Log("ERROR : " + ex);
-                        }
+                                Debug.Log("receivedBattingInfo.id " + PokerGameManager.Instance.receivedBattingInfo.id);
+                                Debug.Log("receivedBattingInfo.betAmout " + PokerGameManager.Instance.receivedBattingInfo.betAmout);
+                                Debug.Log("receivedBattingInfo.currentAmount " + PokerGameManager.Instance.receivedBattingInfo.currentAmount);
+                                Debug.Log("receivedBattingInfo.totalAmount " + PokerGameManager.Instance.receivedBattingInfo.totalAmount);
+
+
+                                PokerGameManager.Instance.GetUserInfo().SetNewData(PokerGameManager.Instance.receivedBattingInfo.currentAmount);
+                                if(type.Equals("CALL"))
+                                {
+                                    PokerGameManager.Instance._pokerGameState = PokerGameState.CALL;
+                                }
+                                else if(type.Equals("RAISE"))
+                                {
+                                    PokerGameManager.Instance._pokerGameState = PokerGameState.RAISE;
+                                }
+                                else if (type.Equals("ALLIN"))
+                                {
+                                    PokerGameManager.Instance._pokerGameState = PokerGameState.ALLIN;
+                                }
+
+                                PokerGameManager.Instance.ReceiveSocketFlag = true;                                   
+                             }
                         break;
+
                     case "DIE":
                         try
                         {
@@ -317,11 +356,6 @@ public class PokerGameSocket : MonoBehaviour
                                     PokerGameManager.Instance.GetPlayerUiOrders.FindIndex
                                     (x => x.id == _messageIntData.content["playerId"]);
 
-                                if (_pokerGamePeopleNum == 2)
-                                {
-                                    if (PokerGameManager.Instance.ResultUserUiPos == 1)
-                                        PokerGameManager.Instance.ResultUserUiPos = 2;
-                                }
 
                                 PokerGameManager.Instance._pokerGameState = PokerGameState.DIE;
                                 PokerGameManager.Instance.ReceiveSocketFlag = true;
@@ -365,6 +399,10 @@ public class PokerGameSocket : MonoBehaviour
                                 Debug.Log("ERROR : " + ex);
                             }
                             break;
+                        case "GAME_END":
+                           // _endMessageData = JsonConvert.DeserializeObject<PokerGameEndData>(message.Body);
+                            //PokerStartPlayerSocketData _startPlayerDatas = _endMessageData.content["playerInfos"];
+                            break;
                     }
 
                 break;
@@ -381,33 +419,47 @@ public class PokerGameSocket : MonoBehaviour
 
     }
 
-    IEnumerator FocusCoroutine()
+
+    IEnumerator WaitSetting()
     {
-        Debug.Log("1");
-        // yield return new WaitUntil(() => GameManager.Instance.CheckNowScene() == Scenes.PokerGameScene);
-        yield return new WaitUntil(() => _startMessageData.type.Equals("FOCUS"));
-        Debug.Log("2");
-        StartCoroutine( FirstFocus());
-        Debug.Log("3");
-        if (GameManager.Instance.CheckNowScene() == Scenes.PokerGameScene)
-            PokerGameManager.Instance.StartPokerGame();
-        else if (GameManager.Instance.CheckNowScene() == Scenes.LobbyScene)
+        yield return new WaitUntil(() => PokerGameManager.Instance._pokerGameState == PokerGameState.NONE); //NONE이 될때까지 기다리기.
+
+        PokerGameManager.Instance.NowTurnUserId = _messageIntData.content["id"];
+        PokerGameManager.Instance._pokerGameState = PokerGameState.FOCUS;
+        PokerGameManager.Instance.ReceiveSocketFlag = true;
+    }
+
+    IEnumerator StartCoroutine()
+    {
+        yield return new WaitUntil(() => _startMessageData.type.Equals("FOCUS")); //start하고나서 처음 FOCUS가 들어왔을 때
+       // StartCoroutine( FirstFocus());
+
+        if (GameManager.Instance.CheckNowScene() == Scenes.PokerGameScene) //게임을 다시 시작하는거라면?
+        {
+            PokerGameManager.Instance.IsFirstTurn = true;
+            PokerGameManager.Instance.StartPokerGame();       
+        }
+         
+        else if (GameManager.Instance.CheckNowScene() == Scenes.LobbyScene) //로비에서 포커게임으로 넘어오는거라면?
+        {
             GameManager.Instance.ChangeScene(Scenes.PokerGameScene);
+            StartCoroutine(FirstFocus());       
+        }
+           
     }
 
     public IEnumerator FirstFocus()
     {
         Debug.Log("FirstFocus");
 
-        yield return new WaitUntil(() => GameManager.Instance.CheckNowScene() == Scenes.PokerGameScene);
+        yield return new WaitUntil(() => GameManager.Instance.CheckNowScene() == Scenes.PokerGameScene); //포커게임씬으로 바뀔때까지 기다리기.
+
         PokerGameManager.Instance.NowTurnUserId = _messageIntData.content["id"];
         Debug.Log("NOW TURN : " + _messageIntData.content["id"]);
-        PokerGameManager.Instance.StartPokerGame();
-        PokerGameManager.Instance._pokerGameState = PokerGameState.FOCUS;
-        PokerGameManager.Instance.ReceiveSocketFlag = true;
 
-
-       
+        PokerGameManager.Instance.IsFirstTurn = true;
+        PokerGameManager.Instance._pokerGameState = PokerGameState.NONE;
+        PokerGameManager.Instance.StartPokerGame();       
     }
 
 
@@ -449,6 +501,54 @@ public class PokerGameSocket : MonoBehaviour
 
         PokerSocketIntData data = new PokerSocketIntData();
         data.type = "BET";
+        data.content.Add("userId", UserInfo.Instance.UserID);
+        data.content.Add("betAmount", battingChipNum);
+        data.content.Add("gameId", GameRoomID);
+        StompMessage message = new StompMessage(StompCommand.MESSAGE,
+            JsonConvert.SerializeObject(data).ToString(), headers);
+
+        _socket.Send(messageParser.Serialize(message));
+    }
+
+    public void SendCallRequest(int battingChipNum)
+    {
+        Dictionary<string, string> headers = new Dictionary<string, string>();
+        headers.Add("destination", "/pub/action");
+
+        PokerSocketIntData data = new PokerSocketIntData();
+        data.type = "CALL";
+        data.content.Add("userId", UserInfo.Instance.UserID);
+        data.content.Add("betAmount", battingChipNum);
+        data.content.Add("gameId", GameRoomID);
+        StompMessage message = new StompMessage(StompCommand.MESSAGE,
+            JsonConvert.SerializeObject(data).ToString(), headers);
+
+        _socket.Send(messageParser.Serialize(message));
+    }
+
+    public void SendRaiseRequest(int battingChipNum)
+    {
+        Dictionary<string, string> headers = new Dictionary<string, string>();
+        headers.Add("destination", "/pub/action");
+
+        PokerSocketIntData data = new PokerSocketIntData();
+        data.type = "RAISE";
+        data.content.Add("userId", UserInfo.Instance.UserID);
+        data.content.Add("betAmount", battingChipNum);
+        data.content.Add("gameId", GameRoomID);
+        StompMessage message = new StompMessage(StompCommand.MESSAGE,
+            JsonConvert.SerializeObject(data).ToString(), headers);
+
+        _socket.Send(messageParser.Serialize(message));
+    }
+
+    public void SendAllInRequest(int battingChipNum)
+    {
+        Dictionary<string, string> headers = new Dictionary<string, string>();
+        headers.Add("destination", "/pub/action");
+
+        PokerSocketIntData data = new PokerSocketIntData();
+        data.type = "ALLIN";
         data.content.Add("userId", UserInfo.Instance.UserID);
         data.content.Add("betAmount", battingChipNum);
         data.content.Add("gameId", GameRoomID);

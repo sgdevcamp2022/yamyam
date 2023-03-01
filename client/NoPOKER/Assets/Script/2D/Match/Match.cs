@@ -177,7 +177,7 @@ public class Match : MonoBehaviour
         _socket.OnOpen += ws_OnOpen;//서버가 연결된 경우 실행할 함수를 등록한다
         _socket.OnClose += ws_OnClose;//서버가 닫힌 경우 실행할 함수를 등록한다.
         _socket.Connect();
-        GameManager.Instance.SendGameStartMessage();
+       // GameManager.Instance.SendGameStartMessage();
         for (int i = 0; i < _loadingObject.Count; i++)
         {
             _loadingObject[i].SetActive(true);
@@ -237,7 +237,7 @@ public class Match : MonoBehaviour
 
     public void MatchingExit()
     {
-        GameManager.Instance.SendGameExitMessage();
+      //  GameManager.Instance.SendGameExitMessage();
         StopLoading();
     }
 

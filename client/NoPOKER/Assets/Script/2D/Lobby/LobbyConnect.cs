@@ -383,8 +383,15 @@ public class LobbyConnect : MonoBehaviour
 
     public void SendGameStartMessage(TeamSocketData sendMessage)
     {
-        sendMessage.type = "game_start";
-        _lobbySocket.Send(JsonConvert.SerializeObject(sendMessage));
+        try
+        {
+            sendMessage.type = "game_start";
+            _lobbySocket.Send(JsonConvert.SerializeObject(sendMessage));
+        }
+        catch(Exception ex)
+        {
+            Debug.Log("EXCEPTION : " + ex);
+        }
     }
 
     public void SendGameExitMessage(GameExitRequestSocketData sendMessage)
