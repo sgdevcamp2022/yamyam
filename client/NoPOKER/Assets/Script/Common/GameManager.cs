@@ -24,7 +24,7 @@ public class GameManager : MonoBehaviour
 
     private void _init()
     {
-        if(s_instance ==null)
+        if (s_instance == null)
         {
             s_instance = this;
         }
@@ -46,13 +46,7 @@ public class GameManager : MonoBehaviour
     {
         if (UserInfo.Instance.IsLeader)
         {
-            Debug.Log("user ID : " + UserInfo.Instance.UserID);
-            Debug.Log("user NickName : " + UserInfo.Instance.NickName);
-            // Debug.Log("Leader ID : " + Team.Instance._teamData.leader.id);
-            // Debug.Log("Leader NickName : " + Team.Instance._teamData.leader.nickname);
-            Team.Instance._teamData.leader =  new UserSocketData(UserInfo.Instance.UserID, UserInfo.Instance.NickName);
-            //Team.Instance._teamData.leader.id = UserInfo.Instance.UserID;
-            //Team.Instance._teamData.leader.nickname = UserInfo.Instance.NickName;
+            Team.Instance._teamData.leader = new UserSocketData(UserInfo.Instance.UserID, UserInfo.Instance.NickName);
             LobbyConnect.Instance.SendGameStartMessage(Team.Instance.GetTeamData);
         }
     }
@@ -73,6 +67,6 @@ public class GameManager : MonoBehaviour
         _exitRequestData.player.id = UserInfo.Instance.UserID;
         _exitRequestData.player.nickname = UserInfo.Instance.NickName;
 
-        LobbyConnect.Instance.SendGameExitMessage(_exitRequestData);       
+        LobbyConnect.Instance.SendGameExitMessage(_exitRequestData);
     }
 }

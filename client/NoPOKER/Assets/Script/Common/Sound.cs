@@ -1,5 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class Sound : MonoBehaviour
@@ -27,10 +25,10 @@ public class Sound : MonoBehaviour
         _soundPlayer.clip = _cardSound;
         _soundPlayer.Play();
     }
+
     public void PlayBattinSound()
     {
         _soundPlayer.clip = _chipSound;
         _soundPlayer.Play();
     }
-
 }

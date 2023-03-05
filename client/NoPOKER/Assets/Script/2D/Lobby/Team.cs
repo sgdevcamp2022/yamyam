@@ -1,6 +1,3 @@
-using System;
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class Team : MonoBehaviour
@@ -32,7 +29,7 @@ public class Team : MonoBehaviour
 
     private void Update()
     {
-        if(ChangedRequestState)
+        if (ChangedRequestState)
         {
             switch (TeamType)
             {
@@ -67,8 +64,6 @@ public class Team : MonoBehaviour
     public void InvitedRequest()
     {
         _inviteRequestData.type = "invite_request";
-        //받는거 test용
-        // LobbyConnect.Instance.SendInviteRequest(_inviteRequestData);
         LobbyWindowController.Instance.ActiveInviteTeamWindow(_inviteRequestData.inviter.nickname);
         UserInfo.Instance.SetLeaderState(true);
 
@@ -79,11 +74,11 @@ public class Team : MonoBehaviour
     public void SetTeamData(TeamSocketData receivedData)
     {
         _invitees = new UserSocketData[4];
-           _teamData = receivedData;
-        _leader = new UserSocketData(receivedData.leader.id, receivedData.leader.nickname) ;
-        _invitees = receivedData.invitees;   
+        _teamData = receivedData;
+        _leader = new UserSocketData(receivedData.leader.id, receivedData.leader.nickname);
+        _invitees = receivedData.invitees;
 
-        if(_leader.id != UserInfo.Instance.UserID)
+        if (_leader.id != UserInfo.Instance.UserID)
         {
             UserInfo.Instance.SetLeaderState(false);
         }
@@ -96,28 +91,17 @@ public class Team : MonoBehaviour
 
     public void RejectedInvite()
     {
-        //거절당했단 메세지 보이게하기.
-       // LobbyWindowController.Instance.ActiveAlertWindow(LobbyAlertMessage.RejectInvite);
-    }
-
-    public void AcceptInvite()
-    {
-
-    }
-
-    public void RejectInvite()
-    {
-
+        LobbyWindowController.Instance.ActiveAlertWindow(LobbyAlertMessage.RejectInvite);
     }
 
     public void ExitTeam()
     {
-      if (UserInfo.Instance.IsLeader)
+        if (UserInfo.Instance.IsLeader)
         {
             _teamData.type = "leader_exit";
             LobbyConnect.Instance.SendLeaderExit(_teamData);
         }
-       else
+        else
         {
             TeamMemberExitSocketData _exitData = new TeamMemberExitSocketData();
             _exitData.type = "invitee_exit";
@@ -128,6 +112,6 @@ public class Team : MonoBehaviour
             LobbyConnect.Instance.SendInviteeExit(_exitData);
         }
     }
- 
- 
+
+
 }

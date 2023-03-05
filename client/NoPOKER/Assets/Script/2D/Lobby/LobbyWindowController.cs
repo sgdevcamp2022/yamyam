@@ -19,7 +19,7 @@ public class LobbyWindowController : MonoBehaviour
     [SerializeField] private GameObject _teamWindow;
     [SerializeField] private GameObject _allChatWindow;
     [SerializeField] private GameObject _teamChatWindow;
- 
+
     private void Awake()
     {
         _init();

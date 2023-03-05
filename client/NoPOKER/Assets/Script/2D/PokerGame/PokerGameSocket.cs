@@ -2,17 +2,14 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using WebSocketSharp;
-using WebSocketSharp.Server;
-using System.Threading;
 using System;
-using System.Text;
 using System.Linq;
 using Newtonsoft.Json;
 using StompHelper;
-using Unity.VisualScripting;
 using Newtonsoft.Json.Linq;
 
-public enum PokerMessageType {
+public enum PokerMessageType
+{
     JOIN,
     READY,
     GAME_START,
@@ -23,9 +20,10 @@ public enum PokerMessageType {
     OPEN,
 }
 
-public class PokerSocketIntData {
-    public string type ;
-    public Dictionary<string,int> content = new Dictionary<string, int>();
+public class PokerSocketIntData
+{
+    public string type;
+    public Dictionary<string, int> content = new Dictionary<string, int>();
 }
 
 public class PokerGameStartSocketData
@@ -46,12 +44,14 @@ public class PokerGameStartContentData
     public PokerStartPlayerSocketData[] playerInfos;
 }
 
-public class PokerGameResultSocketData {
+public class PokerGameResultSocketData
+{
     public string type;
     public Dictionary<string, PokerResultPlayerSocketData[]> content = new Dictionary<string, PokerResultPlayerSocketData[]>();
 }
 
-public class PokerStartPlayerSocketData {
+public class PokerStartPlayerSocketData
+{
     public int id;
     public int currentChip;
     public int card;
@@ -64,21 +64,23 @@ public class PokerStartPlayerSocketData {
     }
 }
 
-public class PokerResultPlayerSocketData {
+public class PokerResultPlayerSocketData
+{
     public int id;
     public bool result;
     public int currentChip;
 }
 
 
-public class PokerUserSocketData {
+public class PokerUserSocketData
+{
     public int id;
     public string nickname;
     public int order;
     public int currentChip;
     public int card;
     public bool result;
-    public PokerUserSocketData(int id, string nickname,int order)
+    public PokerUserSocketData(int id, string nickname, int order)
     {
         this.id = id;
         this.nickname = nickname;
@@ -98,12 +100,14 @@ public class PokerUserSocketData {
     }
 }
 
-public class PokerSocketStringData {
-  
+public class PokerSocketStringData
+{
+
     public string type;
     public Dictionary<string, string> content = new Dictionary<string, string>();
 }
-public class PokerSocketType {
+public class PokerSocketType
+{
 
     public string type;
 }
@@ -142,17 +146,17 @@ public class PokerGameSocket : MonoBehaviour
 
     private void Update()
     {
-        if(IsStart)
+        if (IsStart)
         {
             StartCoroutine(StartCoroutine());
             IsStart = false;
         }
-        if(IsChange3DScene)
+        if (IsChange3DScene)
         {
             GameManager.Instance.ChangeScene(Scenes.ActionGameScene);
             IsChange3DScene = false;
         }
-if(IsFocus)
+        if (IsFocus)
         {
             StartCoroutine(WaitSetting());
             IsFocus = false;
@@ -162,7 +166,7 @@ if(IsFocus)
     public void PokerGameSocketConnect()
     {
         _socket = new WebSocket("ws://15.165.8.102:8004/poker-ws");
-        _socket.OnMessage += ws_OnMessage; 
+        _socket.OnMessage += ws_OnMessage;
         _socket.OnOpen += ws_OnOpen;
         _socket.OnClose += ws_OnClose;
         _socket.Connect();
@@ -195,10 +199,10 @@ if(IsFocus)
 
     }
     public void DisconnectSever()
-    { 
-                SendUnSubScribe();
-        
-                _socket.Close();
+    {
+        SendUnSubScribe();
+
+        _socket.Close();
         Debug.Log("게임서버 강제종료");
 
     }
@@ -223,89 +227,81 @@ if(IsFocus)
         Debug.Log("body: " + message.Body);
 
         try
-        { 
-
-
-        switch (message.Command)
         {
-            case StompCommand.CONNECTED:
-                receiveStartNum = 0;
-                Debug.Log("게임서버 연결되었습니다~");
-                Match.Instance.DisconnectSever();
-                SendStompSubscribe();
-                break;
-            case StompCommand.MESSAGE:
+
+
+            switch (message.Command)
+            {
+                case StompCommand.CONNECTED:
+                    receiveStartNum = 0;
+                    Match.Instance.DisconnectSever();
+                    SendStompSubscribe();
+                    break;
+                case StompCommand.MESSAGE:
 
                     PokerSocketType _socketType = JsonConvert.DeserializeObject<PokerSocketType>(message.Body);
-                 
-                // _messageData = JsonConvert.DeserializeObject<PokerSocketData>(message.Body);
-                switch (_socketType.type) //TYPE 비교
-                {
-                    case "JOIN":
-                            PokerSocketStringData  _messageData = JsonConvert.DeserializeObject<PokerSocketStringData>(message.Body);
+
+                    switch (_socketType.type)
+                    {
+                        case "JOIN":
+                            PokerSocketStringData _messageData = JsonConvert.DeserializeObject<PokerSocketStringData>(message.Body);
                             userSocketDataList.Add(new PokerUserSocketData(
                             Int32.Parse(_messageData.content["userId"]),
                             _messageData.content["nickname"],
                             Int32.Parse(_messageData.content["order"]))
-                            );                   
+                            );
 
-                                userSocketDataList = userSocketDataList.OrderBy(x => x.order).ToList();
-                                _pokerGamePeopleNum = userSocketDataList.Count;
-                                SendReadyRequest(); //준비되었다고 알림보냄
+                            userSocketDataList = userSocketDataList.OrderBy(x => x.order).ToList();
+                            _pokerGamePeopleNum = userSocketDataList.Count;
+                            SendReadyRequest();
 
-                        break;
-                    case "GAME_START":                                           
-                                 _startMessageData = JsonConvert.DeserializeObject<PokerGameStartSocketData>(message.Body);
-                                JArray _startPlayerDataJArray = (JArray)_startMessageData.content["playerInfos"];
-                                foreach (JObject jobject in _startPlayerDataJArray)
+                            break;
+                        case "GAME_START":
+                            _startMessageData = JsonConvert.DeserializeObject<PokerGameStartSocketData>(message.Body);
+                            JArray _startPlayerDataJArray = (JArray)_startMessageData.content["playerInfos"];
+                            foreach (JObject jobject in _startPlayerDataJArray)
+                            {
+                                int _findIndex = userSocketDataList.FindIndex(x => x.id == (int)jobject["id"]);
+                                if ((int)jobject["currentChip"] == 0) 
                                 {
-                                    int _findIndex = userSocketDataList.FindIndex(x => x.id == (int)jobject["id"]);
-                                    if ((int)jobject["currentChip"] == 0) //초기자금이 0인경우
+                                    if ((int)jobject["id"] == UserInfo.Instance.UserID) 
                                     {
-                                        if ((int)jobject["id"] == UserInfo.Instance.UserID) //그게 나라면
-                                        {
-                                            PokerWindowController.Instance.ActiveLooseWindow();
-                                            DisconnectSever();
-                                        }
-                                        else
-                                        {
-                                            userSocketDataList.RemoveAt(_findIndex);
-                                        }
+                                        PokerWindowController.Instance.ActiveLooseWindow();
+                                        DisconnectSever();
                                     }
                                     else
                                     {
-                                      userSocketDataList[_findIndex].SetPokerStartData((int)jobject["currentChip"], (int)jobject["card"]);      
+                                        userSocketDataList.RemoveAt(_findIndex);
                                     }
-                                                             
                                 }
-                           
+                                else
+                                {
+                                    userSocketDataList[_findIndex].SetPokerStartData((int)jobject["currentChip"], (int)jobject["card"]);
+                                }
+
+                            }
                             _pokerGamePeopleNum = userSocketDataList.Count;
-            
-                 //화면에 유저들 렌더링하기.
-                            IsStart = true; 
-                            
-                
+                            IsStart = true;
 
-                        break;
+                            break;
 
-                    case "FOCUS":
-                       
+                        case "FOCUS":
 
-                                _startMessageData.type = "FOCUS";
+
+                            _startMessageData.type = "FOCUS";
                             _messageIntData = JsonConvert.DeserializeObject<PokerSocketIntData>(message.Body);
                             if (GameManager.Instance.CheckNowScene() == Scenes.PokerGameScene)
                             {
-                                    Debug.Log("안들어왔나?");
                                 IsFocus = true;
-                            }      
+                            }
 
-                        break;
+                            break;
 
                         case "CALL":
                         case "RAISE":
-                        case "ALLIN":                           
-                        case "BET":   
-                                _messageIntData = JsonConvert.DeserializeObject<PokerSocketIntData>(message.Body);
+                        case "ALLIN":
+                        case "BET":
+                            _messageIntData = JsonConvert.DeserializeObject<PokerSocketIntData>(message.Body);
 
                             string type = _socketType.type;
 
@@ -319,19 +315,12 @@ if(IsFocus)
                                 PokerGameManager.Instance.receivedBattingInfo.betAmout = _messageIntData.content["betAmount"];
                                 PokerGameManager.Instance.receivedBattingInfo.currentAmount = _messageIntData.content["currentAmount"];
                                 PokerGameManager.Instance.receivedBattingInfo.totalAmount = _messageIntData.content["totalAmount"];
-
-                                Debug.Log("receivedBattingInfo.id " + PokerGameManager.Instance.receivedBattingInfo.id);
-                                Debug.Log("receivedBattingInfo.betAmout " + PokerGameManager.Instance.receivedBattingInfo.betAmout);
-                                Debug.Log("receivedBattingInfo.currentAmount " + PokerGameManager.Instance.receivedBattingInfo.currentAmount);
-                                Debug.Log("receivedBattingInfo.totalAmount " + PokerGameManager.Instance.receivedBattingInfo.totalAmount);
-
-
                                 PokerGameManager.Instance.GetUserInfo().SetNewData(PokerGameManager.Instance.receivedBattingInfo.currentAmount);
-                                if(type.Equals("CALL"))
+                                if (type.Equals("CALL"))
                                 {
                                     PokerGameManager.Instance._pokerGameState = PokerGameState.CALL;
                                 }
-                                else if(type.Equals("RAISE"))
+                                else if (type.Equals("RAISE"))
                                 {
                                     PokerGameManager.Instance._pokerGameState = PokerGameState.RAISE;
                                 }
@@ -340,38 +329,38 @@ if(IsFocus)
                                     PokerGameManager.Instance._pokerGameState = PokerGameState.ALLIN;
                                 }
 
-                                PokerGameManager.Instance.ReceiveSocketFlag = true;                                   
-                             }
-                        break;
-
-                    case "DIE":
-                        try
-                        {
-                            _messageIntData = JsonConvert.DeserializeObject<PokerSocketIntData>(message.Body);
-                            if (_messageIntData.content["playerId"] != UserInfo.Instance.UserID)//남이 죽은거
-                            {
-
-
-                                PokerGameManager.Instance.ResultUserUiPos =
-                                    PokerGameManager.Instance.GetPlayerUiOrders.FindIndex
-                                    (x => x.id == _messageIntData.content["playerId"]);
-
-
-                                PokerGameManager.Instance._pokerGameState = PokerGameState.DIE;
                                 PokerGameManager.Instance.ReceiveSocketFlag = true;
-                                Debug.Log("RECEIVED RESULT");
                             }
+                            break;
+
+                        case "DIE":
+                            try
+                            {
+                                _messageIntData = JsonConvert.DeserializeObject<PokerSocketIntData>(message.Body);
+                                if (_messageIntData.content["playerId"] != UserInfo.Instance.UserID)
+                                {
 
 
-                        }
-                        catch (Exception ex)
-                        {
-                            Debug.Log("ERROR : " + ex);
-                        }
-                        break;
-                    case "RESULT":
-                        try
-                        {//RESULT보여주기.
+                                    PokerGameManager.Instance.ResultUserUiPos =
+                                        PokerGameManager.Instance.GetPlayerUiOrders.FindIndex
+                                        (x => x.id == _messageIntData.content["playerId"]);
+
+
+                                    PokerGameManager.Instance._pokerGameState = PokerGameState.DIE;
+                                    PokerGameManager.Instance.ReceiveSocketFlag = true;
+                                    Debug.Log("RECEIVED RESULT");
+                                }
+
+
+                            }
+                            catch (Exception ex)
+                            {
+                                Debug.Log("ERROR : " + ex);
+                            }
+                            break;
+                        case "RESULT":
+                            try
+                            {
                                 _resultMessageData = JsonConvert.DeserializeObject<PokerGameResultSocketData>(message.Body);
                                 PokerResultPlayerSocketData[] _resultPlayerDatas = _resultMessageData.content["playerInfos"];
                                 for (int i = 0; i < _pokerGamePeopleNum; i++)
@@ -379,19 +368,17 @@ if(IsFocus)
                                     int _findIndex = userSocketDataList.FindIndex(x => x.id == _resultPlayerDatas[i].id);
                                     userSocketDataList[_findIndex].SetPokerResultData(_resultPlayerDatas[i].result, _resultPlayerDatas[i].currentChip);
                                 }
-                                Debug.Log("RECEIVED RESULTRECEIVED RESULTRECEIVED RESULTRECEIVED RESULTRECEIVED RESULT");
                                 PokerGameManager.Instance.ResultPlayerDatas = _resultPlayerDatas;
-                                //
-                        }
-                        catch (Exception ex)
-                        {
-                            Debug.Log("ERROR : " + ex);
-                        }
-                        break;
-                        case  "OPEN":
+                               
+                            }
+                            catch (Exception ex)
+                            {
+                                Debug.Log("ERROR : " + ex);
+                            }
+                            break;
+                        case "OPEN":
                             try
                             {
-                                Debug.Log("OPEN OPENOPEN OPENOPEN OPENOPEN OPENOPEN OPENOPEN OPEN");
                                 PokerGameManager.Instance._pokerGameState = PokerGameState.OPEN;
                             }
                             catch (Exception ex)
@@ -400,19 +387,18 @@ if(IsFocus)
                             }
                             break;
                         case "GAME_END":
-                           // _endMessageData = JsonConvert.DeserializeObject<PokerGameEndData>(message.Body);
-                            //PokerStartPlayerSocketData _startPlayerDatas = _endMessageData.content["playerInfos"];
+
                             break;
                     }
 
-                break;
+                    break;
+            }
+
+
+
         }
 
-
-
-    }
-
-        catch(Exception ex)
+        catch (Exception ex)
         {
             Debug.Log(ex);
         }
@@ -422,7 +408,7 @@ if(IsFocus)
 
     IEnumerator WaitSetting()
     {
-        yield return new WaitUntil(() => PokerGameManager.Instance._pokerGameState == PokerGameState.NONE); //NONE이 될때까지 기다리기.
+        yield return new WaitUntil(() => PokerGameManager.Instance._pokerGameState == PokerGameState.NONE);
 
         PokerGameManager.Instance.NowTurnUserId = _messageIntData.content["id"];
         PokerGameManager.Instance._pokerGameState = PokerGameState.FOCUS;
@@ -431,41 +417,36 @@ if(IsFocus)
 
     IEnumerator StartCoroutine()
     {
-        yield return new WaitUntil(() => _startMessageData.type.Equals("FOCUS")); //start하고나서 처음 FOCUS가 들어왔을 때
-       // StartCoroutine( FirstFocus());
+        yield return new WaitUntil(() => _startMessageData.type.Equals("FOCUS")); 
+                                                                                 
 
-        if (GameManager.Instance.CheckNowScene() == Scenes.PokerGameScene) //게임을 다시 시작하는거라면?
+        if (GameManager.Instance.CheckNowScene() == Scenes.PokerGameScene) 
         {
             PokerGameManager.Instance.IsFirstTurn = true;
-            PokerGameManager.Instance.StartPokerGame();       
+            PokerGameManager.Instance.StartPokerGame();
         }
-         
-        else if (GameManager.Instance.CheckNowScene() == Scenes.LobbyScene) //로비에서 포커게임으로 넘어오는거라면?
+
+        else if (GameManager.Instance.CheckNowScene() == Scenes.LobbyScene) 
         {
             GameManager.Instance.ChangeScene(Scenes.PokerGameScene);
-            StartCoroutine(FirstFocus());       
+            StartCoroutine(FirstFocus());
         }
-           
+
     }
 
     public IEnumerator FirstFocus()
     {
-        Debug.Log("FirstFocus");
-
-        yield return new WaitUntil(() => GameManager.Instance.CheckNowScene() == Scenes.PokerGameScene); //포커게임씬으로 바뀔때까지 기다리기.
+        yield return new WaitUntil(() => GameManager.Instance.CheckNowScene() == Scenes.PokerGameScene); 
 
         PokerGameManager.Instance.NowTurnUserId = _messageIntData.content["id"];
-        Debug.Log("NOW TURN : " + _messageIntData.content["id"]);
-
         PokerGameManager.Instance.IsFirstTurn = true;
         PokerGameManager.Instance._pokerGameState = PokerGameState.NONE;
-        PokerGameManager.Instance.StartPokerGame();       
+        PokerGameManager.Instance.StartPokerGame();
     }
 
 
     private void SendStompSubscribe()
     {
-        Debug.Log("gameRoom ID = " + GameRoomID);
         Dictionary<string, string> headers = new Dictionary<string, string>();
         headers.Add("destination", "/topic/game/" + GameRoomID);
         headers.Add("id", UserInfo.Instance.UserID.ToString());
@@ -488,7 +469,7 @@ if(IsFocus)
         data.type = "READY";
         data.content.Add("userId", UserInfo.Instance.UserID);
         data.content.Add("gameId", GameRoomID);
-        StompMessage message = new StompMessage( StompCommand.MESSAGE,
+        StompMessage message = new StompMessage(StompCommand.MESSAGE,
             JsonConvert.SerializeObject(data).ToString(), headers);
 
         _socket.Send(messageParser.Serialize(message));

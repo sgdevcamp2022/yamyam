@@ -32,9 +32,9 @@ public class Chatting : MonoBehaviour
 
     private void Update()
     {
-        if(IsReceiveMessage)
+        if (IsReceiveMessage)
         {
-            switch(_chattMode)
+            switch (_chattMode)
             {
                 case ChattMode.All:
                     if (_MessageData.id != UserInfo.Instance.UserID)
@@ -55,19 +55,19 @@ public class Chatting : MonoBehaviour
                     break;
                     break;
             }
-           
+
         }
     }
 
     public void SendChatting(UIChattData chattingData)
     {
-        switch(_chattMode)
+        switch (_chattMode)
         {
             case ChattMode.All:
                 _MessageData.LobbyMessageSetting(chattingData.Chat);
                 LobbyConnect.Instance.SendAllChattMessage(_MessageData);
 
-                _allChattingRecycleViewController.AddData(new UIChattData { Name = chattingData.Name, Chat = chattingData.Chat } );
+                _allChattingRecycleViewController.AddData(new UIChattData { Name = chattingData.Name, Chat = chattingData.Chat });
                 _allChattingRecycleViewController.UpdateMyData();
                 break;
             case ChattMode.Team:
@@ -80,8 +80,8 @@ public class Chatting : MonoBehaviour
         }
     }
     public void ReceiveChatting(DefaultMessageSocketData receiveData)
-    { 
-        _MessageData = receiveData;   
+    {
+        _MessageData = receiveData;
     }
 
 

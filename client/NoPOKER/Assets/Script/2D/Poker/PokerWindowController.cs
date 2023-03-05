@@ -4,7 +4,6 @@ using UnityEngine;
 
 public class PokerWindowController : MonoBehaviour
 {
-    // Start is called before the first frame update
     private static PokerWindowController s_instance = null;
     public static PokerWindowController Instance
     { get => s_instance; }

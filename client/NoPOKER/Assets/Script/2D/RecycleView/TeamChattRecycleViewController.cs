@@ -29,8 +29,8 @@ namespace UI
         }
         public void UpdateMyData() //본인이 쓴 채팅이 업데이트 되도록.
         {
-          
-            InitializeTableView();        
+
+            InitializeTableView();
             _scrollRect.verticalNormalizedPosition = 0.0f;
             OnScrollPoschanged(new Vector2(0f, -0.01f));
         }

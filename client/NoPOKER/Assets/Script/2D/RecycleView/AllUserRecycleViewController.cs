@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
@@ -9,8 +8,6 @@ namespace UI
     {
         [SerializeField] RectTransform _scroll;
         [SerializeField] ScrollRect _scrollRect;
-
-        [SerializeField]
         float _preContentHeight;
         float _currentContentPos;
         private float _changedHeight;
@@ -18,19 +15,11 @@ namespace UI
 
         public void LoadAllChattingData()
         {
-            //SetDatas(UserList.Instance..users);
-
-            TableData = new List<UICellUserData>()
-            {
-              
-
-            };
-
+            TableData = new List<UICellUserData>();
             InitializeTableView();
             _preContentHeight = CachedScrollRect.content.sizeDelta.y;
             _scroll.SetInsetAndSizeFromParentEdge(RectTransform.Edge.Left, 0, 0);
         }
-
 
         public void SetDatas(UserSocketData[] users)
         {
@@ -58,22 +47,13 @@ namespace UI
             {
                 if (TableData[i].Id == user.id)
                     TableData.RemoveAt(i);
-                   // TableData.Remove(new UICellUserData { Id = user.id, Name = user.nickname, Invite = true });
-            }
-          
-
+            }        
             UpdateAfterLeaveData();
         }
 
-        public void UpdateData() //새로운 유저가 로비에 추가되었을 때
+        public void UpdateData() 
         {
-           // _currentContentPos = CachedScrollRect.content.anchoredPosition.y;
-           // _changedHeight = CachedScrollRect.content.sizeDelta.y - _preContentHeight;
-           // _preContentHeight = CachedScrollRect.content.sizeDelta.y;
-          //  _currentContentPos += _changedHeight;
-          //  CachedScrollRect.content.anchoredPosition = new Vector2(0f, _currentContentPos);
             InitializeTableView();
-         //   OnScrollPoschanged(new Vector2(0f, -0.01f));
         }
 
         public void UpdateAfterLeaveData()
@@ -91,7 +71,6 @@ namespace UI
         {
             base.Start();
             LoadAllChattingData();
-
         }
     }
 }

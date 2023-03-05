@@ -32,13 +32,12 @@ public class LobbyChoiceAlert : MonoBehaviour
 
     public void ClickedAcceptButton()
     {
-        /*어떤걸 수락했냐에 따라 해당 기능에 맞는 클래스에 전달.*/
+
         switch(_alertMessage)
         {
             case LobbyChoiceAlertMessage.InviteTeam:
                 Team.Instance._inviteRequestData.type = "invite_accept";
                 LobbyConnect.Instance.SendInviteAccept(Team.Instance._inviteRequestData);
-               // Team.Instance.AcceptedInvite(); 
                 break;
             case LobbyChoiceAlertMessage.GameExit:
                 Application.Quit();
@@ -50,14 +49,11 @@ public class LobbyChoiceAlert : MonoBehaviour
 
     public void ClickedRejectButton()
     {
-        /*어떤걸 거절했냐에 따라해당 기능에 맞는 클래스에 전달
-        switch(_alertMessage) 문으로 분기점 나눌예정*/
+
         switch (_alertMessage)
         {
             case LobbyChoiceAlertMessage.InviteTeam:
-                //test용
                 Team.Instance.RejectedInvite();
-                //원래는 Team.Instance.RejectInvite();
                 break;
         }
         LobbyWindowController.Instance.InActiveChoiceAlertWindow();

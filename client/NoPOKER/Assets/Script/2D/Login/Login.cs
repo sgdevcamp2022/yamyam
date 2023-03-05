@@ -3,7 +3,6 @@ using TMPro;
 using System.Net.Http;
 using System.Threading.Tasks;
 using System.Text;
-using Newtonsoft.Json.Linq;
 
 
 public class JsonLoginData
@@ -12,7 +11,7 @@ public class JsonLoginData
     public string password;
 }
 
-public class JsonUserData 
+public class JsonUserData
 {
     public int id;
     public string nickname;
@@ -44,7 +43,7 @@ public class Login : MonoBehaviour
         LoginWebRequest();
     }
 
-    
+
 
     async Task LoginWebRequest()
     {
@@ -53,11 +52,11 @@ public class Login : MonoBehaviour
         _loginData.password = _pw.text;
         _httpClient = new HttpClient();
         _httpContent = new StringContent(JsonUtility.ToJson(_loginData), Encoding.UTF8, "application/json");
-        
+
         _response = await _httpClient.PostAsync(_loginUrl, _httpContent);
 
 
-      
+
 
         switch ((int)_response.StatusCode)
         {
@@ -73,7 +72,7 @@ public class Login : MonoBehaviour
     }
 
 
-    
+
     public void SucceedLoginWebRequest()
     {
         foreach (var i in _response.Headers.GetValues("Access-Token"))
@@ -85,18 +84,11 @@ public class Login : MonoBehaviour
             _RefreshToken = i;
         }
 
-        //_token은 서버로부터 받아온값을 바로 넣어주는걸로.
         _AccessToken = Crypto.AESEncrypt128(_AccessToken, CryptoType.AccessToken);
         _RefreshToken = Crypto.AESEncrypt128(_RefreshToken, CryptoType.RefreshToken);
 
         UserInfo.Instance.SetUserInfo(_userJson.id, _userJson.nickname);
-
-        /*복호화테스트용.
-        _AccessToken = Crypto.AESDecrypt128(CryptoType.AccessToken);
-        _RefreshToken = Crypto.AESDecrypt128(CryptoType.RefreshToken);
-        Debug.Log("AES 복호화 : " + _AccessToken);
-        Debug.Log("AES 복호화 : " + _RefreshToken);*/
         GameManager.Instance.ChangeScene(Scenes.LobbyScene);
-        //LobbyConnect.Instance.LobbyServerConnect();
+
     }
 }

@@ -16,9 +16,7 @@ namespace UI
         private float _changedHeight;
         public void LoadAllChattingData()
         {
-            TableData = new List<UIChattData>()
-            {
-            };
+            TableData = new List<UIChattData>();
 
             InitializeTableView();
             _preContentHeight = CachedScrollRect.content.sizeDelta.y;
@@ -29,15 +27,15 @@ namespace UI
         {
             TableData.Add(data);
         }
-        public void UpdateMyData() //본인이 쓴 채팅이 업데이트 되도록.
+        public void UpdateMyData() 
         {
-           
+
             InitializeTableView();
             _scrollRect.verticalNormalizedPosition = 0.0f;
             OnScrollPoschanged(new Vector2(0f, -0.01f));
         }
 
-        public void UpdateData() //남이 채팅에서 썻을때
+        public void UpdateData() 
         {
             _currentContentPos = CachedScrollRect.content.anchoredPosition.y;
             _changedHeight = CachedScrollRect.content.sizeDelta.y - _preContentHeight;

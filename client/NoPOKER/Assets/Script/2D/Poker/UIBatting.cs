@@ -44,8 +44,8 @@ public class UIBatting : MonoBehaviour
         _roundBattingChip.text = Batting.Instance.RoundBattingChip.ToString();
         _myBattingChip.text = Batting.Instance.MyBattingChip.ToString();
         _battingChipNum.text = _canBatting.ToString();
-        for(int i=0;i<4;i++)
-        _4DieView[i].SetActive(false);
+        for (int i = 0; i < 4; i++)
+            _4DieView[i].SetActive(false);
         for (int i = 0; i < 2; i++)
             _2DieView[i].SetActive(false);
 
@@ -68,21 +68,21 @@ public class UIBatting : MonoBehaviour
     {
         _canBatting += 1;
 
-        if ( _canBatting <= Batting.Instance.MyBattingChip)
+        if (_canBatting <= Batting.Instance.MyBattingChip)
         {
             _battingChipNum.text = _canBatting.ToString();
         }
         else
         {
-            _canBatting -=1;
-        }       
+            _canBatting -= 1;
+        }
     }
 
     public void BattingDown()
     {
         _canBatting -= 1;
 
-        if ( _canBatting < Batting.Instance.MinBattingChip)
+        if (_canBatting < Batting.Instance.MinBattingChip)
         {
             _canBatting += 1;
         }
@@ -97,16 +97,19 @@ public class UIBatting : MonoBehaviour
         _allInorCallText.text = "올인";
         _inactiveBattingButtonView.SetActive(true);
     }
+
     public void AccessBattingButton()
     {
         _allInorCallText.text = "콜";
         _inactiveBattingButtonView.SetActive(false);
     }
+
     public void DonAccessCallButton()
     {
 
         _inactiveCallButtonView.SetActive(true);
     }
+
     public void AccessCallButton()
     {
 
@@ -121,10 +124,12 @@ public class UIBatting : MonoBehaviour
         ChangeRaiseBattingChip();
 
     }
+
     public void ChangeRaiseBattingChip()
     {
         _battingChipNum.text = Batting.Instance.MinBattingChip.ToString();
     }
+
     public void ChangeRoundBattingChip()
     {
         _roundBattingChip.text = Batting.Instance.RoundBattingChip.ToString();
@@ -134,8 +139,6 @@ public class UIBatting : MonoBehaviour
     {
         _myBattingChip.text = Batting.Instance.MyBattingChip.ToString();
     }
-
- 
 
     public void ActiveDieView(int who)
     {
@@ -147,12 +150,12 @@ public class UIBatting : MonoBehaviour
         {
             _4DieView[who].SetActive(true);
         }
-     
+
     }
 
     public void SetPlayerBattingResult(int who, string text)
     {
-        if(PokerGameManager.Instance.PeopleNum == 2)
+        if (PokerGameManager.Instance.PeopleNum == 2)
         {
             _2PlayerBattingResultObject[who].SetActive(true);
             _2PlayerBattingResultText[who].text = text;
@@ -164,30 +167,29 @@ public class UIBatting : MonoBehaviour
         }
 
     }
+
     public void ShowBattingChipMoveCenter(int battingMoney)
     {
         _battingChips[0].position = _playersPosition[PokerGameManager.Instance.UiPos].transform.position;
         _battingChips[0].gameObject.SetActive(true);
         StartCoroutine(BattingChipMoveCenter(battingMoney));
     }
-    
+
     IEnumerator BattingChipMoveCenter(int battingMoney)
     {
         Sound.Instance.PlayBattinSound();
         _targetPos = transform.position;
 
-
         while ((_battingChips[0].position - _targetPos).sqrMagnitude > 0.5)
         {
             _battingChips[0].position = Vector3.Lerp(_battingChips[0].position, _targetPos, 0.5f);
             yield return new WaitForSeconds(0.1f);
-        }       
+        }
         _battingChips[0].gameObject.SetActive(false);
     }
 
     public void ShowBattingChipMovePlayer(int winner)
     {
-
         _battingChips[0].gameObject.SetActive(true);
         _battingChips[0].position = transform.position;
         StartCoroutine(BattingChipMovePlayer(winner));
@@ -195,15 +197,12 @@ public class UIBatting : MonoBehaviour
 
     IEnumerator BattingChipMovePlayer(int who)
     {
-        Debug.Log("who is : " + who);
         _targetPos = _playersPosition[who].transform.position;
         while ((_battingChips[0].position - _targetPos).sqrMagnitude > 0.5)
         {
             _battingChips[0].position = Vector3.Lerp(_battingChips[0].position, _targetPos, 0.5f);
             yield return new WaitForSeconds(0.1f);
         }
-       // _battingChips[0].gameObject.SetActive(false);
-        
     }
 
 }

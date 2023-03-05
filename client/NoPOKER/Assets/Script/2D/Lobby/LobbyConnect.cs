@@ -233,7 +233,6 @@ public class LobbyConnect : MonoBehaviour
     private void ws_OnMessage(object sender, MessageEventArgs e)
     {
         Debug.Log(e.Data);
-        //MessageDataDecoding(e.Data);
 
         LobbyMessageType _messageType = JsonConvert.DeserializeObject<LobbyMessageType>(e.Data);
         try
@@ -253,7 +252,6 @@ public class LobbyConnect : MonoBehaviour
                     Chatting.Instance.IsReceiveMessage = true;
                     break;
                 case LobbySocketType.user_join:
-                    //유저리스트 업데이트. 한명들어온거 반영
                     try
                     {
 
@@ -261,7 +259,6 @@ public class LobbyConnect : MonoBehaviour
                         if (_userData.user.id != UserInfo.Instance.UserID)
                         {
                             UserList.Instance.JoinUser(_userData);
-                            Debug.Log("user_list: LobbyUserChangeType is Add");
                             UserList.Instance.IsUserCountChanged = LobbyUserChangeType.Add;
                         }
 
@@ -275,7 +272,6 @@ public class LobbyConnect : MonoBehaviour
                 case LobbySocketType.user_list:
                     _userListData = JsonConvert.DeserializeObject<LobbyUserListSocketData>(e.Data);
 
-                    Debug.Log("user_list: LobbyUserChangeType is Setting");
                     UserList.Instance.IsUserCountChanged = LobbyUserChangeType.Setting;
                     UserList.Instance.SetUserList(_userListData);
                     break;
@@ -286,7 +282,6 @@ public class LobbyConnect : MonoBehaviour
                     Team.Instance.ChangedRequestState = true;
                     break;
                 case LobbySocketType.team_list:
-                    // StartCoroutine(SocketConnectAndGetData(e.Data));
                     TeamSocketData _teamData = JsonConvert.DeserializeObject<TeamSocketData>(e.Data);
                     Team.Instance.SetTeamData(_teamData);
                     Team.Instance.TeamType = LobbySocketType.team_list;
@@ -388,7 +383,7 @@ public class LobbyConnect : MonoBehaviour
             sendMessage.type = "game_start";
             _lobbySocket.Send(JsonConvert.SerializeObject(sendMessage));
         }
-        catch(Exception ex)
+        catch (Exception ex)
         {
             Debug.Log("EXCEPTION : " + ex);
         }

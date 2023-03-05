@@ -4,7 +4,8 @@ using UnityEngine;
 using UI;
 using Newtonsoft.Json.Linq;
 
-public enum LobbyUserChangeType {
+public enum LobbyUserChangeType
+{
     None,
     Setting,
     Add,
@@ -14,7 +15,6 @@ public class UserList : MonoBehaviour
 {
     private static UserList s_instance = null;
     public static UserList Instance { get => s_instance; }
-    List<UserSocketData> _users = new List<UserSocketData>();
     [SerializeField] AllUserRecycleViewController _allUserRecycleViewController = new AllUserRecycleViewController();
     LobbyUserListSocketData _userList = null;
     UserSocketData _user;
@@ -23,28 +23,22 @@ public class UserList : MonoBehaviour
 
     private void Awake()
     {
-      Init();
+        Init();
     }
 
-    void  Init()
+    void Init()
     {
-     
         if (s_instance == null)
             s_instance = this;
-
-        
-      
     }
+
     private void Update()
     {
-        if(IsUserCountChanged != LobbyUserChangeType.None)
+        if (IsUserCountChanged != LobbyUserChangeType.None)
         {
-            Debug.Log("IsUserCountChanged != LobbyUserChangeType.None");
             switch (IsUserCountChanged)
             {
                 case LobbyUserChangeType.Setting:
-                    //Debug.Log("SeTTING");
-                    //StartCoroutine(SetDatas());
                     _allUserRecycleViewController.SetDatas(_userList.users);
                     break;
                 case LobbyUserChangeType.Add:
@@ -61,20 +55,16 @@ public class UserList : MonoBehaviour
 
     IEnumerator SetDatas()
     {
-        Debug.Log("USER = NULL?");
         yield return new WaitUntil(() => _userList.users != null);
-        Debug.Log("USER NOT NULL");
         _allUserRecycleViewController.SetDatas(_userList.users);
     }
 
     public void JoinUser(DefaultUserSocketData newData) //한명 더 들어왔을 때
     {
-
-        Debug.Log("JoinUser userNickName = " + newData.user.nickname);
-        _user =  new UserSocketData(newData.user.id, newData.user.nickname);
+        _user = new UserSocketData(newData.user.id, newData.user.nickname);
     }
-    
-     public void SetUserList(LobbyUserListSocketData userList)
+
+    public void SetUserList(LobbyUserListSocketData userList)
     {
         _userList = userList;
     }
@@ -83,6 +73,6 @@ public class UserList : MonoBehaviour
     {
         _user = new UserSocketData(leaveData.user.id, leaveData.user.nickname);
     }
- 
+
 
 }

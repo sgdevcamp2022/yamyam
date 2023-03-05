@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using TMPro;
 using System.Net.Http;
 using System.Threading.Tasks;
@@ -12,8 +12,8 @@ public class ResetPWData
 
 public class ResetPW : MonoBehaviour
 {
-    [SerializeField] private  TMP_InputField _inputID;
-    [SerializeField] private  TMP_InputField _inputEmail;
+    [SerializeField] private TMP_InputField _inputID;
+    [SerializeField] private TMP_InputField _inputEmail;
 
     private string _blank = "";
 
@@ -41,9 +41,9 @@ public class ResetPW : MonoBehaviour
             WindowController.Instance.SendAlertMessage(LoginAlertMessage.IncorrectEmail);
             return;
         }
-         ResetPwWebRequest();
+        ResetPwWebRequest();
     }
-     async Task ResetPwWebRequest()
+    async Task ResetPwWebRequest()
     {
         ResetPWData _data = new ResetPWData();
         _data.email = _inputEmail.text;
@@ -53,7 +53,7 @@ public class ResetPW : MonoBehaviour
         string _url = "http://127.0.0.1:8000/accounts/password_reset";
         using HttpResponseMessage _response = await _httpClient.PostAsync(_url, _httpContent);
 
-        switch((int)_response.StatusCode)
+        switch ((int)_response.StatusCode)
         {
             case 200:
                 SucceedFindPWWebRequest();

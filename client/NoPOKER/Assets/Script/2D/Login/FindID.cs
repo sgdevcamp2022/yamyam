@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using TMPro;
 using System.Net.Http;
 using System.Threading.Tasks;
@@ -47,7 +47,7 @@ public class FindID : MonoBehaviour
         HttpContent _httpContent = new StringContent(JsonUtility.ToJson(_data), Encoding.UTF8, "application/json");
         string _url = "http://127.0.0.1:8000/accounts/find_username/";
         using HttpResponseMessage _response = await _httpClient.PostAsync(_url, _httpContent);
-        
+
         switch ((int)_response.StatusCode)
         {
             case 200:
