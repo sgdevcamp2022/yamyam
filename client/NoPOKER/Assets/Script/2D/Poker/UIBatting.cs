@@ -23,7 +23,7 @@ public class UIBatting : MonoBehaviour
 
     [SerializeField] GameObject[] _playersPosition = new GameObject[4];
     [SerializeField] RectTransform[] _battingChips = new RectTransform[3];
-    [SerializeField] GameObject _inactiveBattingButtonView;
+    [SerializeField] GameObject _inactiveRaiseButtonView;
     [SerializeField] TMP_Text _allInorCallText;
     [SerializeField] GameObject _inactiveCallButtonView;
     private int _canBatting;
@@ -92,16 +92,16 @@ public class UIBatting : MonoBehaviour
         }
     }
 
-    public void DonAccessBattingButton()
+    public void ChangeToAllinButton()
     {
         _allInorCallText.text = "올인";
-        _inactiveBattingButtonView.SetActive(true);
+        _inactiveRaiseButtonView.SetActive(true);
     }
 
-    public void AccessBattingButton()
+    public void ChangeToCallButton()
     {
         _allInorCallText.text = "콜";
-        _inactiveBattingButtonView.SetActive(false);
+        _inactiveRaiseButtonView.SetActive(false);
     }
 
     public void DonAccessCallButton()
@@ -152,6 +152,20 @@ public class UIBatting : MonoBehaviour
         }
 
     }
+
+    public void ResetPlayerBattingResult()
+    {
+        for(int i=0;i<2;i++)
+        {
+            _2PlayerBattingResultObject[i].SetActive(false);
+        }
+        
+        for(int i=0;i<4;i++)
+        {
+            _4PlayerBattingResultObject[i].SetActive(false);
+        }
+    }
+
 
     public void SetPlayerBattingResult(int who, string text)
     {

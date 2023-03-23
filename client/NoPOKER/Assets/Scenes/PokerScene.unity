@@ -38,7 +38,7 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 0}
-  m_IndirectSpecularColor: {r: 0.18028378, g: 0.22571412, b: 0.30692285, a: 1}
+  m_IndirectSpecularColor: {r: 0.18028328, g: 0.22571322, b: 0.30692163, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -12579,7 +12579,7 @@ MonoBehaviour:
   - {fileID: 1430754856}
   - {fileID: 768677481}
   - {fileID: 2024873813}
-  _inactiveBattingButtonView: {fileID: 989994448}
+  _inactiveRaiseButtonView: {fileID: 989994448}
   _allInorCallText: {fileID: 1332869744}
   _inactiveCallButtonView: {fileID: 1844754590}
 --- !u!224 &1773321154

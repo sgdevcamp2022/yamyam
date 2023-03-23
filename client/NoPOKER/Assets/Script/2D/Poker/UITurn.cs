@@ -34,11 +34,13 @@ public class UITurn : MonoBehaviour
 
     IEnumerator TurnWait()
     {
-        if (_isWaitDistribute)
+        
+        if (!PokerGameManager.Instance.IsDistributed)
         {
-            yield return new WaitUntil(() => PokerGameManager.Instance.DistributeNum == PokerGameManager.Instance.PeopleNum);
-            _isWaitDistribute = false;
+            yield return new WaitForSeconds(0.5f);
         }
+
+
         StartCoroutine(_battingTurn);
         yield return new WaitUntil(() => PokerGameManager.Instance.IsBattingFinish);
         if (PokerGameSocket.Instance.GetPokerGamePeopleNum == 2)

@@ -11,7 +11,7 @@ public class UIPokerPlayer : MonoBehaviour
         _uiUserNames[pos].text = name;
     }
 
-    public void SetUsetChip(int pos, int chip)
+    public void SetUserChip(int pos, int chip)
     {
         _uiUserChip[pos].text = chip.ToString();
     }

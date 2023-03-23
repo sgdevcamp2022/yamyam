@@ -26,6 +26,6 @@ public class UIPersonalCard : MonoBehaviour
             transform.position = Vector3.Lerp(transform.position, _targetPos, 0.3f);
             yield return new WaitForSeconds(0.1f);
         }
-        PokerGameManager.Instance.UpDistributeNum();
+        PokerGameManager.Instance.FinishDistribute();
     }
 }

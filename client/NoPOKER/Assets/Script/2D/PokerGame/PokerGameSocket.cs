@@ -280,6 +280,7 @@ public class PokerGameSocket : MonoBehaviour
                                 }
 
                             }
+                          
                             _pokerGamePeopleNum = userSocketDataList.Count;
                             IsStart = true;
 
@@ -369,7 +370,9 @@ public class PokerGameSocket : MonoBehaviour
                                     userSocketDataList[_findIndex].SetPokerResultData(_resultPlayerDatas[i].result, _resultPlayerDatas[i].currentChip);
                                 }
                                 PokerGameManager.Instance.ResultPlayerDatas = _resultPlayerDatas;
-                               
+                                PokerGameManager.Instance._pokerGameState = PokerGameState.RESULT;
+                                PokerGameManager.Instance.ReceiveSocketFlag = true;
+
                             }
                             catch (Exception ex)
                             {
@@ -422,7 +425,8 @@ public class PokerGameSocket : MonoBehaviour
 
         if (GameManager.Instance.CheckNowScene() == Scenes.PokerGameScene) 
         {
-            PokerGameManager.Instance.IsFirstTurn = true;
+            yield return new WaitForSeconds(1.5f);
+            PokerGameManager.Instance.IsFirstTurn = true;         
             PokerGameManager.Instance.StartPokerGame();
         }
 

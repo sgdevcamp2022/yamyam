@@ -17,6 +17,7 @@ public class Batting : MonoBehaviour
     private bool _canPayChip;
     public GameObject InActiveButtonView;
 
+    
 
     private void Awake()
     {
@@ -36,7 +37,15 @@ public class Batting : MonoBehaviour
 
     public void SetCallBattingChip(int callChip)
     {
-        _callBattingChip = callChip;
+        if(callChip > _myBattingChip)
+        {
+            CallorDieState(true);
+        }
+        else
+        {
+            _callBattingChip = callChip;
+        }
+       
     }
 
     private bool _checkMyChip(int batting)
@@ -47,6 +56,7 @@ public class Batting : MonoBehaviour
         }
         return _myBattingChip < batting ? false : true;
     }
+
 
     public void Raise(int raiseChip)
     {
@@ -76,14 +86,20 @@ public class Batting : MonoBehaviour
         if (_canPayChip)
         {
             _uiBatting.SetPlayerBattingResult(0, "콜");
+            Batting.Instance.CallorDieState(false);
+
             PersonSound.Instance.PlayCallSound();
 
+            _payChip(_callBattingChip, true);
+        }
+        else
+        {
+            _uiBatting.SetPlayerBattingResult(0, "올인");
             _payChip(_callBattingChip, true);
         }
     }
     public void OtherCall()
     {
-
         _uiBatting.SetPlayerBattingResult(PokerGameManager.Instance.ResultUserUiPos, "콜");
         PersonSound.Instance.PlayCallSound();
     }
@@ -149,7 +165,7 @@ public class Batting : MonoBehaviour
 
 
 
-    public void SetRoundBatting(long total, int raise)
+    public void ChangeRoundBatting(long total, int raise)
     {
         _roundBattingChip = total;
         _callBattingChip = raise;
@@ -160,6 +176,8 @@ public class Batting : MonoBehaviour
     public void SettingRoundBatting(int roundBatting)
     {
         _roundBattingChip = roundBatting;
+        _uiBatting.ChangeBattingChip();
+        _uiBatting.ResetPlayerBattingResult();
     }
 
     public void Win(int who) 
@@ -173,17 +191,15 @@ public class Batting : MonoBehaviour
         _callBattingChip = 0;
     }
 
-
-
-    public void CallorDieState(bool state)
+    public void CallorDieState(bool isAllIn)
     {
-        if (state)
+        if (isAllIn)
         {
-            _uiBatting.DonAccessBattingButton();
+            _uiBatting.ChangeToAllinButton();
         }
         else
         {
-            _uiBatting.AccessBattingButton();
+            _uiBatting.ChangeToCallButton();
         }
     }
     public void CanCallState(bool state)
